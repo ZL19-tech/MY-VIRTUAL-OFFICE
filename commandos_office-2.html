@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CommandOS — Agent Office</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;image-rendering:pixelated;}
+:root{
+  --bg:#0D1117;--walls:#1C2333;--green:#00FF88;--blue:#00BFFF;
+  --gold:#FFD700;--text:#E6EDF3;--orange:#FF6B35;--desk:#243048;
+  --monitor:#0A1628;--floor:#161B27;--purple:#9D4EDD;--teal:#20B2AA;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);}
+body{display:flex;flex-direction:row;font-family:'Press Start 2P',monospace;}
+
+/* LEFT PANEL — Office */
+#left-panel{flex:0 0 62%;height:100vh;position:relative;overflow:hidden;}
+canvas{display:block;width:100%;height:100%;}
+
+/* RIGHT PANEL — Tasks */
+#right-panel{
+  flex:1;height:100vh;background:#0A0F1A;
+  border-left:2px solid #1C2333;
+  display:flex;flex-direction:column;overflow:hidden;
+  position:relative;
+}
+#right-header{
+  padding:14px 16px 10px;border-bottom:1px solid #1C2333;
+  display:flex;align-items:center;justify-content:space-between;
+  background:#0D1117;flex-shrink:0;
+  gap:20px;
+}
+#right-header h2{font-size:9px;color:var(--green);letter-spacing:1px;}
+#music-section{
+  padding:10px 14px;border-top:1px solid #1C2333;flex-shrink:0;
+  background:#080D16;display:flex;align-items:center;gap:10px;
+}
+#music-section .music-label{font-size:7px;color:var(--gold);font-family:'Press Start 2P';}
+#music-input{
+  background:#0D1520;border:1px solid #263348;color:var(--text);
+  font-family:'Share Tech Mono',monospace;font-size:8px;padding:5px 8px;
+  width:200px;outline:none;border-radius:1px;
+}
+#music-input:focus{border-color:var(--green);}
+.music-btn{
+  background:transparent;border:1px solid var(--green);color:var(--green);
+  font-family:'Press Start 2P',monospace;font-size:6px;padding:4px 8px;cursor:pointer;white-space:nowrap;
+}
+.music-btn:hover{background:rgba(0,255,136,0.1);}
+.lang-btns{display:flex;gap:6px;}
+.lang-btn{
+  background:transparent;border:1px solid #263348;color:#8B949E;
+  font-family:'Press Start 2P',monospace;font-size:7px;
+  padding:5px 10px;cursor:pointer;transition:all .15s;
+}
+.lang-btn.active{background:var(--green);color:#0D1117;border-color:var(--green);}
+.lang-btn:hover:not(.active){border-color:var(--green);color:var(--green);}
+
+/* ADMIN CONTROLS */
+#admin-section{
+  padding:10px 14px;border-bottom:1px solid #1C2333;flex-shrink:0;
+  background:#080D16;
+}
+#admin-section .admin-title{font-size:7px;color:var(--gold);margin-bottom:8px;}
+#agent-buttons{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;}
+.agent-btn{
+  font-family:'Press Start 2P',monospace;font-size:6px;padding:4px 8px;
+  border:1px solid;cursor:pointer;transition:all .15s;background:transparent;
+}
+.agent-btn:hover{filter:brightness(1.4);}
+#task-input{
+  width:100%;background:#0D1520;border:1px solid #263348;
+  color:var(--text);font-family:'Share Tech Mono',monospace;
+  font-size:11px;padding:6px 8px;margin-bottom:6px;outline:none;
+  border-radius:1px;
+}
+#task-input:focus{border-color:var(--green);}
+#send-task-btn{
+  width:100%;background:transparent;border:1px solid var(--green);
+  color:var(--green);font-family:'Press Start 2P',monospace;font-size:7px;
+  padding:7px;cursor:pointer;
+}
+#send-task-btn:hover{background:rgba(0,255,136,0.1);}
+
+/* Task list */
+#task-list-section{flex:1;overflow-y:auto;padding:10px 14px;}
+#task-list-section::-webkit-scrollbar{width:4px;}
+#task-list-section::-webkit-scrollbar-track{background:#080D16;}
+#task-list-section::-webkit-scrollbar-thumb{background:#263348;}
+.task-group-title{font-size:7px;color:var(--blue);margin:10px 0 6px;letter-spacing:1px;}
+.task-item{
+  background:#0D1520;border:1px solid #1C2333;border-left:3px solid;
+  padding:7px 10px;margin-bottom:5px;font-family:'Share Tech Mono',monospace;
+  font-size:10px;color:var(--text);border-radius:1px;
+  animation:fadeIn .3s ease;
+}
+.task-item.done{opacity:0.4;text-decoration:line-through;color:#556;}
+.task-item .task-agent{font-size:8px;margin-bottom:3px;font-family:'Press Start 2P',monospace;}
+.task-item .task-time{font-size:8px;color:#556;float:right;}
+@keyframes fadeIn{from{opacity:0;transform:translateX(10px);}to{opacity:1;transform:translateX(0);}}
+
+/* CHARTS SECTION */
+#charts-section{
+  padding:10px 14px;border-top:1px solid #1C2333;flex-shrink:0;
+  height:160px;
+}
+#charts-section .chart-title{font-size:7px;color:var(--blue);margin-bottom:8px;}
+#charts-canvas{width:100%;height:115px;display:block;}
+
+/* Status bar */
+#status-bar{
+  padding:10px 14px;border-top:1px solid #1C2333;flex-shrink:0;
+  background:#0D1117;display:flex;align-items:center;gap:30px;
+  font-family:'Share Tech Mono',monospace;font-size:14px;color:#00FF88;
+}
+.status-dot{
+  width:8px;height:8px;border-radius:50%;background:var(--green);
+  display:inline-block;margin-right:5px;
+  animation:pulse 1.5s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* Toast */
+#toast-wrap{
+  position:fixed;bottom:50px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  pointer-events:none;z-index:999;
+}
+.toast{
+  background:rgba(0,255,136,0.08);border:1px solid var(--green);
+  color:var(--green);font-family:'Share Tech Mono',monospace;font-size:10px;
+  padding:5px 14px;white-space:nowrap;
+  animation:toastIn .3s ease,toastOut .3s ease 2.7s forwards;
+}
+.toast.warn{border-color:var(--orange);color:var(--orange);background:rgba(255,107,53,0.08);}
+.toast.gold{border-color:var(--gold);color:var(--gold);background:rgba(255,215,0,0.08);}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+@keyframes toastOut{to{opacity:0;}}
+</style>
+</head>
+<body>
+
+<!-- LEFT: Canvas Office -->
+<div id="left-panel">
+  <canvas id="c"></canvas>
+  <!-- Background Music - Always Playing -->
+  <audio id="bgMusic" loop autoplay style="display:none;">
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+  </audio>
+</div>
+
+<!-- RIGHT: Task Panel -->
+<div id="right-panel">
+  <div id="right-header">
+    <h2 id="panel-title">⬡ TASK BOARD</h2>
+    <div class="lang-btns">
+      <button class="lang-btn active" onclick="setLang('ro')">RO</button>
+      <button class="lang-btn" onclick="setLang('ru')">RU</button>
+    </div>
+  </div>
+
+  <div id="admin-section">
+    <div class="admin-title">👑 COMMANDER — <span id="admin-label">Atribuie sarcină</span></div>
+    <div id="agent-buttons"></div>
+    <input id="task-input" type="text" placeholder="Scrie sarcina..." maxlength="80" />
+    <button id="send-task-btn" onclick="sendTask()">⟶ TRIMITE SARCINA</button>
+  </div>
+
+  <div id="task-list-section">
+    <div class="task-group-title" id="active-label">SARCINI ACTIVE</div>
+    <div id="active-tasks"></div>
+    <div class="task-group-title" id="done-label">FINALIZATE</div>
+    <div id="done-tasks"></div>
+  </div>
+
+  <div id="music-section">
+    <div class="music-label">🎵 MUSIC</div>
+    <input id="music-input" type="text" placeholder="MP3 URL..." />
+    <button class="music-btn" id="playPauseBtn" onclick="toggleMusic()">⏸ PAUSE</button>
+    <button class="music-btn" onclick="stopMusic()">⏹ STOP</button>
+  </div>
+
+  <div id="charts-section">
+    <div class="chart-title" id="chart-label">📊 HP AGENȚI ȘI SARCINI</div>
+    <canvas id="charts-canvas"></canvas>
+  </div>
+
+  <div id="status-bar">
+    <span><span class="status-dot"></span><span id="sb-tasks">0 sarcini</span></span>
+    <span id="sb-agents">6 agenți</span>
+    <span style="color:var(--green)">AI: ON</span>
+  </div>
+</div>
+
+<div id="toast-wrap"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+//  COMMANDOS OFFICE  –  Full Rebuilt
+// ═══════════════════════════════════════════════════════════════════
+
+// ── Music Control ───────────────────────────────────────────────────
+const bgMusic = document.getElementById('bgMusic');
+const musicInput = document.getElementById('music-input');
+const playPauseBtn = document.getElementById('playPauseBtn');
+let isMusicPlaying = true;  // Start as playing
+
+function toggleMusic() {
+  const url = musicInput.value.trim();
+
+  if (url) {
+    // Change to new URL if provided
+    bgMusic.src = url;
+  }
+
+  if (isMusicPlaying) {
+    // Pause
+    bgMusic.pause();
+    isMusicPlaying = false;
+    playPauseBtn.textContent = '▶ PLAY';
+    showToast('⏸ Paused', 'gold');
+  } else {
+    // Play
+    bgMusic.volume = 0.3;
+    bgMusic.play().catch(err => {
+      console.error('Playback error:', err);
+      showToast('⚠ Cannot play - check URL is direct MP3', 'warn');
+    });
+    isMusicPlaying = true;
+    playPauseBtn.textContent = '⏸ PAUSE';
+    showToast('🎵 Playing...', 'green');
+  }
+}
+
+function stopMusic() {
+  bgMusic.pause();
+  bgMusic.currentTime = 0;
+  isMusicPlaying = false;
+  playPauseBtn.textContent = '▶ PLAY';
+  showToast('⏹ Stopped', 'gold');
+}
+
+// Allow Enter key to toggle play/pause
+musicInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') toggleMusic();
+});
+
+// ── Language ────────────────────────────────────────────────────────
+let LANG = 'ro';
+const T = {
+  ro: {
+    panelTitle: '⬡ PANOU SARCINI',
+    adminLabel: 'Atribuie sarcină',
+    activeLabel: 'SARCINI ACTIVE',
+    doneLabel: 'FINALIZATE',
+    chartLabel: '📊 HP AGENȚI ȘI SARCINI',
+    sendBtn: '⟶ TRIMITE SARCINA',
+    placeholder: 'Scrie sarcina...',
+    sbTasks: (n) => `${n} sarcini`,
+    sbAgents: (n) => `${n} agenți activi`,
+    taskAssigned: (name, task) => `✓ ${name}: sarcină atribuită`,
+    taskDone: (name) => `✓ ${name}: sarcină finalizată`,
+    lowHp: (name) => `⚠ ${name} e supraîncărcat!`,
+    agentDead: (name) => `💀 ${name} a căzut! Prea multe sarcini!`,
+    morning: '☕ Ziua de lucru începe',
+    taskBoard: 'SARCINI AZI',
+    defaultTask: 'Procesează datele zilei',
+    roles: {
+      commander: 'CEO', alexa: 'Asistent AI', scout: 'Intel Echipă',
+      memo: 'Ședințe', doc: 'Baza de cunoștințe', cal: 'Planificare',
+    }
+  },
+  ru: {
+    panelTitle: '⬡ ПАНЕЛЬ ЗАДАЧ',
+    adminLabel: 'Назначить задачу',
+    activeLabel: 'АКТИВНЫЕ ЗАДАЧИ',
+    doneLabel: 'ЗАВЕРШЁННЫЕ',
+    chartLabel: '📊 HP АГЕНТОВ И ЗАДАЧИ',
+    sendBtn: '⟶ ОТПРАВИТЬ ЗАДАЧУ',
+    placeholder: 'Введите задачу...',
+    sbTasks: (n) => `${n} задач`,
+    sbAgents: (n) => `${n} агентов онлайн`,
+    taskAssigned: (name, task) => `✓ ${name}: задача назначена`,
+    taskDone: (name) => `✓ ${name}: задача выполнена`,
+    lowHp: (name) => `⚠ ${name} перегружен!`,
+    agentDead: (name) => `💀 ${name} упал! Слишком много задач!`,
+    morning: '☕ Рабочий день начинается',
+    taskBoard: 'ЗАДАЧИ НА ДЕНЬ',
+    defaultTask: 'Обработай данные дня',
+    roles: {
+      commander: 'CEO', alexa: 'AI-ассистент', scout: 'Разведка',
+      memo: 'Совещания', doc: 'База знаний', cal: 'Планирование',
+    }
+  }
+};
+function t(key, ...args) {
+  const fn = T[LANG][key];
+  return typeof fn === 'function' ? fn(...args) : fn;
+}
+function setLang(lang) {
+  LANG = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.textContent === lang.toUpperCase()));
+  document.getElementById('panel-title').textContent = t('panelTitle');
+  document.getElementById('admin-label').textContent = t('adminLabel');
+  document.getElementById('active-label').textContent = t('activeLabel');
+  document.getElementById('done-label').textContent = t('doneLabel');
+  document.getElementById('chart-label').textContent = t('chartLabel');
+  document.getElementById('send-task-btn').textContent = t('sendBtn');
+  document.getElementById('task-input').placeholder = t('placeholder');
+  updateStatusBar();
+}
+
+// ── Canvas setup ────────────────────────────────────────────────────
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+function resizeCanvas() {
+  const panel = document.getElementById('left-panel');
+  canvas.width  = panel.clientWidth;
+  canvas.height = panel.clientHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+function S(v)  { return v * (canvas.width / 960); }
+function sx(x) { return S(x); }
+function sy(y) { return S(y) * (canvas.height / 700); }
+
+// ── Color palette ───────────────────────────────────────────────────
+const C = {
+  bg:'#0D1117', walls:'#1C2333', floor:'#161B27', desk:'#243048',
+  deskTop:'#2D3A52', green:'#00FF88', blue:'#00BFFF', gold:'#FFD700',
+  text:'#E6EDF3', orange:'#FF6B35', monitor:'#0A1628', dim:'#8B949E',
+  purple:'#9D4EDD', teal:'#20B2AA', pink:'#FF69B4', red:'#FF3355',
+};
+
+// ── Agent definitions ───────────────────────────────────────────────
+const AGENTS = [
+  { id:'alexa',     name:'Alexa',     color:C.blue,   accent:'#FFFFFF', icon:'⊕', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'tshirt' },
+  { id:'scout',     name:'Scout',     color:C.green,  accent:'#FFFFFF', icon:'◉', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'tshirt' },
+  { id:'memo',      name:'Memo',      color:C.purple, accent:'#FFFFFF', icon:'♪', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'tshirt' },
+  { id:'doc',       name:'Doc',       color:C.teal,   accent:'#FFFFFF', icon:'⊞', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'tshirt' },
+  { id:'cal',       name:'Cal',       color:C.orange, accent:'#FFFFFF', icon:'◫', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'tshirt' },
+  { id:'commander', name:'Commander', color:C.gold,   accent:'#B8860B', icon:'♛', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'classic' },
+];
+
+// Grid layout for 6 agents: 3 in first row, 2 in second, Commander big at bottom center
+const GRID = [
+  { x: 20,  y: 40  },   // alexa     (row1 col1)
+  { x: 320, y: 40  },   // scout     (row1 col2)
+  { x: 620, y: 40  },   // memo      (row1 col3)
+  { x: 20,  y: 350 },   // doc       (row2 col1)
+  { x: 620, y: 350 },   // cal       (row2 col2)
+  { x: 330, y: 580 },   // commander (row3 - centered, big desk)
+];
+
+// Agent home positions (in front of desk)
+AGENTS.forEach((a, i) => {
+  a.x = GRID[i].x + 120;
+  a.y = GRID[i].y + 170;
+  a.homeX = a.x;
+  a.homeY = a.y;
+  a.gridIdx = i;
+});
+
+// ── State ────────────────────────────────────────────────────────────
+let tick = 0;
+let taskLog = [];
+let selectedAgent = null;
+let bubbles = [];
+let statusAbove = {};
+let agentWalk = {};
+let waveAnim = {};
+let scenePhase = 0;
+let sceneTimer = 0;
+let totalTaskCount = 0;
+
+// ── Control System ───────────────────────────────────────────────────
+let systemState = 'running';  // 'running', 'paused', 'stopped', 'lunch'
+let pauseTimer = 0;
+let lunchTimer = 0;
+let lunchDuration = 0;
+let inMeeting = false;
+let meetingTimer = 0;
+
+// ── Task System ──────────────────────────────────────────────────────
+let selectedAgentId = null;
+
+function buildAgentButtons() {
+  const wrap = document.getElementById('agent-buttons');
+  wrap.innerHTML = '';
+  // Only show agents that are not Commander
+  AGENTS.filter(a => a.id !== 'commander').forEach(a => {
+    const btn = document.createElement('button');
+    btn.className = 'agent-btn';
+    btn.textContent = a.name;
+    btn.style.borderColor = a.color;
+    btn.style.color = a.color;
+    btn.dataset.id = a.id;
+    btn.onclick = () => {
+      selectedAgentId = a.id;
+      document.querySelectorAll('.agent-btn').forEach(b => b.style.background = 'transparent');
+      btn.style.background = a.color + '22';
+    };
+    wrap.appendChild(btn);
+  });
+}
+
+function sendTask() {
+  const input = document.getElementById('task-input');
+  const text  = input.value.trim();
+
+  if (!text) {
+    showToast('⚠ Write a task first', 'warn');
+    return;
+  }
+
+  if (!selectedAgentId) {
+    showToast('⚠ Select an agent first', 'warn');
+    return;
+  }
+
+  // Only assign if it's Commander creating the task
+  assignTask(selectedAgentId, text, true);
+  input.value = '';
+}
+document.getElementById('task-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendTask();
+});
+
+function assignTask(agentId, taskText, fromAdmin) {
+  const agent = AGENTS.find(a => a.id === agentId);
+  if (!agent) return;
+
+  // HP damage: 12–22 per task
+  const dmg = 12 + Math.floor(Math.random() * 10);
+  agent.hp = Math.max(0, agent.hp - dmg);
+  agent.tasks++;
+  totalTaskCount++;
+
+  // Task log
+  const task = {
+    id: Date.now() + Math.random(),
+    agentId,
+    agentName: agent.name,
+    agentColor: agent.color,
+    text: taskText,
+    done: false,
+    time: new Date().toLocaleTimeString('ro-RO', {hour:'2-digit',minute:'2-digit'}),
+  };
+  taskLog.unshift(task);
+  renderTaskList();
+
+  // Animation triggers
+  addBubble(agentId, taskText.slice(0, 22) + (taskText.length > 22 ? '…' : ''), agent.color, 90);
+  addStatus(agentId, 'TASK ▓▓▓░░', 70);
+  // Regular agents stay sitting, only set sit_work state
+  if (agent.state !== 'dead' && agent.id !== 'admin') agent.state = 'sit_work';
+
+  showToast(t('taskAssigned', agent.name, taskText), 'green');
+
+  // Low HP warning
+  if (agent.hp <= 30 && agent.hp > 0) {
+    showToast(t('lowHp', agent.name), 'warn');
+  }
+
+  // Death
+  if (agent.hp <= 0 && agent.state !== 'dead') {
+    killAgent(agent);
+  }
+
+  updateStatusBar();
+
+  // Auto-complete after delay
+  if (agent.state !== 'dead') {
+    setTimeout(() => {
+      task.done = true;
+      renderTaskList();
+      showToast(t('taskDone', agent.name), 'green');
+      // Slowly recover HP
+      agent.hp = Math.min(agent.maxHp, agent.hp + 5);
+      // Regular agents stay sitting, don't change state
+      // Only Admin can move around
+    }, 8000 + Math.random() * 6000);
+  }
+}
+
+function killAgent(agent) {
+  agent.hp = 0;
+  agent.state = 'dead';
+  agent.deadTimer = 300;  // ticks before respawn
+  showToast(t('agentDead', agent.name), 'warn');
+  addBubble(agent.id, '💀 x_x', C.red, 120);
+
+  // Respawn after 8 seconds
+  setTimeout(() => {
+    if (agent.state === 'dead') {
+      agent.hp = 60;
+      agent.state = 'idle';
+      agent.deadTimer = 0;
+      agent.deadAnim = 0;
+      showToast(`🔄 ${agent.name}: respawn!`, 'gold');
+    }
+  }, 8000);
+}
+
+function renderTaskList() {
+  const activeDiv = document.getElementById('active-tasks');
+  const doneDiv   = document.getElementById('done-tasks');
+  activeDiv.innerHTML = '';
+  doneDiv.innerHTML   = '';
+
+  taskLog.slice(0, 30).forEach(task => {
+    const div = document.createElement('div');
+    div.className = 'task-item' + (task.done ? ' done' : '');
+    div.style.borderLeftColor = task.agentColor;
+    div.innerHTML = `
+      <span class="task-agent" style="color:${task.agentColor}">${task.agentName}</span>
+      <span class="task-time">${task.time}</span>
+      <div>${task.text}</div>
+    `;
+    (task.done ? doneDiv : activeDiv).appendChild(div);
+  });
+  updateStatusBar();
+}
+
+function updateStatusBar() {
+  const active = taskLog.filter(t => !t.done).length;
+  document.getElementById('sb-tasks').textContent = t('sbTasks', active);
+  const alive = AGENTS.filter(a => a.state !== 'dead').length;
+  document.getElementById('sb-agents').textContent = t('sbAgents', alive);
+}
+
+// ── Bubble / Status helpers ──────────────────────────────────────────
+function addBubble(agentId, text, color, duration) {
+  const a = AGENTS.find(x => x.id === agentId);
+  bubbles = bubbles.filter(b => b.id !== agentId);
+  bubbles.push({ id: agentId, text, color: color || C.green, timer: duration || 90 });
+}
+function addStatus(agentId, text, duration) {
+  statusAbove[agentId] = { text, timer: duration || 80 };
+}
+
+// ── Walk helpers ─────────────────────────────────────────────────────
+function walkTo(agentId, tx, ty, onArrive) {
+  agentWalk[agentId] = { tx, ty, onArrive };
+  const a = AGENTS.find(x => x.id === agentId);
+  if (a && a.state !== 'dead') a.state = 'walk';
+}
+
+// ── Toast ────────────────────────────────────────────────────────────
+function showToast(msg, type) {
+  const wrap = document.getElementById('toast-wrap');
+  const d = document.createElement('div');
+  d.className = 'toast' + (type === 'warn' ? ' warn' : type === 'gold' ? ' gold' : '');
+  d.textContent = msg;
+  wrap.appendChild(d);
+  setTimeout(() => d.remove(), 3200);
+}
+
+// ── Drawing helpers ──────────────────────────────────────────────────
+function fillR(x, y, w, h, color, alpha) {
+  ctx.globalAlpha = alpha !== undefined ? alpha : 1;
+  ctx.fillStyle = color;
+  ctx.fillRect(sx(x), sy(y), S(w), S(h) * (700/700));
+  ctx.globalAlpha = 1;
+}
+function fillRpx(x, y, w, h, color, alpha) {
+  // raw pixel coords
+  ctx.globalAlpha = alpha !== undefined ? alpha : 1;
+  ctx.fillStyle = color;
+  ctx.fillRect(x, y, w, h);
+  ctx.globalAlpha = 1;
+}
+function txt(t2, x, y, size, color, align, mono) {
+  ctx.font = `${S(size)}px "${mono ? 'Share Tech Mono' : 'Press Start 2P'}", monospace`;
+  ctx.fillStyle = color;
+  ctx.textAlign = align || 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(t2, sx(x), sy(y));
+}
+
+// ── HP Bar ───────────────────────────────────────────────────────────
+function drawHPBar(agent, gx, gy) {
+  // Position: top of desk cell
+  const bx = sx(gx + 10), by = sy(gy + 8);
+  const bw = S(280), bh = S(10);
+  const pct = agent.hp / agent.maxHp;
+
+  // Background
+  ctx.fillStyle = '#0A1020';
+  ctx.fillRect(bx, by, bw, bh);
+
+  // Bar color: green → yellow → red
+  let barColor;
+  if (pct > 0.6) barColor = C.green;
+  else if (pct > 0.3) barColor = C.gold;
+  else barColor = C.red;
+
+  // Animated flash when low
+  const flash = pct <= 0.3 ? (Math.sin(tick * 0.3) > 0 ? 1 : 0.4) : 1;
+  ctx.globalAlpha = flash;
+  ctx.fillStyle = barColor;
+  ctx.fillRect(bx, by, bw * pct, bh);
+  ctx.globalAlpha = 1;
+
+  // Border
+  ctx.strokeStyle = '#263348';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(bx, by, bw, bh);
+
+  // HP text
+  ctx.font = `${S(6.5)}px "Share Tech Mono", monospace`;
+  ctx.fillStyle = pct > 0.3 ? C.text : C.red;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(`HP ${Math.ceil(agent.hp)}/${agent.maxHp}`, bx + bw/2, by + bh/2);
+
+  // Skull icon when dead
+  if (agent.state === 'dead') {
+    ctx.font = `${S(14)}px serif`;
+    ctx.fillText('💀', bx + bw/2, by - S(8));
+  }
+}
+
+// ── Desk - CommandOS Style (Admin) ──────────────────────────────────
+function drawDesk(gx, gy, agent) {
+  const W = 280, H = 140;
+
+  // Desk body
+  fillR(gx, gy + 22, W, H, C.desk);
+  fillR(gx, gy + 22, W, 6, C.deskTop);
+
+  // Desk legs
+  fillR(gx + 8,  gy + 22 + H, 10, 30, C.deskTop);
+  fillR(gx + W - 18, gy + 22 + H, 10, 30, C.deskTop);
+
+  // Monitor base + pole
+  fillR(gx + 95, gy + 22 + H - 28, 90, 8, '#151E2E');
+  fillR(gx + 130, gy + 22 + H - 44, 20, 20, '#151E2E');
+
+  // Monitor screen
+  const mx = gx + 50, my = gy - 70;
+  fillR(mx - 4, my - 4, 192, 132, '#151E2E');
+  fillR(mx, my, 184, 124, C.monitor);
+
+  // Monitor glow - CommandOS green
+  ctx.fillStyle = agent.color;
+  ctx.globalAlpha = 0.07 + 0.04 * Math.sin(tick * 0.05);
+  ctx.fillRect(sx(mx), sy(my), S(184), S(124));
+  ctx.globalAlpha = 1;
+
+  // Monitor content
+  drawMonitorContent(agent, mx, my, 184, 124);
+
+  // Keyboard
+  fillR(gx + 55, gy + 30, 120, 18, '#1C2333');
+  for (let ki = 0; ki < 9; ki++)
+    for (let kj = 0; kj < 3; kj++)
+      fillR(gx + 58 + ki * 13, gy + 32 + kj * 5, 10, 3, '#263348');
+
+  // Mouse
+  fillR(gx + 185, gy + 32, 22, 16, '#1A2133');
+
+  // Agent role label
+  ctx.font = `${S(7)}px "Share Tech Mono", monospace`;
+  ctx.fillStyle = agent.color;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(t('roles')[agent.id] || agent.id, sx(gx + W/2), sy(gy + 22 + H + 14));
+}
+
+// ── Small MacBook Desk (for 6 regular agents) ──────────────────────
+function drawSmallDesk(gx, gy, agent) {
+  const W = 200, H = 100;
+
+  // Desk body - CommandOS style
+  fillR(gx + 20, gy + 22, W, H, C.desk);
+  fillR(gx + 20, gy + 22, W, 6, C.deskTop);
+
+  // Desk legs
+  fillR(gx + 25,  gy + 22 + H, 10, 28, C.deskTop);
+  fillR(gx + 20 + W - 15, gy + 22 + H, 10, 28, C.deskTop);
+
+  // MacBook - silver aluminum look
+  const mbx = gx + 40, mby = gy + 8;
+
+  // MacBook base/stand
+  fillR(mbx, mby + 30, 120, 4, '#CCCCCC');
+
+  // MacBook screen frame
+  fillR(mbx + 5, mby + 4, 110, 70, '#333333');
+
+  // MacBook display
+  fillR(mbx + 8, mby + 7, 104, 64, C.monitor);
+
+  // Monitor glow - CommandOS colors
+  ctx.fillStyle = agent.color;
+  ctx.globalAlpha = 0.07 + 0.04 * Math.sin(tick * 0.05);
+  ctx.fillRect(sx(mbx + 8), sy(mby + 7), S(104), S(64));
+  ctx.globalAlpha = 1;
+
+  // MacBook monitor content
+  drawSmallMonitorContent(agent, mbx + 8, mby + 7, 104, 64);
+
+  // MacBook trackpad
+  fillR(mbx + 35, mby + 42, 50, 20, '#888888');
+
+  // Agent role label
+  ctx.font = `${S(6)}px "Share Tech Mono", monospace`;
+  ctx.fillStyle = agent.color;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(t('roles')[agent.id] || agent.id, sx(gx + 30 + W/2), sy(gy + 22 + H + 12));
+}
+
+// ── Small Monitor Content (MacBook) ──────────────────────────────────
+function drawSmallMonitorContent(agent, x, y, w, h) {
+  // Simple colored background with agent icon
+  ctx.fillStyle = agent.color;
+  ctx.globalAlpha = 0.3;
+  ctx.fillRect(sx(x), sy(y), S(w), S(h));
+  ctx.globalAlpha = 1;
+
+  // Lines representing content
+  fillR(x + 10, y + 10, w - 20, 4, agent.color, 0.4);
+  fillR(x + 10, y + 18, w - 30, 3, agent.color, 0.3);
+  fillR(x + 10, y + 25, w - 25, 3, agent.color, 0.3);
+  fillR(x + 10, y + 32, w - 20, 4, agent.color, 0.4);
+  fillR(x + 10, y + 40, w - 30, 3, agent.color, 0.3);
+  fillR(x + 10, y + 47, w - 25, 3, agent.color, 0.3);
+
+  // Agent icon/indicator
+  ctx.font = `${S(12)}px serif`;
+  ctx.fillStyle = agent.color;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(agent.icon, sx(x + w/2), sy(y + h - 12));
+}
+
+// ── Monitor Content per agent ────────────────────────────────────────
+function drawMonitorContent(agent, x, y, w, h) {
+  switch (agent.id) {
+    case 'commander': drawMonCmd(agent, x, y, w, h); break;
+    case 'alexa':     drawMonAlexa(agent, x, y, w, h); break;
+    case 'scout':     drawMonScout(agent, x, y, w, h); break;
+    case 'memo':      drawMonMemo(agent, x, y, w, h); break;
+    case 'doc':       drawMonDoc(agent, x, y, w, h); break;
+    case 'cal':       drawMonCal(agent, x, y, w, h); break;
+    case 'admin':     drawMonAdmin(agent, x, y, w, h); break;
+  }
+}
+
+function drawMonAdmin(a, x, y, w, h) {
+  txt('SYSTEM', x+4, y+8, 7, C.pink, 'left', true);
+  const uptime = Math.floor(tick / 1800) + 'h';
+  const stats = [
+    {l:'Uptime', v:`${uptime}`, c:C.green},
+    {l:'Agents', v:`${AGENTS.length}`, c:C.blue},
+    {l:'Tasks', v:`${totalTaskCount}`, c:C.pink},
+  ];
+  stats.forEach((s,i)=>{
+    const mx = x+6+i*60;
+    txt(s.l, mx, y+24, 6, C.dim, 'left', true);
+    txt(s.v, mx, y+38, 10, s.c, 'left', true);
+  });
+  // Status logs
+  txt('Status OK', x+4, y+60, 7, C.green, 'left', true);
+  txt('All systems running', x+4, y+76, 6, C.dim, 'left', true);
+  txt('Network stable', x+4, y+88, 6, C.dim, 'left', true);
+}
+
+function drawMonCmd(a, x, y, w, h) {
+  txt('COMMANDER CONTROL', x+4, y+8, 7, C.gold, 'left', true);
+
+  // System status
+  txt(`STATUS: ${systemState.toUpperCase()}`, x+4, y+30, 6, C.green, 'left', true);
+
+  if (inMeeting) {
+    txt('🔔 IN MEETING', x+4, y+50, 6, C.blue, 'left', true);
+  }
+  if (systemState === 'lunch' && lunchTimer > 0) {
+    const mins = Math.ceil(lunchTimer / 60);
+    txt(`LUNCH: ${mins}m left`, x+4, y+50, 6, C.gold, 'left', true);
+  }
+
+  // Display info
+  txt('Use task panel', x+4, y+70, 6, C.dim, 'left', true);
+  txt('for controls', x+4, y+82, 6, C.dim, 'left', true);
+}
+
+function drawMonAlexa(a, x, y, w, h) {
+  const lines = ['> Procesez cerere...','> ██████░ 72%','> Răspuns generat ✓','> 3 mesaje noi'];
+  const vis = Math.min(4, 1+Math.floor((tick%200)/50));
+  lines.slice(0,vis).forEach((l,i)=> txt(l, x+4, y+14+i*24, 7, i===vis-1?C.blue:C.dim, 'left', true));
+  if ((tick%50)<30) txt('▌', x+4, y+14+vis*24, 8, C.blue, 'left', true);
+}
+
+function drawMonScout(a, x, y, w, h) {
+  const bars=[0.75,0.42,0.88,0.31,0.65];
+  const labels=['Sales','Dev','HR','Mkt','Sup'];
+  txt('SENTIMENT', x+4, y+8, 6, C.dim, 'left', true);
+  bars.forEach((v,i)=>{
+    const bx=x+6+i*34, maxbh=80, bh=maxbh*v;
+    const col=v>0.6?C.green:v>0.4?C.gold:C.orange;
+    fillR(bx, y+h-20-bh, 24, bh, col, 0.85);
+    txt(labels[i], bx+2, y+h-10, 5.5, C.dim, 'left', true);
+    txt(`${Math.round(v*100)}`, bx+2, y+h-22-bh, 5, col, 'left', true);
+  });
+  if(a.tasks>2){
+    ctx.fillStyle=C.orange; ctx.globalAlpha=0.15+0.1*Math.sin(tick*0.2);
+    ctx.fillRect(sx(x),sy(y),S(w),S(h)); ctx.globalAlpha=1;
+    txt('⚠ ALERT', x+w/2, y+h/2, 8, C.orange, 'center', true);
+  }
+}
+
+function drawMonMemo(a, x, y, w, h) {
+  ctx.strokeStyle=C.purple; ctx.lineWidth=S(1.5);
+  ctx.beginPath();
+  for(let i=0;i<w;i+=2){
+    const amp=Math.sin((i+tick*2)*0.15)*10+Math.sin((i+tick)*0.3)*5;
+    const py=y+h*0.4+amp;
+    i===0?ctx.moveTo(sx(x+i),sy(py)):ctx.lineTo(sx(x+i),sy(py));
+  }
+  ctx.stroke();
+  txt('REC ●', x+w-38, y+8, 7, (tick%30<20)?C.orange:C.dim, 'left', true);
+  const tasks2=['• Brief Q3','• @Alex FU','• Review'];
+  tasks2.forEach((t2,i)=>txt(t2, x+4, y+65+i*16, 7, C.purple, 'left', true));
+}
+
+function drawMonDoc(a, x, y, w, h) {
+  const page=Math.floor((tick*0.015)%4);
+  fillR(x+6, y+8, w-12, h-16, '#0F1A2E');
+  for(let i=0;i<5;i++){
+    fillR(x+12, y+18+i*16, 80-page*4, 4, C.teal, 0.6);
+    fillR(x+12, y+20+i*16, 30+page*8, 2, C.dim, 0.3);
+  }
+  txt(`KB v1.${page+1}`, x+4, y+8, 7, C.teal, 'left', true);
+  txt(`p${page+1}/4`, x+w-30, y+h-12, 6, C.dim, 'left', true);
+}
+
+function drawMonCal(a, x, y, w, h) {
+  const days=['M','T','W','T','F'];
+  const cw=(w-8)/5;
+  days.forEach((d,i)=>txt(d, x+4+i*cw+cw/2, y+10, 7, C.dim, 'center', true));
+  const calTasks=[
+    {c:0,r:0,color:C.orange,l:'Brief'},
+    {c:1,r:1,color:C.blue,l:'Stand'},
+    {c:2,r:0,color:C.green,l:'Rev'},
+    {c:3,r:1,color:C.purple,l:'1:1'},
+    {c:4,r:0,color:C.gold,l:'Rep'},
+  ];
+  const ch=(h-28)/3;
+  calTasks.forEach(ct=>{
+    const tx=x+4+ct.c*cw, ty=y+22+ct.r*ch;
+    fillR(tx,ty,cw-3,ch-3,ct.color,0.5);
+    txt(ct.l, tx+2, ty+ch/2-4, 6, C.text, 'left', true);
+  });
+}
+
+// ── Pixel Agent sprite ───────────────────────────────────────────────
+function drawAgent(agent) {
+  const a = agent;
+  if (a.state === 'hidden') {
+    return;  // Don't draw hidden agents (lunch time)
+  }
+  if (a.state === 'dead') {
+    drawDeadAgent(a);
+    return;
+  }
+
+  // Sitting: agent offset
+  const sitting = a.state === 'sit_work';
+  const isAdmin = a.id === 'admin';
+  const scale = isAdmin ? 1.4 : 1;  // Admin is 40% bigger
+  const ax = sx(a.x), ay = sy(a.y) + (sitting ? S(35) : 0);
+  const pw = S(62 * scale), ph = S(95 * scale);
+  const bob = sitting ? 0 : Math.floor(Math.sin(tick * 0.1) * S(3));
+  const walkLeg = a.state === 'walk' ? Math.sin(tick * 0.28) : 0;
+
+  // Shadow
+  ctx.fillStyle='rgba(0,0,0,0.35)';
+  ctx.fillRect(ax-S(8), ay+ph-S(5), pw+S(14), S(10));
+
+  // Legs
+  const legL = sitting ? S(28) : S(8) + walkLeg * S(12);
+  const legR = sitting ? S(28) : S(8) - walkLeg * S(12);
+  ctx.fillStyle = '#1A1A2E';  // Dark pants
+  ctx.fillRect(ax+S(12), ay+S(52)+bob, S(16), legL);
+  ctx.fillRect(ax+S(34), ay+S(52)+bob, S(16), legR);
+
+  // Shoes
+  ctx.fillStyle = '#0F0F1A';
+  ctx.fillRect(ax+S(10), ay+S(52)+bob+legL, S(20), S(8));
+  ctx.fillRect(ax+S(32), ay+S(52)+bob+legR, S(20), S(8));
+
+  // Body/T-shirt (white for most, with styling)
+  if (a.clothing === 'classic') {
+    // Classic suit with tie
+    ctx.fillStyle = '#2A2A3A';  // Dark jacket
+    ctx.fillRect(ax+S(6), ay+S(22)+bob, pw-S(12), S(36));
+    // Tie
+    ctx.fillStyle = a.color;
+    ctx.fillRect(ax+S(28), ay+S(22)+bob, S(6), S(20));
+  } else {
+    // Simple white t-shirt
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(ax+S(6), ay+S(22)+bob, pw-S(12), S(36));
+  }
+
+  // Collar detail / shirt accent
+  if (a.clothing === 'classic') {
+    ctx.fillStyle = '#EEEEEE';
+    ctx.fillRect(ax+S(20), ay+S(22)+bob, S(22), S(6));
+  } else {
+    ctx.fillStyle = a.color;  // Color accent on t-shirt
+    ctx.fillRect(ax+S(20), ay+S(22)+bob, S(22), S(5));
+  }
+
+  // Arms - minimal movement, just up/down bobbing
+  const armBob = Math.floor(Math.sin(tick * 0.05) * S(2));
+  if (a.clothing === 'classic') {
+    ctx.fillStyle = '#2A2A3A';  // Jacket sleeves
+  } else {
+    ctx.fillStyle = '#FFFFFF';  // T-shirt sleeves
+  }
+
+  if (a.state === 'point') {
+    ctx.fillRect(ax-S(16), ay+S(28)+bob, S(22), S(12));
+    ctx.fillRect(ax+pw-S(6), ay+S(28)+bob, S(16), S(12));
+  } else {
+    // Just subtle vertical bobbing, no swinging
+    ctx.fillRect(ax-S(7), ay+S(25)+bob+armBob, S(14), S(32));
+    ctx.fillRect(ax+pw-S(7), ay+S(25)+bob+armBob, S(14), S(32));
+  }
+
+  // Head
+  ctx.fillStyle = '#D4A574';
+  ctx.fillRect(ax+S(12), ay+S(0)+bob, S(38), S(28));
+
+  // Hair
+  ctx.fillStyle = a.color;
+  ctx.fillRect(ax+S(12), ay+bob, S(38), S(8));
+
+  // Blink
+  const blink = (tick % 100) < 94;
+  ctx.fillStyle = '#000020';
+  if (blink) {
+    ctx.fillRect(ax+S(19), ay+S(10)+bob, S(6), S(7));
+    ctx.fillRect(ax+S(37), ay+S(10)+bob, S(6), S(7));
+  } else {
+    ctx.fillRect(ax+S(19), ay+S(14)+bob, S(6), S(2));
+    ctx.fillRect(ax+S(37), ay+S(14)+bob, S(6), S(2));
+  }
+
+  // Pupils - simple white dots
+  if (blink) {
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(ax+S(21), ay+S(11)+bob, S(2), S(2));
+    ctx.fillRect(ax+S(39), ay+S(11)+bob, S(2), S(2));
+  }
+  // Mouth
+  ctx.fillStyle = '#A0704A';
+  ctx.fillRect(ax+S(22), ay+S(22)+bob, S(16), S(4));
+
+  // Role icon - BIGGER - WHITE
+  ctx.font = `${S(26)}px serif`;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(a.icon, ax+pw/2, ay-S(16)+bob);
+
+  // Name - BIGGER - WHITE
+  ctx.font = `${S(14)}px "Press Start 2P", monospace`;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.fillText(a.name, ax+pw/2, ay-S(48));
+
+  // Waving arm
+  if (waveAnim[a.id] > 0) {
+    const wt = waveAnim[a.id];
+    ctx.save();
+    ctx.translate(ax-S(6), ay+S(30)+bob);
+    ctx.rotate(Math.sin(wt * 0.3) * 0.6);
+    if (a.clothing === 'classic') ctx.fillStyle = '#2A2A3A';
+    else ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(-S(12), -S(5), S(14), S(32));
+    ctx.restore();
+  }
+}
+
+function drawDeadAgent(agent) {
+  const g = GRID[agent.gridIdx];
+  const ax = sx(g.x + 60);
+  const ay = sy(g.y + 210);
+  agent.deadAnim = Math.min(1, agent.deadAnim + 0.05);
+  const angle = (Math.PI / 2) * agent.deadAnim;
+
+  ctx.save();
+  ctx.translate(ax + S(26), ay);
+  ctx.rotate(angle);
+  ctx.translate(-S(26), 0);
+
+  // Body horizontal
+  const pw = S(52);
+  ctx.fillStyle = agent.accent;
+  ctx.fillRect(0, 0, pw, S(14)); // legs
+  ctx.fillStyle = agent.color;
+  ctx.fillRect(S(6), -S(30), pw-S(12), S(30)); // body
+  // Head
+  ctx.fillStyle = '#D4A574';
+  ctx.fillRect(S(10), -S(54), S(32), S(24));
+  // X eyes
+  ctx.fillStyle = C.red;
+  ctx.font = `${S(18)}px "Press Start 2P", monospace`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('×_×', S(26), -S(42));
+  ctx.restore();
+
+  // Skull floating
+  const float = Math.sin(tick * 0.08) * S(4);
+  ctx.font = `${S(20)}px serif`;
+  ctx.textAlign = 'center';
+  ctx.fillText('💀', ax + S(26), ay - S(30) + float);
+
+  // Respawn timer text
+  const remaining = Math.ceil(agent.deadTimer / 60);
+  ctx.font = `${S(7)}px "Share Tech Mono", monospace`;
+  ctx.fillStyle = C.red;
+  ctx.fillText(`DEAD`, ax + S(26), ay + S(30));
+}
+
+// ── HP Bar drawing (positioned above desk) ───────────────────────────
+// Called in context of grid position
+
+// ── Bubble drawing ───────────────────────────────────────────────────
+function drawBubble(b) {
+  // Disabled - bubbles removed
+}
+
+function drawStatusAbove(agentId, gx, gy) {
+  // Disabled - status text removed
+}
+
+// ── CommandOS Brand Background ──────────────────────────────────────
+function drawBG() {
+  // Dark background - CommandOS brand
+  ctx.fillStyle = C.bg;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Subtle grid pattern
+  ctx.strokeStyle = '#111820';
+  ctx.lineWidth = 0.5;
+  for (let x = 0; x < canvas.width; x += S(40)) {
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x, canvas.height); ctx.stroke();
+  }
+  for (let y = 0; y < canvas.height; y += canvas.height/18) {
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke();
+  }
+
+  // Floor strip
+  ctx.fillStyle = C.floor;
+  ctx.fillRect(0, canvas.height - S(40), canvas.width, S(40));
+
+  // Header bar - CommandOS style
+  ctx.fillStyle = C.walls;
+  ctx.fillRect(0, 0, canvas.width, sy(44));
+  ctx.font = `${S(11)}px "Press Start 2P", monospace`;
+  ctx.fillStyle = C.green;
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.fillText('⬡ CommandOS', sx(14), sy(22));
+  const now = new Date().toTimeString().substr(0,8);
+  ctx.font = `${S(16)}px "Share Tech Mono", monospace`;
+  ctx.fillStyle = C.green;
+  ctx.textAlign = 'right';
+  ctx.fillText(now, canvas.width - sx(14), sy(22));
+  // header sep
+  ctx.fillStyle = C.green;
+  ctx.globalAlpha = 0.25;
+  ctx.fillRect(0, sy(44), canvas.width, S(1));
+  ctx.globalAlpha = 1;
+}
+
+// ── Charts canvas (right panel) ──────────────────────────────────────
+const chartCanvas = document.getElementById('charts-canvas');
+const cctx = chartCanvas.getContext('2d');
+function resizeCharts() {
+  chartCanvas.width  = chartCanvas.parentElement.clientWidth - 28;
+  chartCanvas.height = 115;
+}
+resizeCharts();
+window.addEventListener('resize', resizeCharts);
+
+function drawCharts() {
+  const cw = chartCanvas.width, ch = chartCanvas.height;
+  cctx.clearRect(0, 0, cw, ch);
+  cctx.fillStyle = '#080D16';
+  cctx.fillRect(0, 0, cw, ch);
+
+  // Skip Commander (last agent) in chart
+  const agentsToShow = AGENTS.filter(a => a.id !== 'commander');
+  const bw2 = Math.floor(cw / agentsToShow.length);
+
+  agentsToShow.forEach((a, i) => {
+    const bx = i * bw2 + 4;
+    const maxH = ch - 30;
+    const hpH = Math.floor(maxH * (a.hp / a.maxHp));
+    const tasksH = Math.min(maxH, Math.floor(a.tasks * 8));
+
+    // Task count bar (darker)
+    cctx.fillStyle = a.color + '44';
+    cctx.fillRect(bx, ch - 20 - tasksH, bw2 - 8, tasksH);
+
+    // HP bar
+    const hpColor = a.hp > 60 ? C.green : a.hp > 30 ? C.gold : C.red;
+    cctx.fillStyle = hpColor;
+    cctx.globalAlpha = a.state === 'dead' ? 0.25 : 0.85;
+    cctx.fillRect(bx, ch - 20 - hpH, bw2 - 8, hpH);
+    cctx.globalAlpha = 1;
+
+    // Border
+    cctx.strokeStyle = a.color + '55';
+    cctx.lineWidth = 1;
+    cctx.strokeRect(bx, ch - 20 - maxH, bw2 - 8, maxH);
+
+    // Name
+    cctx.font = `11px "Share Tech Mono", monospace`;
+    cctx.fillStyle = a.state === 'dead' ? C.red : a.color;
+    cctx.textAlign = 'center';
+    cctx.textBaseline = 'middle';
+    cctx.fillText(a.state === 'dead' ? '💀' : a.name.slice(0,5), bx + (bw2-8)/2, ch - 10);
+
+    // HP value
+    cctx.font = `13px "Share Tech Mono", monospace`;
+    cctx.fillStyle = hpColor;
+    cctx.fillText(a.state === 'dead' ? '0' : Math.ceil(a.hp), bx + (bw2-8)/2, ch - 20 - hpH - 8);
+  });
+
+  // Legend
+  cctx.font = `12px "Share Tech Mono", monospace`;
+  cctx.fillStyle = '#556';
+  cctx.textAlign = 'left';
+  cctx.fillText('█ HP', 4, 14);
+  cctx.fillStyle = '#334';
+  cctx.fillText('▒ tasks', 60, 14);
+}
+
+// ── Scene auto-animation ─────────────────────────────────────────────
+function runAutoScene() {
+  // Handle system states
+  if (systemState === 'paused') {
+    pauseTimer--;
+    if (pauseTimer <= 0) {
+      systemState = 'running';
+      showToast('▶ Pause finished - resuming', 'green');
+    }
+    return;  // Don't advance scene when paused
+  }
+
+  if (systemState === 'stopped') {
+    return;  // Don't advance when stopped
+  }
+
+  if (systemState === 'lunch') {
+    lunchTimer--;
+    if (lunchTimer <= 0) {
+      systemState = 'running';
+      // Bring everyone back
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      oscillator.frequency.value = 800;
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.5);
+      showToast('🔔 LUNCH OVER - everyone back to work!', 'gold');
+      AGENTS.forEach(a => {
+        if (a.id !== 'commander') a.state = 'sit_work';
+      });
+    }
+    return;
+  }
+
+  sceneTimer++;
+
+  // 5-Scene Narrative Loop
+  // Scene 1: Morning (0-80) - Show office
+  if (sceneTimer === 20) {
+    showToast(t('morning'), 'gold');
+  }
+
+  // Scene 2: Commander distributes tasks (80-250)
+  if (sceneTimer === 100) {
+    walkTo('commander', GRID[0].x + 60, GRID[0].y + 200);  // Go to Alexa
+  }
+  if (sceneTimer === 140) {
+    assignTask('alexa', 'Procesează cereri client', false);
+  }
+  if (sceneTimer === 160) {
+    walkTo('commander', GRID[1].x + 60, GRID[1].y + 200);  // Go to Scout
+  }
+  if (sceneTimer === 200) {
+    assignTask('scout', 'Analizează rapoarte', false);
+  }
+  if (sceneTimer === 220) {
+    walkTo('commander', GRID[3].x + 60, GRID[3].y + 200);  // Go to Doc
+  }
+  if (sceneTimer === 260) {
+    assignTask('doc', 'Actualizează KB', false);
+  }
+
+  // Scene 3: Agents working (250-350)
+  // (automatic - agents display eye glow when working)
+
+  // Scene 4: Interaction moment (350-450)
+  if (sceneTimer === 360) {
+    addBubble('memo', 'Raport gata!', C.purple, 80);
+  }
+
+  // Scene 5: Day summary (450-500)
+  if (sceneTimer === 460) {
+    showToast(`✓ Ziua finalizata: ${totalTaskCount} sarcini`, 'gold');
+  }
+
+  // Loop reset
+  if (sceneTimer > 500) sceneTimer = 0;
+
+  // Walk home occasionally
+  AGENTS.forEach(a => {
+    if (a.state === 'walk' && !agentWalk[a.id]) {
+      a.state = 'sit_work';
+    }
+  });
+
+  // Update walking
+  Object.entries(agentWalk).forEach(([id, w]) => {
+    const a = AGENTS.find(x => x.id === id);
+    if (!a || a.state === 'dead') { delete agentWalk[id]; return; }
+    const dx = w.tx - a.x, dy = w.ty - a.y;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if (dist < 3) {
+      a.x = w.tx; a.y = w.ty;
+      delete agentWalk[id];
+      if (w.onArrive) w.onArrive();
+    } else {
+      const speed = 2;
+      a.x += dx/dist * speed;
+      a.y += dy/dist * speed;
+    }
+  });
+
+  // Decay bubbles
+  bubbles.forEach(b => b.timer--);
+  bubbles = bubbles.filter(b => b.timer > 0);
+
+  // Decay status
+  Object.keys(statusAbove).forEach(id => {
+    statusAbove[id].timer--;
+    if (statusAbove[id].timer <= 0) delete statusAbove[id];
+  });
+
+  // Decay wave
+  Object.keys(waveAnim).forEach(id => {
+    waveAnim[id]--;
+    if (waveAnim[id] <= 0) delete waveAnim[id];
+  });
+
+  // Decay dead timer
+  AGENTS.forEach(a => {
+    if (a.state === 'dead' && a.deadTimer > 0) a.deadTimer--;
+  });
+
+  // Waves between agents
+  if (sceneTimer % 180 === 0) {
+    const alive = AGENTS.filter(a=>a.state!=='dead');
+    if (alive.length >= 2) {
+      waveAnim[alive[0].id] = 50;
+      waveAnim[alive[1].id] = 50;
+    }
+  }
+
+  // Loop
+  if (sceneTimer > 750) sceneTimer = 0;
+}
+
+// ── Main render ──────────────────────────────────────────────────────
+function render() {
+  resizeCanvas();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawBG();
+
+  AGENTS.forEach((a, i) => {
+    const g = GRID[i];
+    if (a.id === 'commander') {
+      drawDesk(g.x, g.y + 44, a);  // +44 for header - large desk for Commander
+    } else {
+      drawSmallDesk(g.x, g.y + 44, a);  // Small MacBook desk for other agents
+    }
+    // HP bars removed - only shown in right panel chart
+    // drawHPBar(a, g.x, g.y + 44);
+    drawAgent(a);
+    // Status text disabled
+    // drawStatusAbove(a.id, g.x, g.y + 44);
+  });
+
+  // Bubbles disabled
+  // bubbles.forEach(b => drawBubble(b));
+
+  drawCharts();
+  runAutoScene();
+  tick++;
+  requestAnimationFrame(render);
+}
+
+// ── Canvas Click Handler ────────────────────────────────────────────
+canvas.addEventListener('click', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const clickXScreen = e.clientX - rect.left;
+  const clickYScreen = e.clientY - rect.top;
+
+  // Convert screen coordinates to game coordinates (960x700)
+  const clickX = (clickXScreen / canvas.width) * 960;
+  const clickY = (clickYScreen / canvas.height) * 700;
+
+  if (window.cmdButtons && window.cmdButtons.length > 0) {
+    for (let btn of window.cmdButtons) {
+      if (clickX >= btn.x && clickX <= btn.x + btn.w &&
+          clickY >= btn.y && clickY <= btn.y + btn.h) {
+        handleCommandButton(btn.action);
+        return;
+      }
+    }
+  }
+});
+
+function handleCommandButton(action) {
+  console.log('Button pressed:', action);
+
+  if (action === 'meeting') {
+    if (!inMeeting) {
+      inMeeting = true;
+      showToast('🔔 MEETING - all gather at center! Press STOP to dismiss', 'gold');
+      AGENTS.forEach(a => {
+        if (a.id !== 'commander') {
+          walkTo(a.id, 480, 400);  // Center of canvas
+        }
+      });
+    }
+  } else if (action === 'pause') {
+    systemState = 'paused';
+    pauseTimer = 300;  // 5 minutes (300 ticks)
+    showToast('⏸ SYSTEM PAUSED - resuming in 5 minutes', 'gold');
+  } else if (action === 'stop') {
+    if (inMeeting) {
+      // End the meeting
+      inMeeting = false;
+      showToast('✓ Meeting ended - returning to desks', 'green');
+      AGENTS.forEach(a => {
+        if (a.id !== 'commander') {
+          const idx = AGENTS.indexOf(a);
+          const g = GRID[idx];
+          walkTo(a.id, g.x + 80, g.y + 110);
+        }
+      });
+    } else {
+      // Toggle work state
+      systemState = systemState === 'stopped' ? 'running' : 'stopped';
+      if (systemState === 'stopped') {
+        showToast('⏹ ALL SYSTEMS STOPPED', 'orange');
+      } else {
+        showToast('▶ SYSTEMS RUNNING', 'green');
+      }
+    }
+  } else if (action === 'lunch') {
+    const mins = prompt('🍽 Lunch break duration (minutes):', '30');
+    if (mins && !isNaN(mins) && parseInt(mins) > 0) {
+      const duration = parseInt(mins);
+      systemState = 'lunch';
+      lunchDuration = duration * 60;
+      lunchTimer = lunchDuration;
+      showToast(`🍽 LUNCH TIME - ${duration} minutes!`, 'gold');
+      AGENTS.forEach(a => {
+        if (a.id !== 'commander') a.state = 'hidden';
+      });
+    }
+  }
+}
+
+// ── Init ─────────────────────────────────────────────────────────────
+buildAgentButtons();
+setLang('ro');
+// Place agents at their desk positions - much closer to the desk
+AGENTS.forEach((a, i) => {
+  if (a.id === 'commander') {
+    a.x = GRID[i].x + 100;
+    a.y = GRID[i].y + 195;
+    a.state = 'idle';  // Commander can walk and manage
+  } else {
+    // Regular agents positioned right at their desks
+    a.x = GRID[i].x + 80;
+    a.y = GRID[i].y + 110;  // Much higher, closer to desk
+    a.state = 'sit_work';  // Always sitting at their desks
+  }
+  a.homeX = a.x;
+  a.homeY = a.y;
+});
+render();
+</script>
+</body>
+</html>
