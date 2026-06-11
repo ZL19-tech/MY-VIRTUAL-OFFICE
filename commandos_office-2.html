@@ -1252,8 +1252,24 @@ function runAutoScene() {
       if (w.onArrive) w.onArrive();
     } else {
       const speed = 2;
-      a.x += dx/dist * speed;
-      a.y += dy/dist * speed;
+      let newX = a.x + dx/dist * speed;
+      let newY = a.y + dy/dist * speed;
+
+      // Commander restricted zones (only can walk in marked red areas)
+      if (a.id === 'commander') {
+        // Zone 1: Center area (x: 200-700, y: 200-450)
+        // Zone 2: Bottom desk area (x: 100-500, y: 400-650)
+        const inZone1 = newX >= 200 && newX <= 700 && newY >= 200 && newY <= 450;
+        const inZone2 = newX >= 100 && newX <= 500 && newY >= 400 && newY <= 650;
+
+        if (inZone1 || inZone2) {
+          a.x = newX;
+          a.y = newY;
+        }
+      } else {
+        a.x = newX;
+        a.y = newY;
+      }
     }
   });
 
