@@ -336,12 +336,12 @@ const C = {
 
 // ── Agent definitions ───────────────────────────────────────────────
 const AGENTS = [
-  { id:'alexa',     name:'Alexa',     color:C.blue,   accent:'#FFFFFF', icon:'⊕', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'tshirt' },
-  { id:'scout',     name:'Scout',     color:C.green,  accent:'#FFFFFF', icon:'◉', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'tshirt' },
-  { id:'memo',      name:'Memo',      color:C.purple, accent:'#FFFFFF', icon:'♪', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'tshirt' },
-  { id:'doc',       name:'Doc',       color:C.teal,   accent:'#FFFFFF', icon:'⊞', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'tshirt' },
-  { id:'cal',       name:'Cal',       color:C.orange, accent:'#FFFFFF', icon:'◫', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'tshirt' },
-  { id:'commander', name:'Commander', color:C.gold,   accent:'#B8860B', icon:'♛', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'classic' },
+  { id:'alexa',     name:'Alexa',     job:'Marketing',      color:C.blue,   accent:'#FFFFFF', icon:'⊕', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'tshirt' },
+  { id:'scout',     name:'Scout',     job:'Sales',          color:C.green,  accent:'#FFFFFF', icon:'◉', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'tshirt' },
+  { id:'memo',      name:'Memo',      job:'Management',     color:C.purple, accent:'#FFFFFF', icon:'♪', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'tshirt' },
+  { id:'doc',       name:'Doc',       job:'Content Creator', color:C.teal,   accent:'#FFFFFF', icon:'⊞', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'tshirt' },
+  { id:'cal',       name:'Cal',       job:'Ads Manager',     color:C.orange, accent:'#FFFFFF', icon:'◫', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'tshirt' },
+  { id:'commander', name:'Commander', job:'CEO',             color:C.gold,   accent:'#B8860B', icon:'♛', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'classic' },
 ];
 
 // Grid layout for 6 agents: 3 in first row, 2 in second, Commander big at bottom center
@@ -969,11 +969,17 @@ function drawAgent(agent) {
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.fillText(a.icon, ax+pw/2, ay-S(16)+bob);
 
+  // Job title - NEW
+  ctx.font = `${S(8)}px "Share Tech Mono", monospace`;
+  ctx.fillStyle = a.color;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.fillText(a.job, ax+pw/2, ay-S(56));
+
   // Name - BIGGER - WHITE
   ctx.font = `${S(14)}px "Press Start 2P", monospace`;
   ctx.fillStyle = '#FFFFFF';
   ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-  ctx.fillText(a.name, ax+pw/2, ay-S(48));
+  ctx.fillText(a.name, ax+pw/2, ay-S(40));
 
   // Waving arm
   if (waveAnim[a.id] > 0) {
