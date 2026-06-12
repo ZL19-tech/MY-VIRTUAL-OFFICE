@@ -1256,24 +1256,13 @@ function runAutoScene() {
       let newX = a.x + dx/dist * speed;
       let newY = a.y + dy/dist * speed;
 
-      // Commander restricted zones (ONLY in red marked areas - the desks)
+      // Commander can move freely, just keep within office bounds
       if (a.id === 'commander') {
-        // Zone 1: Alexa desk RED area (x: 20-280, y: 100-280)
-        // Zone 2: Doc desk RED area (x: 20-280, y: 420-600)
-        // Zone 3: Cal desk RED area (x: 620-880, y: 420-600)
-        // Zone 4: Memo desk RED area (x: 620-880, y: 100-280)
-        // Zone 5: Central area RED box (x: 220-640, y: 230-440)
-        const inZone1 = newX >= 20 && newX <= 280 && newY >= 100 && newY <= 280;
-        const inZone2 = newX >= 20 && newX <= 280 && newY >= 420 && newY <= 600;
-        const inZone3 = newX >= 620 && newX <= 880 && newY >= 420 && newY <= 600;
-        const inZone4 = newX >= 620 && newX <= 880 && newY >= 100 && newY <= 280;
-        const inZone5 = newX >= 220 && newX <= 640 && newY >= 230 && newY <= 440;
-
-        if (inZone1 || inZone2 || inZone3 || inZone4 || inZone5) {
+        // Keep within office bounds (x: 0-960, y: 0-700)
+        if (newX >= 0 && newX <= 960 && newY >= 0 && newY <= 700) {
           a.x = newX;
           a.y = newY;
         }
-        // Otherwise, stay in current position (don't move outside red zones)
       } else {
         a.x = newX;
         a.y = newY;
