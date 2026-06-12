@@ -378,6 +378,21 @@ let scenePhase = 0;
 let sceneTimer = 0;
 let totalTaskCount = 0;
 
+// ── Commander patrol route ───────────────────────────────────────────
+const COMMANDER_ROUTE = [
+  { x: 300, y: 200 },   // Sus centru
+  { x: 150, y: 350 },   // Stânga
+  { x: 400, y: 450 },   // Centru jos
+  { x: 750, y: 350 },   // Dreapta
+  { x: 600, y: 650 },   // Jos centru
+  { x: 200, y: 550 },   // Jos stânga
+];
+let commanderRouteIdx = 0;
+let commanderWalkTimer = 0;      // Timer pentru 5 secunde de mers
+let commanderRestTimer = 0;      // Timer pentru 5 secunde de odihnă
+const COMMANDER_WALK_DURATION = 300;  // 5 secunde (60 ticks/sec)
+const COMMANDER_REST_DURATION = 300;  // 5 secunde
+
 // ── Control System ───────────────────────────────────────────────────
 let systemState = 'running';  // 'running', 'paused', 'stopped', 'lunch'
 let pauseTimer = 0;
@@ -1250,6 +1265,40 @@ function runAutoScene() {
 
   // Loop reset
   if (sceneTimer > 500) sceneTimer = 0;
+
+  // ── Commander patrol route logic ────────────────────────────────────
+  const commander = AGENTS.find(a => a.id === 'commander');
+  if (commander && systemState === 'running') {
+    if (commanderRestTimer > 0) {
+      // Resting - don't move
+      commanderRestTimer--;
+      commander.state = 'idle';
+    } else if (commanderWalkTimer > 0) {
+      // Walking to next waypoint
+      commanderWalkTimer--;
+      const waypoint = COMMANDER_ROUTE[commanderRouteIdx];
+      const dx = waypoint.x - commander.x;
+      const dy = waypoint.y - commander.y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+
+      if (dist > 2) {
+        const speed = 2;
+        commander.x += dx/dist * speed;
+        commander.y += dy/dist * speed;
+        commander.state = 'walk';
+      } else {
+        // Reached waypoint, start resting
+        commander.x = waypoint.x;
+        commander.y = waypoint.y;
+        commanderWalkTimer = 0;
+        commanderRestTimer = COMMANDER_REST_DURATION;
+      }
+    } else {
+      // Start walking to next waypoint
+      commanderRouteIdx = (commanderRouteIdx + 1) % COMMANDER_ROUTE.length;
+      commanderWalkTimer = COMMANDER_WALK_DURATION;
+    }
+  }
 
   // Walk home occasionally
   AGENTS.forEach(a => {
