@@ -964,20 +964,20 @@ function drawAgent(agent) {
   ctx.fillRect(ax+S(22), ay+S(22)+bob, S(16), S(4));
 
   // Job title BOX - BACKGROUND
-  const jobBoxW = S(100);
-  const jobBoxH = S(18);
+  const jobBoxW = S(140);
+  const jobBoxH = S(24);
   const jobBoxX = ax + pw/2 - jobBoxW/2;
-  const jobBoxY = ay - S(72);
+  const jobBoxY = ay - S(78);
   ctx.fillStyle = a.color;
-  ctx.globalAlpha = 0.2;
+  ctx.globalAlpha = 0.15;
   ctx.fillRect(jobBoxX, jobBoxY, jobBoxW, jobBoxH);
   ctx.globalAlpha = 1;
   ctx.strokeStyle = a.color;
-  ctx.lineWidth = S(1.5);
+  ctx.lineWidth = S(2);
   ctx.strokeRect(jobBoxX, jobBoxY, jobBoxW, jobBoxH);
 
-  // Job title - INSIDE BOX
-  ctx.font = `${S(7)}px "Press Start 2P", monospace`;
+  // Job title - INSIDE BOX - BIGGER
+  ctx.font = `${S(9)}px "Press Start 2P", monospace`;
   ctx.fillStyle = a.color;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.fillText(a.job, ax+pw/2, jobBoxY + jobBoxH/2);
