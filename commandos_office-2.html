@@ -315,6 +315,8 @@ function setLang(lang) {
 // ── Canvas setup ────────────────────────────────────────────────────
 const canvas = document.getElementById('c');
 const ctx    = canvas.getContext('2d');
+const CANVAS_WIDTH = 1200;   // Expanded game width
+const CANVAS_HEIGHT = 950;   // Expanded game height
 function resizeCanvas() {
   const panel = document.getElementById('left-panel');
   canvas.width  = panel.clientWidth;
@@ -322,9 +324,9 @@ function resizeCanvas() {
 }
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
-function S(v)  { return v * (canvas.width / 960); }
+function S(v)  { return v * (canvas.width / CANVAS_WIDTH); }
 function sx(x) { return S(x); }
-function sy(y) { return S(y) * (canvas.height / 700); }
+function sy(y) { return S(y) * (canvas.height / CANVAS_HEIGHT); }
 
 // ── Color palette ───────────────────────────────────────────────────
 const C = {
@@ -345,13 +347,14 @@ const AGENTS = [
 ];
 
 // Grid layout for 6 agents: 3 in first row, 2 in second, Commander big at bottom center
+// EXPANDED for full screen visibility
 const GRID = [
-  { x: 20,  y: 100  },   // alexa     (row1 col1)
-  { x: 320, y: 100  },   // scout     (row1 col2)
-  { x: 620, y: 100  },   // memo      (row1 col3)
-  { x: 20,  y: 420 },    // doc       (row2 col1)
-  { x: 620, y: 420 },    // cal       (row2 col2)
-  { x: 330, y: 650 },    // commander (row3 - centered, big desk)
+  { x: 40,  y: 80   },   // alexa     (row1 col1)
+  { x: 360, y: 80   },   // scout     (row1 col2)
+  { x: 680, y: 80   },   // memo      (row1 col3)
+  { x: 40,  y: 380  },   // doc       (row2 col1)
+  { x: 680, y: 380  },   // cal       (row2 col2)
+  { x: 390, y: 700  },   // commander (row3 - centered, big desk)
 ];
 
 // Agent home positions (in front of desk)
@@ -1271,8 +1274,8 @@ function runAutoScene() {
 
       // Commander can move freely, just keep within office bounds
       if (a.id === 'commander') {
-        // Keep within office bounds (x: 0-960, y: 0-700)
-        if (newX >= 0 && newX <= 960 && newY >= 0 && newY <= 700) {
+        // Keep within office bounds (x: 0-1200, y: 0-950)
+        if (newX >= 0 && newX <= CANVAS_WIDTH && newY >= 0 && newY <= CANVAS_HEIGHT) {
           a.x = newX;
           a.y = newY;
         }
@@ -1352,9 +1355,9 @@ canvas.addEventListener('click', (e) => {
   const clickXScreen = e.clientX - rect.left;
   const clickYScreen = e.clientY - rect.top;
 
-  // Convert screen coordinates to game coordinates (960x700)
-  const clickX = (clickXScreen / canvas.width) * 960;
-  const clickY = (clickYScreen / canvas.height) * 700;
+  // Convert screen coordinates to game coordinates (1200x950)
+  const clickX = (clickXScreen / canvas.width) * CANVAS_WIDTH;
+  const clickY = (clickYScreen / canvas.height) * CANVAS_HEIGHT;
 
   if (window.cmdButtons && window.cmdButtons.length > 0) {
     for (let btn of window.cmdButtons) {
@@ -1427,12 +1430,12 @@ setLang('ro');
 AGENTS.forEach((a, i) => {
   if (a.id === 'commander') {
     a.x = GRID[i].x + 100;
-    a.y = GRID[i].y + 180;  // Adjusted for larger header
+    a.y = GRID[i].y + 170;  // Adjusted for expanded canvas
     a.state = 'idle';  // Commander can walk and manage
   } else {
     // Regular agents positioned right at their desks
     a.x = GRID[i].x + 80;
-    a.y = GRID[i].y + 95;  // Adjusted for larger header
+    a.y = GRID[i].y + 90;   // Adjusted for expanded canvas
     a.state = 'sit_work';  // Always sitting at their desks
   }
   a.homeX = a.x;
