@@ -963,17 +963,30 @@ function drawAgent(agent) {
   ctx.fillStyle = '#A0704A';
   ctx.fillRect(ax+S(22), ay+S(22)+bob, S(16), S(4));
 
+  // Job title BOX - BACKGROUND
+  const jobBoxW = S(100);
+  const jobBoxH = S(18);
+  const jobBoxX = ax + pw/2 - jobBoxW/2;
+  const jobBoxY = ay - S(72);
+  ctx.fillStyle = a.color;
+  ctx.globalAlpha = 0.2;
+  ctx.fillRect(jobBoxX, jobBoxY, jobBoxW, jobBoxH);
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = a.color;
+  ctx.lineWidth = S(1.5);
+  ctx.strokeRect(jobBoxX, jobBoxY, jobBoxW, jobBoxH);
+
+  // Job title - INSIDE BOX
+  ctx.font = `${S(7)}px "Press Start 2P", monospace`;
+  ctx.fillStyle = a.color;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(a.job, ax+pw/2, jobBoxY + jobBoxH/2);
+
   // Role icon - BIGGER - WHITE
   ctx.font = `${S(26)}px serif`;
   ctx.fillStyle = '#FFFFFF';
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.fillText(a.icon, ax+pw/2, ay-S(16)+bob);
-
-  // Job title - NEW
-  ctx.font = `${S(8)}px "Share Tech Mono", monospace`;
-  ctx.fillStyle = a.color;
-  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-  ctx.fillText(a.job, ax+pw/2, ay-S(56));
 
   // Name - BIGGER - WHITE
   ctx.font = `${S(14)}px "Press Start 2P", monospace`;
