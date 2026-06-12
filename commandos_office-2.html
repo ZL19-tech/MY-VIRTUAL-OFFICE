@@ -346,12 +346,12 @@ const AGENTS = [
 
 // Grid layout for 6 agents: 3 in first row, 2 in second, Commander big at bottom center
 const GRID = [
-  { x: 20,  y: 40  },   // alexa     (row1 col1)
-  { x: 320, y: 40  },   // scout     (row1 col2)
-  { x: 620, y: 40  },   // memo      (row1 col3)
-  { x: 20,  y: 350 },   // doc       (row2 col1)
-  { x: 620, y: 350 },   // cal       (row2 col2)
-  { x: 330, y: 580 },   // commander (row3 - centered, big desk)
+  { x: 20,  y: 100  },   // alexa     (row1 col1)
+  { x: 320, y: 100  },   // scout     (row1 col2)
+  { x: 620, y: 100  },   // memo      (row1 col3)
+  { x: 20,  y: 420 },    // doc       (row2 col1)
+  { x: 620, y: 420 },    // cal       (row2 col2)
+  { x: 330, y: 650 },    // commander (row3 - centered, big desk)
 ];
 
 // Agent home positions (in front of desk)
@@ -1063,6 +1063,22 @@ function drawBG() {
     ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke();
   }
 
+  // Draw RED ZONES - where Commander can move
+  ctx.strokeStyle = '#FF3355';
+  ctx.lineWidth = S(3);
+  ctx.globalAlpha = 0.6;
+  // Zone 1: Alexa desk RED area (x: 20-280, y: 100-280)
+  ctx.strokeRect(sx(20), sy(100), S(260), S(180));
+  // Zone 2: Doc desk RED area (x: 20-280, y: 420-600)
+  ctx.strokeRect(sx(20), sy(420), S(260), S(180));
+  // Zone 3: Cal desk RED area (x: 620-880, y: 420-600)
+  ctx.strokeRect(sx(620), sy(420), S(260), S(180));
+  // Zone 4: Memo desk RED area (x: 620-880, y: 100-280)
+  ctx.strokeRect(sx(620), sy(100), S(260), S(180));
+  // Zone 5: Central area RED box (x: 220-640, y: 230-440)
+  ctx.strokeRect(sx(220), sy(230), S(420), S(210));
+  ctx.globalAlpha = 1;
+
   // Floor strip
   ctx.fillStyle = C.floor;
   ctx.fillRect(0, canvas.height - S(40), canvas.width, S(40));
@@ -1257,16 +1273,16 @@ function runAutoScene() {
 
       // Commander restricted zones (ONLY in red marked areas - the desks)
       if (a.id === 'commander') {
-        // Zone 1: Alexa desk RED area (x: 20-280, y: 300-480)
-        // Zone 2: Doc desk RED area (x: 20-280, y: 610-790)
-        // Zone 3: Cal desk RED area (x: 620-880, y: 610-790)
-        // Zone 4: Memo desk RED area (x: 620-880, y: 300-480)
-        // Zone 5: Central area RED box (x: 220-640, y: 330-540)
-        const inZone1 = newX >= 20 && newX <= 280 && newY >= 300 && newY <= 480;
-        const inZone2 = newX >= 20 && newX <= 280 && newY >= 610 && newY <= 790;
-        const inZone3 = newX >= 620 && newX <= 880 && newY >= 610 && newY <= 790;
-        const inZone4 = newX >= 620 && newX <= 880 && newY >= 300 && newY <= 480;
-        const inZone5 = newX >= 220 && newX <= 640 && newY >= 330 && newY <= 540;
+        // Zone 1: Alexa desk RED area (x: 20-280, y: 100-280)
+        // Zone 2: Doc desk RED area (x: 20-280, y: 420-600)
+        // Zone 3: Cal desk RED area (x: 620-880, y: 420-600)
+        // Zone 4: Memo desk RED area (x: 620-880, y: 100-280)
+        // Zone 5: Central area RED box (x: 220-640, y: 230-440)
+        const inZone1 = newX >= 20 && newX <= 280 && newY >= 100 && newY <= 280;
+        const inZone2 = newX >= 20 && newX <= 280 && newY >= 420 && newY <= 600;
+        const inZone3 = newX >= 620 && newX <= 880 && newY >= 420 && newY <= 600;
+        const inZone4 = newX >= 620 && newX <= 880 && newY >= 100 && newY <= 280;
+        const inZone5 = newX >= 220 && newX <= 640 && newY >= 230 && newY <= 440;
 
         if (inZone1 || inZone2 || inZone3 || inZone4 || inZone5) {
           a.x = newX;
@@ -1424,12 +1440,12 @@ setLang('ro');
 AGENTS.forEach((a, i) => {
   if (a.id === 'commander') {
     a.x = GRID[i].x + 100;
-    a.y = GRID[i].y + 250;  // Adjusted for larger header
+    a.y = GRID[i].y + 180;  // Adjusted for larger header
     a.state = 'idle';  // Commander can walk and manage
   } else {
     // Regular agents positioned right at their desks
     a.x = GRID[i].x + 80;
-    a.y = GRID[i].y + 165;  // Adjusted for larger header
+    a.y = GRID[i].y + 95;  // Adjusted for larger header
     a.state = 'sit_work';  // Always sitting at their desks
   }
   a.homeX = a.x;
