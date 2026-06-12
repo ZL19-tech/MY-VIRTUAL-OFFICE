@@ -1255,17 +1255,18 @@ function runAutoScene() {
       let newX = a.x + dx/dist * speed;
       let newY = a.y + dy/dist * speed;
 
-      // Commander restricted zones (only can walk in marked red areas)
+      // Commander restricted zones (ONLY in red marked areas)
       if (a.id === 'commander') {
-        // Zone 1: Center area - LARGER (x: 25-700, y: 280-450)
-        // Zone 2: Bottom desk area - LARGER (x: 25-570, y: 430-670)
-        const inZone1 = newX >= 25 && newX <= 700 && newY >= 280 && newY <= 450;
-        const inZone2 = newX >= 25 && newX <= 570 && newY >= 430 && newY <= 670;
+        // Zone 1: Top center RED area (x: 25-700, y: 285-420)
+        // Zone 2: Bottom desk RED area (x: 200-520, y: 435-665)
+        const inZone1 = newX >= 25 && newX <= 700 && newY >= 285 && newY <= 420;
+        const inZone2 = newX >= 200 && newX <= 520 && newY >= 435 && newY <= 665;
 
         if (inZone1 || inZone2) {
           a.x = newX;
           a.y = newY;
         }
+        // Otherwise, stay in current position (don't move outside red zones)
       } else {
         a.x = newX;
         a.y = newY;
