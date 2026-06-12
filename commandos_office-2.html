@@ -1283,8 +1283,21 @@ function runAutoScene() {
 
       if (dist > 2) {
         const speed = 2;
-        commander.x += dx/dist * speed;
-        commander.y += dy/dist * speed;
+        let newX = commander.x + dx/dist * speed;
+        let newY = commander.y + dy/dist * speed;
+
+        // Check collision with desks
+        const onAlexaDesk = newX >= 40 && newX <= 240 && newY >= 80 && newY <= 280;
+        const onScoutDesk = newX >= 360 && newX <= 560 && newY >= 80 && newY <= 280;
+        const onMemoDesk = newX >= 680 && newX <= 880 && newY >= 80 && newY <= 280;
+        const onDocDesk = newX >= 40 && newX <= 240 && newY >= 380 && newY <= 580;
+        const onCalDesk = newX >= 680 && newX <= 880 && newY >= 380 && newY <= 580;
+
+        // Only move if NOT on desk
+        if (!onAlexaDesk && !onScoutDesk && !onMemoDesk && !onDocDesk && !onCalDesk) {
+          commander.x = newX;
+          commander.y = newY;
+        }
         commander.state = 'walk';
       } else {
         // Reached waypoint, start resting
