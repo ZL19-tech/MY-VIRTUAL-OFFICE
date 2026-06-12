@@ -1063,21 +1063,6 @@ function drawBG() {
     ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke();
   }
 
-  // Draw RED ZONES - where Commander can move
-  ctx.strokeStyle = '#FF3355';
-  ctx.lineWidth = S(3);
-  ctx.globalAlpha = 0.6;
-  // Zone 1: Alexa desk RED area (x: 20-280, y: 100-280)
-  ctx.strokeRect(sx(20), sy(100), S(260), S(180));
-  // Zone 2: Doc desk RED area (x: 20-280, y: 420-600)
-  ctx.strokeRect(sx(20), sy(420), S(260), S(180));
-  // Zone 3: Cal desk RED area (x: 620-880, y: 420-600)
-  ctx.strokeRect(sx(620), sy(420), S(260), S(180));
-  // Zone 4: Memo desk RED area (x: 620-880, y: 100-280)
-  ctx.strokeRect(sx(620), sy(100), S(260), S(180));
-  // Zone 5: Central area RED box (x: 220-640, y: 230-440)
-  ctx.strokeRect(sx(220), sy(230), S(420), S(210));
-  ctx.globalAlpha = 1;
 
   // Floor strip
   ctx.fillStyle = C.floor;
