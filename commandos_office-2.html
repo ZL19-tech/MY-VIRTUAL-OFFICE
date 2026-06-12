@@ -13,15 +13,15 @@
   --monitor:#0A1628;--floor:#161B27;--purple:#9D4EDD;--teal:#20B2AA;
 }
 html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);}
-body{display:flex;flex-direction:row;font-family:'Press Start 2P',monospace;}
+body{display:flex;flex-direction:row;font-family:'Press Start 2P',monospace;font-size:14px;}
 
 /* LEFT PANEL — Office */
-#left-panel{flex:0 0 62%;height:100vh;position:relative;overflow:hidden;}
+#left-panel{flex:0 0 65%;height:100vh;position:relative;overflow:hidden;}
 canvas{display:block;width:100%;height:100%;}
 
 /* RIGHT PANEL — Tasks */
 #right-panel{
-  flex:1;height:100vh;background:#0A0F1A;
+  flex:0 0 35%;height:100vh;background:#0A0F1A;
   border-left:2px solid #1C2333;
   display:flex;flex-direction:column;overflow:hidden;
   position:relative;
@@ -1069,20 +1069,20 @@ function drawBG() {
 
   // Header bar - CommandOS style
   ctx.fillStyle = C.walls;
-  ctx.fillRect(0, 0, canvas.width, sy(44));
-  ctx.font = `${S(11)}px "Press Start 2P", monospace`;
+  ctx.fillRect(0, 0, canvas.width, sy(54));
+  ctx.font = `${S(16)}px "Press Start 2P", monospace`;
   ctx.fillStyle = C.green;
   ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-  ctx.fillText('⬡ CommandOS', sx(14), sy(22));
+  ctx.fillText('⬡ CommandOS', sx(14), sy(27));
   const now = new Date().toTimeString().substr(0,8);
-  ctx.font = `${S(16)}px "Share Tech Mono", monospace`;
+  ctx.font = `${S(24)}px "Share Tech Mono", monospace`;
   ctx.fillStyle = C.green;
   ctx.textAlign = 'right';
-  ctx.fillText(now, canvas.width - sx(14), sy(22));
+  ctx.fillText(now, canvas.width - sx(20), sy(27));
   // header sep
   ctx.fillStyle = C.green;
   ctx.globalAlpha = 0.25;
-  ctx.fillRect(0, sy(44), canvas.width, S(1));
+  ctx.fillRect(0, sy(54), canvas.width, S(2));
   ctx.globalAlpha = 1;
 }
 
@@ -1255,14 +1255,20 @@ function runAutoScene() {
       let newX = a.x + dx/dist * speed;
       let newY = a.y + dy/dist * speed;
 
-      // Commander restricted zones (ONLY in red marked areas)
+      // Commander restricted zones (ONLY in red marked areas - the desks)
       if (a.id === 'commander') {
-        // Zone 1: Top center RED area (x: 25-700, y: 285-420)
-        // Zone 2: Bottom desk RED area (x: 200-520, y: 435-700)
-        const inZone1 = newX >= 25 && newX <= 700 && newY >= 285 && newY <= 420;
-        const inZone2 = newX >= 200 && newX <= 520 && newY >= 435 && newY <= 700;
+        // Zone 1: Alexa desk RED area (x: 20-280, y: 300-480)
+        // Zone 2: Doc desk RED area (x: 20-280, y: 610-790)
+        // Zone 3: Cal desk RED area (x: 620-880, y: 610-790)
+        // Zone 4: Memo desk RED area (x: 620-880, y: 300-480)
+        // Zone 5: Central area RED box (x: 220-640, y: 330-540)
+        const inZone1 = newX >= 20 && newX <= 280 && newY >= 300 && newY <= 480;
+        const inZone2 = newX >= 20 && newX <= 280 && newY >= 610 && newY <= 790;
+        const inZone3 = newX >= 620 && newX <= 880 && newY >= 610 && newY <= 790;
+        const inZone4 = newX >= 620 && newX <= 880 && newY >= 300 && newY <= 480;
+        const inZone5 = newX >= 220 && newX <= 640 && newY >= 330 && newY <= 540;
 
-        if (inZone1 || inZone2) {
+        if (inZone1 || inZone2 || inZone3 || inZone4 || inZone5) {
           a.x = newX;
           a.y = newY;
         }
@@ -1317,9 +1323,9 @@ function render() {
   AGENTS.forEach((a, i) => {
     const g = GRID[i];
     if (a.id === 'commander') {
-      drawDesk(g.x, g.y + 44, a);  // +44 for header - large desk for Commander
+      drawDesk(g.x, g.y + 54, a);  // +54 for header - large desk for Commander
     } else {
-      drawSmallDesk(g.x, g.y + 44, a);  // Small MacBook desk for other agents
+      drawSmallDesk(g.x, g.y + 54, a);  // Small MacBook desk for other agents
     }
     // HP bars removed - only shown in right panel chart
     // drawHPBar(a, g.x, g.y + 44);
@@ -1418,12 +1424,12 @@ setLang('ro');
 AGENTS.forEach((a, i) => {
   if (a.id === 'commander') {
     a.x = GRID[i].x + 100;
-    a.y = GRID[i].y + 195;
+    a.y = GRID[i].y + 250;  // Adjusted for larger header
     a.state = 'idle';  // Commander can walk and manage
   } else {
     // Regular agents positioned right at their desks
     a.x = GRID[i].x + 80;
-    a.y = GRID[i].y + 110;  // Much higher, closer to desk
+    a.y = GRID[i].y + 165;  // Adjusted for larger header
     a.state = 'sit_work';  // Always sitting at their desks
   }
   a.homeX = a.x;
