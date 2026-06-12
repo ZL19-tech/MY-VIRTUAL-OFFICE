@@ -247,6 +247,52 @@ musicInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') toggleMusic();
 });
 
+// ── Voice Chat System (Game-style gibberish) ────────────────────────
+// Creates audio context for voice-like chatter without real words
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playGameVoice(pitch = 400, duration = 0.3, type = 'sine') {
+  try {
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    // Gibberish-like pitch variations
+    osc.type = type;
+    osc.frequency.setValueAtTime(pitch, now);
+    osc.frequency.exponentialRampToValueAtTime(pitch * 0.6, now + duration * 0.7);
+
+    gain.gain.setValueAtTime(0.1, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+
+    osc.start(now);
+    osc.stop(now + duration);
+  } catch (e) {
+    // Silently fail if audio context not available
+  }
+}
+
+function playAgentChatter() {
+  // Random gibberish voice pattern
+  const patterns = [
+    [400, 0.15, 350, 0.15, 420, 0.1],
+    [380, 0.2, 420, 0.15, 360, 0.1],
+    [410, 0.12, 390, 0.18, 440, 0.12],
+    [370, 0.15, 400, 0.15, 380, 0.15],
+  ];
+
+  const pattern = patterns[Math.floor(Math.random() * patterns.length)];
+
+  for (let i = 0; i < pattern.length; i += 2) {
+    setTimeout(() => {
+      playGameVoice(pattern[i], pattern[i + 1], Math.random() > 0.5 ? 'sine' : 'triangle');
+    }, i * 50);
+  }
+}
+
 // ── Language ────────────────────────────────────────────────────────
 let LANG = 'ro';
 const T = {
@@ -572,7 +618,13 @@ function addStatus(agentId, text, duration) {
 function walkTo(agentId, tx, ty, onArrive) {
   agentWalk[agentId] = { tx, ty, onArrive };
   const a = AGENTS.find(x => x.id === agentId);
-  if (a && a.state !== 'dead') a.state = 'walk';
+  if (a && a.state !== 'dead') {
+    a.state = 'walk';
+    // Play agent chatter when they respond to movement
+    if (agentId !== 'commander') {
+      setTimeout(() => playAgentChatter(), 100);
+    }
+  }
 }
 
 // ── Toast ────────────────────────────────────────────────────────────
@@ -1245,18 +1297,21 @@ function runAutoScene() {
   }
   if (sceneTimer === 140) {
     assignTask('alexa', 'Procesează cereri client', false);
+    playAgentChatter();  // Agent responds with voice
   }
   if (sceneTimer === 160) {
     walkTo('commander', GRID[1].x + 60, GRID[1].y + 200);  // Go to Scout
   }
   if (sceneTimer === 200) {
     assignTask('scout', 'Analizează rapoarte', false);
+    playAgentChatter();  // Agent responds with voice
   }
   if (sceneTimer === 220) {
     walkTo('commander', GRID[3].x + 60, GRID[3].y + 200);  // Go to Doc
   }
   if (sceneTimer === 260) {
     assignTask('doc', 'Actualizează KB', false);
+    playAgentChatter();  // Agent responds with voice
   }
 
   // Scene 3: Agents working (250-350)
