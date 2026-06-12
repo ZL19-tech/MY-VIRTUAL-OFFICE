@@ -379,13 +379,22 @@ let sceneTimer = 0;
 let totalTaskCount = 0;
 
 // ── Commander patrol route ───────────────────────────────────────────
+// Desks: Alexa (40-240, 80-280), Scout (360-560, 80-280), Memo (680-880, 80-280)
+//        Doc (40-240, 380-580), Cal (680-880, 380-580), Commander (center bottom)
+// Route avoids all desks
 const COMMANDER_ROUTE = [
-  { x: 300, y: 200 },   // Sus centru
-  { x: 150, y: 350 },   // Stânga
-  { x: 400, y: 450 },   // Centru jos
-  { x: 750, y: 350 },   // Dreapta
-  { x: 600, y: 650 },   // Jos centru
-  { x: 200, y: 550 },   // Jos stânga
+  { x: 250, y: 100 },   // Between Alexa and Scout (top)
+  { x: 300, y: 50 },    // Top center (above desks)
+  { x: 600, y: 100 },   // Between Scout and Memo (top)
+  { x: 750, y: 50 },    // Top right area
+  { x: 900, y: 150 },   // Far right side
+  { x: 900, y: 320 },   // Right side between rows
+  { x: 950, y: 450 },   // Far right bottom
+  { x: 750, y: 620 },   // Right side of Commander desk
+  { x: 350, y: 700 },   // Bottom center (below desks)
+  { x: 150, y: 620 },   // Left side bottom
+  { x: 0, y: 450 },     // Far left side
+  { x: 0, y: 300 },     // Left side between rows
 ];
 let commanderRouteIdx = 0;
 let commanderWalkTimer = 0;      // Timer pentru 5 secunde de mers
