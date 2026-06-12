@@ -1079,19 +1079,6 @@ function drawBG() {
     ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke();
   }
 
-  // Draw RED ZONES - where Commander can move (VISUAL ONLY - for reference)
-  ctx.strokeStyle = '#FF3355';
-  ctx.lineWidth = S(2);
-  ctx.globalAlpha = 0.4;
-  // Zone 1: Stânga sus
-  ctx.strokeRect(sx(20), sy(340), S(220), S(180));
-  // Zone 2: Centru
-  ctx.strokeRect(sx(230), sy(320), S(470), S(330));
-  // Zone 3: Dreapta
-  ctx.strokeRect(sx(650), sy(350), S(270), S(180));
-  // Zone 4: Jos
-  ctx.strokeRect(sx(20), sy(650), S(860), S(250));
-  ctx.globalAlpha = 1;
 
 
   // Floor strip
@@ -1286,22 +1273,26 @@ function runAutoScene() {
       let newX = a.x + dx/dist * speed;
       let newY = a.y + dy/dist * speed;
 
-      // Commander restricted to marked RED zones only
+      // Commander can move freely everywhere EXCEPT on agent desks
       if (a.id === 'commander') {
-        // Zone 1: Stânga sus (x: 20-240, y: 340-520)
-        // Zone 2: Centru (x: 230-700, y: 320-650)
-        // Zone 3: Dreapta (x: 650-920, y: 350-530)
-        // Zone 4: Jos (x: 20-880, y: 650-900)
-        const inZone1 = newX >= 20 && newX <= 240 && newY >= 340 && newY <= 520;
-        const inZone2 = newX >= 230 && newX <= 700 && newY >= 320 && newY <= 650;
-        const inZone3 = newX >= 650 && newX <= 920 && newY >= 350 && newY <= 530;
-        const inZone4 = newX >= 20 && newX <= 880 && newY >= 650 && newY <= 900;
+        // Desk collision zones to AVOID
+        // Alexa desk: x: 40-240, y: 80-280
+        // Scout desk: x: 360-560, y: 80-280
+        // Memo desk: x: 680-880, y: 80-280
+        // Doc desk: x: 40-240, y: 380-580
+        // Cal desk: x: 680-880, y: 380-580
+        const onAlexaDesk = newX >= 40 && newX <= 240 && newY >= 80 && newY <= 280;
+        const onScoutDesk = newX >= 360 && newX <= 560 && newY >= 80 && newY <= 280;
+        const onMemoDesk = newX >= 680 && newX <= 880 && newY >= 80 && newY <= 280;
+        const onDocDesk = newX >= 40 && newX <= 240 && newY >= 380 && newY <= 580;
+        const onCalDesk = newX >= 680 && newX <= 880 && newY >= 380 && newY <= 580;
 
-        if (inZone1 || inZone2 || inZone3 || inZone4) {
+        // If NOT on any desk and within bounds, allow movement
+        if (!onAlexaDesk && !onScoutDesk && !onMemoDesk && !onDocDesk && !onCalDesk &&
+            newX >= 0 && newX <= CANVAS_WIDTH && newY >= 0 && newY <= CANVAS_HEIGHT) {
           a.x = newX;
           a.y = newY;
         }
-        // Otherwise, stay in current position (don't move outside red zones)
       } else {
         a.x = newX;
         a.y = newY;
