@@ -1258,9 +1258,9 @@ function runAutoScene() {
       // Commander restricted zones (ONLY in red marked areas)
       if (a.id === 'commander') {
         // Zone 1: Top center RED area (x: 25-700, y: 285-420)
-        // Zone 2: Bottom desk RED area (x: 200-520, y: 435-665)
+        // Zone 2: Bottom desk RED area (x: 200-520, y: 435-700)
         const inZone1 = newX >= 25 && newX <= 700 && newY >= 285 && newY <= 420;
-        const inZone2 = newX >= 200 && newX <= 520 && newY >= 435 && newY <= 665;
+        const inZone2 = newX >= 200 && newX <= 520 && newY >= 435 && newY <= 700;
 
         if (inZone1 || inZone2) {
           a.x = newX;
