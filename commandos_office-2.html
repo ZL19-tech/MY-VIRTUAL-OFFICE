@@ -361,18 +361,46 @@ function setLang(lang) {
 // ── Canvas setup ────────────────────────────────────────────────────
 const canvas = document.getElementById('c');
 const ctx    = canvas.getContext('2d');
-const CANVAS_WIDTH = 1200;   // Expanded game width
-const CANVAS_HEIGHT = 950;   // Expanded game height
+const CANVAS_WIDTH = 1200;   // Fixed internal resolution
+const CANVAS_HEIGHT = 950;   // Fixed internal resolution
+
+// Responsive zoom system - "Fit to Screen"
+let zoomLevel = 1.0;  // 1.0 = 100% zoom
+let offsetX = 0;      // Horizontal centering offset
+let offsetY = 0;      // Vertical centering offset
+
+function calculateZoom() {
+  const panel = document.getElementById('left-panel');
+  const maxWidth = panel.clientWidth;
+  const maxHeight = panel.clientHeight;
+
+  // Calculate zoom needed to fit 1200x950 into available space
+  const zoomX = maxWidth / CANVAS_WIDTH;
+  const zoomY = maxHeight / CANVAS_HEIGHT;
+
+  // Use smaller zoom (most restrictive) to ensure everything fits
+  zoomLevel = Math.min(zoomX, zoomY);
+
+  // Calculate centering offsets
+  const scaledWidth = CANVAS_WIDTH * zoomLevel;
+  const scaledHeight = CANVAS_HEIGHT * zoomLevel;
+  offsetX = (maxWidth - scaledWidth) / 2;
+  offsetY = (maxHeight - scaledHeight) / 2;
+}
+
 function resizeCanvas() {
   const panel = document.getElementById('left-panel');
   canvas.width  = panel.clientWidth;
   canvas.height = panel.clientHeight;
+  calculateZoom();
 }
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
-function S(v)  { return v * (canvas.width / CANVAS_WIDTH); }
-function sx(x) { return S(x); }
-function sy(y) { return S(y) * (canvas.height / CANVAS_HEIGHT); }
+
+// Scaling functions - now work with fixed internal resolution
+function S(v)  { return v; }  // No longer needs to scale - zoom handles it
+function sx(x) { return x; }
+function sy(y) { return y; }
 
 // ── Color palette ───────────────────────────────────────────────────
 const C = {
@@ -2037,6 +2065,11 @@ function runAutoScene() {
 function render() {
   resizeCanvas();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Apply zoom transformation for responsive scaling
+  ctx.save();
+  ctx.setTransform(zoomLevel, 0, 0, zoomLevel, offsetX, offsetY);
+
   drawBG();
 
   AGENTS.forEach((a, i) => {
@@ -2056,6 +2089,8 @@ function render() {
   // Bubbles disabled
   // bubbles.forEach(b => drawBubble(b));
 
+  ctx.restore();
+
   drawCharts();
   runAutoScene();
   tick++;
@@ -2068,9 +2103,9 @@ canvas.addEventListener('click', (e) => {
   const clickXScreen = e.clientX - rect.left;
   const clickYScreen = e.clientY - rect.top;
 
-  // Convert screen coordinates to game coordinates (1200x950)
-  const clickX = (clickXScreen / canvas.width) * CANVAS_WIDTH;
-  const clickY = (clickYScreen / canvas.height) * CANVAS_HEIGHT;
+  // Convert screen coordinates to game coordinates (1200x950), accounting for zoom and offset
+  const clickX = (clickXScreen - offsetX) / zoomLevel;
+  const clickY = (clickYScreen - offsetY) / zoomLevel;
 
   if (window.cmdButtons && window.cmdButtons.length > 0) {
     for (let btn of window.cmdButtons) {
