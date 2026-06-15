@@ -2092,11 +2092,8 @@ function render() {
 
   AGENTS.forEach((a, i) => {
     const g = GRID[i];
-    if (a.id === 'commander') {
-      drawDesk(g.x, g.y + 54, a);  // +54 for header - large desk for Commander
-    } else {
-      drawSmallDesk(g.x, g.y + 54, a);  // Small MacBook desk for other agents
-    }
+    // All agents use the same desk size
+    drawSmallDesk(g.x, g.y + 54, a);
     // HP bars removed - only shown in right panel chart
     // drawHPBar(a, g.x, g.y + 44);
     drawAgent(a);
