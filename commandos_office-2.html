@@ -916,65 +916,52 @@ function drawDesk(gx, gy, agent) {
 
 // ── Agent Office Desks - Premium Wood Style ──────────────────────────
 function drawSmallDesk(gx, gy, agent) {
-  const W = 220, H = 110;
+  const W = 220, H = 80;
 
-  // Shadow under desk
-  drawDeskShadow(gx + 5, gy + 20 + H, W, 6);
-
-  // Main desk surface with wood texture
-  const deskColor = '#5A4B38';
-  drawWoodTexture(gx + 8, gy + 20, W, H, deskColor);
+  // SIMPLE PIXEL ART DESK - Clean minimalist style
+  // Desk top surface - orange/brown solid color
+  ctx.fillStyle = '#A0826D';
+  ctx.fillRect(gx, gy + 30, W, H);
 
   // Top edge highlight
-  ctx.fillStyle = '#7B6A57';
-  ctx.globalAlpha = 0.4;
-  ctx.fillRect(gx + 8, gy + 20, W, 2);
-  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#C0A68D';
+  ctx.fillRect(gx, gy + 30, W, 2);
 
-  // LEFT SIDE DRAWER (2 visible drawers)
-  const drawerLeft = gx + 3;
-  const drawerW = 14;
-  const drawerH = 14;
-  const drawerYSpacing = 18;
-  const drawerY = gy + 32;
+  // Bottom edge shadow
+  ctx.fillStyle = '#6A5A4D';
+  ctx.fillRect(gx, gy + 30 + H - 2, W, 2);
 
-  for (let i = 0; i < 2; i++) {
-    const dy = drawerY + i * drawerYSpacing;
-    ctx.fillStyle = '#4A3B2A';
-    ctx.fillRect(drawerLeft, dy, drawerW, drawerH);
+  // LEFT SIDE - Single simple drawer
+  const drawerLeft = gx + 5;
+  const drawerW = 20;
+  const drawerH = 18;
+  const drawerY = gy + 45;
 
-    drawWoodTexture(drawerLeft + 1, dy + 1, drawerW - 2, drawerH - 2, '#5A4B38');
+  // Drawer body
+  ctx.fillStyle = '#8A6F5A';
+  ctx.fillRect(drawerLeft, drawerY, drawerW, drawerH);
+  // Drawer border
+  ctx.strokeStyle = '#5A4A3A';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(drawerLeft, drawerY, drawerW, drawerH);
+  // Handle
+  ctx.fillStyle = '#6A5A4A';
+  ctx.fillRect(drawerLeft + 8, drawerY + 8, 4, 2);
 
-    ctx.fillStyle = '#0F0F14';
-    ctx.globalAlpha = 0.25;
-    ctx.fillRect(drawerLeft, dy + drawerH - 1, drawerW, 1);
-    ctx.globalAlpha = 1;
+  // RIGHT SIDE - Single simple drawer
+  const drawerRight = gx + W - 25;
+  ctx.fillStyle = '#8A6F5A';
+  ctx.fillRect(drawerRight, drawerY, drawerW, drawerH);
+  ctx.strokeStyle = '#5A4A3A';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(drawerRight, drawerY, drawerW, drawerH);
+  ctx.fillStyle = '#6A5A4A';
+  ctx.fillRect(drawerRight + 8, drawerY + 8, 4, 2);
 
-    drawBrassHandle(drawerLeft + drawerW - 2, dy + drawerH/2, 2);
-  }
-
-  // RIGHT SIDE DRAWER (2 visible drawers) - mirrored
-  const drawerRight = gx + W + 4;
-
-  for (let i = 0; i < 2; i++) {
-    const dy = drawerY + i * drawerYSpacing;
-    ctx.fillStyle = '#4A3B2A';
-    ctx.fillRect(drawerRight, dy, drawerW, drawerH);
-
-    drawWoodTexture(drawerRight + 1, dy + 1, drawerW - 2, drawerH - 2, '#5A4B38');
-
-    ctx.fillStyle = '#0F0F14';
-    ctx.globalAlpha = 0.25;
-    ctx.fillRect(drawerRight, dy + drawerH - 1, drawerW, 1);
-    ctx.globalAlpha = 1;
-
-    drawBrassHandle(drawerRight + 2, dy + drawerH/2, 2);
-  }
-
-  // Support legs
-  ctx.fillStyle = '#3A3A2A';
-  ctx.fillRect(gx + 12, gy + 20 + H - 3, 7, 3);
-  ctx.fillRect(gx + W + 8, gy + 20 + H - 3, 7, 3);
+  // Support legs - simple vertical lines
+  ctx.fillStyle = '#5A4A3A';
+  ctx.fillRect(gx + 10, gy + 30 + H, 4, 10);
+  ctx.fillRect(gx + W - 14, gy + 30 + H, 4, 10);
 
   // DESKTOP ITEMS - Like pixel art image
   // Monitor on LEFT
