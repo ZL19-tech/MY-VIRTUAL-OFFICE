@@ -1284,22 +1284,161 @@ function drawStatusAbove(agentId, gx, gy) {
 
 // ── CommandOS Brand Background ──────────────────────────────────────
 function drawBG() {
-  // Pixel-art Office Floor - Dark blue-gray tile pattern (like first image)
-  const tileWidth = S(50);   // Wider horizontal tiles
-  const tileHeight = S(18);  // Proportional height
+  // WALL SECTION (Upper 20% of screen - y: 54 to ~240)
+  // ════════════════════════════════════════════════════════════════
 
-  // Draw horizontal tile floor across entire office
-  for (let y = sy(54); y < canvas.height; y += tileHeight) {
+  // Main wall background - dark blue-gray
+  ctx.fillStyle = '#3D4456';
+  ctx.fillRect(0, sy(54), canvas.width, sy(186));
+
+  // Upper wall molding/trim (gold accent)
+  ctx.fillStyle = '#D4A574';
+  ctx.fillRect(0, sy(54), canvas.width, S(6));
+
+  // Molding detail - darker recess
+  ctx.fillStyle = '#8B7355';
+  ctx.fillRect(0, sy(54) + S(2), canvas.width, S(2));
+
+  // WINDOWS - 3 large windows with city skyline
+  const windowY = sy(70);
+  const windowH = S(100);
+  const windowPositions = [150, 450, 750];
+
+  windowPositions.forEach(wx => {
+    // Window frame - dark border
+    ctx.fillStyle = '#1A1A1A';
+    ctx.fillRect(sx(wx - 5), windowY - S(5), S(150), windowH + S(10));
+
+    // Glass with tint
+    ctx.fillStyle = '#2D4A6A';
+    ctx.fillRect(sx(wx), windowY, S(140), windowH);
+
+    // Sunset gradient inside window
+    const gradient = ctx.createLinearGradient(sx(wx), windowY, sx(wx), windowY + windowH);
+    gradient.addColorStop(0, '#6B2C7A');      // Purple top
+    gradient.addColorStop(0.4, '#D4A574');    // Orange middle
+    gradient.addColorStop(1, '#FF6B35');      // Red bottom
+    ctx.fillStyle = gradient;
+    ctx.globalAlpha = 0.4;
+    ctx.fillRect(sx(wx), windowY, S(140), windowH);
+    ctx.globalAlpha = 1;
+
+    // City skyline silhouette
+    ctx.fillStyle = '#1A1A2E';
+    ctx.beginPath();
+    ctx.moveTo(sx(wx), windowY + windowH - S(30));
+    ctx.lineTo(sx(wx) + S(20), windowY + windowH - S(50));
+    ctx.lineTo(sx(wx) + S(35), windowY + windowH - S(35));
+    ctx.lineTo(sx(wx) + S(50), windowY + windowH - S(55));
+    ctx.lineTo(sx(wx) + S(70), windowY + windowH - S(40));
+    ctx.lineTo(sx(wx) + S(90), windowY + windowH - S(60));
+    ctx.lineTo(sx(wx) + S(110), windowY + windowH - S(35));
+    ctx.lineTo(sx(wx) + S(140), windowY + windowH - S(30));
+    ctx.lineTo(sx(wx) + S(140), windowY + windowH);
+    ctx.fill();
+
+    // Window panes - grid (2x3)
+    ctx.strokeStyle = '#0F0F14';
+    ctx.lineWidth = S(2);
+
+    // Horizontal panes
+    ctx.beginPath();
+    ctx.moveTo(sx(wx), windowY + windowH/3);
+    ctx.lineTo(sx(wx) + S(140), windowY + windowH/3);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(sx(wx), windowY + 2*windowH/3);
+    ctx.lineTo(sx(wx) + S(140), windowY + 2*windowH/3);
+    ctx.stroke();
+
+    // Vertical panes
+    ctx.beginPath();
+    ctx.moveTo(sx(wx) + S(47), windowY);
+    ctx.lineTo(sx(wx) + S(47), windowY + windowH);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(sx(wx) + S(93), windowY);
+    ctx.lineTo(sx(wx) + S(93), windowY + windowH);
+    ctx.stroke();
+  });
+
+  // CEILING LAMPS - hanging lights with glow
+  const lampPositions = [200, 600, 1000];
+  const lampGlow = 0.6 + 0.3 * Math.sin(tick * 0.05);
+
+  lampPositions.forEach(lx => {
+    // Chain/rod
+    ctx.strokeStyle = '#8B7355';
+    ctx.lineWidth = S(2);
+    ctx.beginPath();
+    ctx.moveTo(sx(lx), sy(65));
+    ctx.lineTo(sx(lx), sy(130));
+    ctx.stroke();
+
+    // Lamp fixture - brass/gold
+    ctx.fillStyle = '#D4A574';
+    ctx.fillRect(sx(lx - 8), sy(130), S(16), S(15));
+
+    // Lamp bulb - yellow/orange with glow
+    ctx.fillStyle = '#FFD700';
+    ctx.globalAlpha = 0.7;
+    ctx.beginPath();
+    ctx.arc(sx(lx), sy(140), S(10), 0, Math.PI * 2);
+    ctx.fill();
+
+    // Glow effect
+    ctx.fillStyle = '#FF8C00';
+    ctx.globalAlpha = 0.3 * lampGlow;
+    ctx.beginPath();
+    ctx.arc(sx(lx), sy(140), S(20), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  });
+
+  // WALL DECORATION - Planning board on left wall
+  ctx.fillStyle = '#8B6F47';
+  ctx.fillRect(sx(50), sy(80), S(80), S(90));
+
+  // Cork board texture
+  ctx.fillStyle = '#A0826D';
+  for (let i = 0; i < 20; i++) {
+    ctx.fillRect(sx(50 + Math.random() * 80), sy(80 + Math.random() * 90), S(2), S(2));
+  }
+
+  // Sticky notes on board
+  const noteColors = ['#FFFF88', '#FF88FF', '#88FFFF', '#FFCC88'];
+  const notePositions = [[60, 85], [75, 90], [65, 105], [80, 100]];
+
+  notePositions.forEach((pos, idx) => {
+    ctx.fillStyle = noteColors[idx];
+    ctx.fillRect(sx(pos[0]), sy(pos[1]), S(15), S(15));
+    ctx.strokeStyle = '#0F0F14';
+    ctx.lineWidth = 0.5;
+    ctx.strokeRect(sx(pos[0]), sy(pos[1]), S(15), S(15));
+  });
+
+  // Lower wall molding (separates wall from floor)
+  ctx.fillStyle = '#D4A574';
+  ctx.fillRect(0, sy(235), canvas.width, S(6));
+
+  ctx.fillStyle = '#8B7355';
+  ctx.fillRect(0, sy(237), canvas.width, S(2));
+
+  // FLOOR SECTION (starts at y: ~240)
+  // ════════════════════════════════════════════════════════════════
+  const tileWidth = S(50);
+  const tileHeight = S(18);
+
+  for (let y = sy(240); y < canvas.height; y += tileHeight) {
     for (let x = -tileWidth; x < canvas.width; x += tileWidth) {
-      // Alternate subtle shades of gray-blue for depth
-      // Main colors: #3D4456 (darker) and #4A5165 (lighter)
-      const isAlternate = (Math.floor((y - sy(54)) / tileHeight) + Math.floor(x / tileWidth)) % 2;
+      const isAlternate = (Math.floor((y - sy(240)) / tileHeight) + Math.floor(x / tileWidth)) % 2;
       const tileColor = isAlternate === 0 ? '#3D4456' : '#4A5165';
 
       ctx.fillStyle = tileColor;
       ctx.fillRect(x, y, tileWidth, tileHeight);
 
-      // Subtle horizontal line between tiles (pixel-art style)
       ctx.strokeStyle = '#2F3541';
       ctx.lineWidth = 1;
       ctx.beginPath();
@@ -1307,7 +1446,6 @@ function drawBG() {
       ctx.lineTo(x + tileWidth, y + tileHeight);
       ctx.stroke();
 
-      // Subtle vertical line for pixel-art grid feel
       ctx.strokeStyle = '#35394A';
       ctx.lineWidth = 0.5;
       ctx.beginPath();
@@ -1317,28 +1455,9 @@ function drawBG() {
     }
   }
 
-  // Optional: Add very subtle shading variation for depth
   ctx.fillStyle = '#000000';
   ctx.globalAlpha = 0.02;
-  ctx.fillRect(0, sy(54), canvas.width, canvas.height - sy(54));
-  ctx.globalAlpha = 1;
-
-  // Header bar - CommandOS style
-  ctx.fillStyle = C.walls;
-  ctx.fillRect(0, 0, canvas.width, sy(54));
-  ctx.font = `${S(16)}px "Press Start 2P", monospace`;
-  ctx.fillStyle = C.green;
-  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-  ctx.fillText('⬡ CommandOS', sx(14), sy(27));
-  const now = new Date().toTimeString().substr(0,8);
-  ctx.font = `${S(24)}px "Share Tech Mono", monospace`;
-  ctx.fillStyle = C.green;
-  ctx.textAlign = 'right';
-  ctx.fillText(now, canvas.width - sx(20), sy(27));
-  // header sep
-  ctx.fillStyle = C.green;
-  ctx.globalAlpha = 0.25;
-  ctx.fillRect(0, sy(54), canvas.width, S(2));
+  ctx.fillRect(0, sy(240), canvas.width, canvas.height - sy(240));
   ctx.globalAlpha = 1;
 }
 
