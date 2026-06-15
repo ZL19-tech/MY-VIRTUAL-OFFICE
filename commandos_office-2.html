@@ -1498,22 +1498,21 @@ function runAutoScene() {
       let newX = a.x + dx/dist * speed;
       let newY = a.y + dy/dist * speed;
 
-      // Commander can move freely everywhere EXCEPT on agent desks
+      // Commander can move freely everywhere EXCEPT on ANY desk
       if (a.id === 'commander') {
         // Desk collision zones to AVOID
-        // Alexa desk: x: 40-240, y: 80-280
-        // Scout desk: x: 360-560, y: 80-280
-        // Memo desk: x: 680-880, y: 80-280
-        // Doc desk: x: 40-240, y: 380-580
-        // Cal desk: x: 680-880, y: 380-580
+        // Agent desks: Alexa (40-240, 80-280), Scout (360-560, 80-280), Memo (680-880, 80-280)
+        //              Doc (40-240, 380-580), Cal (680-880, 380-580)
+        // Commander desk: (390-670, 776-916)
         const onAlexaDesk = newX >= 40 && newX <= 240 && newY >= 80 && newY <= 280;
         const onScoutDesk = newX >= 360 && newX <= 560 && newY >= 80 && newY <= 280;
         const onMemoDesk = newX >= 680 && newX <= 880 && newY >= 80 && newY <= 280;
         const onDocDesk = newX >= 40 && newX <= 240 && newY >= 380 && newY <= 580;
         const onCalDesk = newX >= 680 && newX <= 880 && newY >= 380 && newY <= 580;
+        const onCommanderDesk = newX >= 390 && newX <= 670 && newY >= 776 && newY <= 916;
 
         // If NOT on any desk and within bounds, allow movement
-        if (!onAlexaDesk && !onScoutDesk && !onMemoDesk && !onDocDesk && !onCalDesk &&
+        if (!onAlexaDesk && !onScoutDesk && !onMemoDesk && !onDocDesk && !onCalDesk && !onCommanderDesk &&
             newX >= 0 && newX <= CANVAS_WIDTH && newY >= 0 && newY <= CANVAS_HEIGHT) {
           a.x = newX;
           a.y = newY;
