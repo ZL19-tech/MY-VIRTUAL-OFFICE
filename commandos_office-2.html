@@ -710,119 +710,262 @@ function drawHPBar(agent, gx, gy) {
   }
 }
 
-// ── Pixel-Art Office Desk - Warm Brown Style (Top-Down View) ──────
+// ── Premium Wood Texture Helper ──────────────────────────────────────
+function drawWoodTexture(x, y, w, h, baseColor) {
+  // Base color
+  ctx.fillStyle = baseColor;
+  ctx.fillRect(x, y, w, h);
+
+  // Horizontal wood grain lines
+  ctx.strokeStyle = '#1A0F00';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i < h; i += 3) {
+    if (Math.random() > 0.3) {
+      ctx.globalAlpha = 0.1 + Math.random() * 0.15;
+      ctx.beginPath();
+      ctx.moveTo(x, y + i);
+      ctx.lineTo(x + w, y + i + Math.sin(i * 0.02) * 2);
+      ctx.stroke();
+    }
+  }
+  ctx.globalAlpha = 1;
+
+  // Wood highlight streaks
+  ctx.fillStyle = '#FFFFFF';
+  ctx.globalAlpha = 0.05;
+  for (let i = 0; i < Math.floor(h / 8); i++) {
+    const randY = y + Math.random() * h;
+    ctx.fillRect(x, randY, w * (0.4 + Math.random() * 0.3), 1);
+  }
+  ctx.globalAlpha = 1;
+}
+
+// ── Realistic Monitor Drawing ────────────────────────────────────────
+function drawRealisticMonitor(x, y, w, h, color) {
+  // Monitor base/stand
+  ctx.fillStyle = '#2A2A2A';
+  ctx.fillRect(x + w/2 - 6, y + h - 4, 12, 8);
+
+  // Monitor frame - dark bezel
+  ctx.fillStyle = '#0F0F14';
+  ctx.fillRect(x - 2, y - 2, w + 4, h + 2);
+
+  // Screen area - blue tinted
+  ctx.fillStyle = '#1A3A5E';
+  ctx.fillRect(x + 1, y + 1, w - 2, h - 5);
+
+  // Screen glow with agent color
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.1 + 0.04 * Math.sin(tick * 0.05);
+  ctx.fillRect(x + 1, y + 1, w - 2, h - 5);
+  ctx.globalAlpha = 1;
+
+  // Top bezel highlight
+  ctx.fillStyle = '#FFFFFF';
+  ctx.globalAlpha = 0.2;
+  ctx.fillRect(x + 1, y + 1, w - 2, 1);
+  ctx.globalAlpha = 1;
+}
+
+// ── Metal Handle (Brass Knob) ────────────────────────────────────────
+function drawBrassHandle(x, y, size) {
+  // Knob
+  ctx.fillStyle = '#D4A574';
+  ctx.fillRect(x - size/2, y - size/2, size, size);
+
+  // Highlight
+  ctx.fillStyle = '#E5B98A';
+  ctx.globalAlpha = 0.5;
+  ctx.fillRect(x - size/2, y - size/2, size/2, size/2);
+  ctx.globalAlpha = 1;
+}
+
+// ── Desk Shadow ──────────────────────────────────────────────────────
+function drawDeskShadow(x, y, w, h) {
+  ctx.fillStyle = '#000000';
+  ctx.globalAlpha = 0.15;
+  ctx.fillRect(x, y + h, w, 6);
+  ctx.globalAlpha = 1;
+}
+
+// ── Pixel-Art Office Desk - Premium Wood Style ───────────────────────
 function drawDesk(gx, gy, agent) {
-  const W = 280, H = 130;
+  const W = 300, H = 140;
 
-  // Main desk surface - warm maro deschis (like image)
-  fillR(gx - 5, gy + 20, W + 10, H, '#C19A6B');  // Warm brown desktop
+  // Shadow under desk
+  drawDeskShadow(gx - 8, gy + 20 + H, W + 16, 8);
 
-  // Desk top surface with subtle border
-  fillR(gx - 3, gy + 20, W + 6, 4, '#D4A574');   // Lighter edge
+  // Main desk surface with wood texture
+  const deskColor = '#5A4B38';
+  drawWoodTexture(gx - 5, gy + 20, W + 10, H, deskColor);
 
-  // Left side drawers stack (darker brown)
-  fillR(gx - 5, gy + 28, 18, H - 8, '#6B4423');
-  fillR(gx - 5, gy + 35, 18, 14, '#5C3A1F');     // Drawer 1
-  fillR(gx - 5, gy + 52, 18, 14, '#5C3A1F');     // Drawer 2
-  fillR(gx - 5, gy + 69, 18, 14, '#5C3A1F');     // Drawer 3
+  // Top edge highlight
+  ctx.fillStyle = '#7B6A57';
+  ctx.globalAlpha = 0.4;
+  ctx.fillRect(gx - 5, gy + 20, W + 10, 2);
+  ctx.globalAlpha = 1;
 
-  // Right side drawers stack (darker brown) - mirrored
-  fillR(gx + W - 13, gy + 28, 18, H - 8, '#6B4423');
-  fillR(gx + W - 13, gy + 35, 18, 14, '#5C3A1F');
-  fillR(gx + W - 13, gy + 52, 18, 14, '#5C3A1F');
-  fillR(gx + W - 13, gy + 69, 18, 14, '#5C3A1F');
+  // LEFT SIDE DRAWERS (3 drawers)
+  const drawerLeft = gx - 6;
+  const drawerW = 18;
+  const drawerH = 15;
+  const drawerSpacing = 18;
+  const drawerY = gy + 30;
 
-  // Drawer handles (small gold accents)
-  fillR(gx - 2, gy + 40, 4, 4, '#8B7355');
-  fillR(gx - 2, gy + 57, 4, 4, '#8B7355');
-  fillR(gx - 2, gy + 74, 4, 4, '#8B7355');
+  for (let i = 0; i < 3; i++) {
+    const dy = drawerY + i * drawerSpacing;
 
-  fillR(gx + W - 2, gy + 40, 4, 4, '#8B7355');
-  fillR(gx + W - 2, gy + 57, 4, 4, '#8B7355');
-  fillR(gx + W - 2, gy + 74, 4, 4, '#8B7355');
+    // Drawer background
+    ctx.fillStyle = '#4A3B2A';
+    ctx.fillRect(drawerLeft, dy, drawerW, drawerH);
 
-  // Desktop items - center area
-  const centerX = gx + W/2;
+    // Drawer texture
+    drawWoodTexture(drawerLeft + 1, dy + 1, drawerW - 2, drawerH - 2, '#5A4B38');
 
-  // Monitor placement (based on agent)
-  switch(agent.id) {
-    case 'commander':
-      // Commander: Single large center monitor
-      drawDeskMonitorItem(centerX - 50, gy + 5, 100, 45, agent.color);
-      break;
-    default:
-      // Regular agents: smaller monitor positioning
-      drawDeskMonitorItem(centerX - 40, gy + 10, 80, 40, agent.color);
+    // Drawer shadow
+    ctx.fillStyle = '#0F0F14';
+    ctx.globalAlpha = 0.3;
+    ctx.fillRect(drawerLeft, dy + drawerH - 1, drawerW, 1);
+    ctx.globalAlpha = 1;
+
+    // Brass handle
+    drawBrassHandle(drawerLeft + drawerW - 3, dy + drawerH/2, 3);
   }
 
-  // Agent function label - positioned below desk
+  // RIGHT SIDE DRAWERS (3 drawers) - mirrored
+  const drawerRight = gx + W - 12;
+
+  for (let i = 0; i < 3; i++) {
+    const dy = drawerY + i * drawerSpacing;
+
+    ctx.fillStyle = '#4A3B2A';
+    ctx.fillRect(drawerRight, dy, drawerW, drawerH);
+
+    drawWoodTexture(drawerRight + 1, dy + 1, drawerW - 2, drawerH - 2, '#5A4B38');
+
+    ctx.fillStyle = '#0F0F14';
+    ctx.globalAlpha = 0.3;
+    ctx.fillRect(drawerRight, dy + drawerH - 1, drawerW, 1);
+    ctx.globalAlpha = 1;
+
+    drawBrassHandle(drawerRight + 3, dy + drawerH/2, 3);
+  }
+
+  // Support legs (bottom)
+  ctx.fillStyle = '#3A3A2A';
+  ctx.fillRect(gx + 5, gy + 20 + H - 3, 8, 3);
+  ctx.fillRect(gx + W - 13, gy + 20 + H - 3, 8, 3);
+
+  // Desktop accessories
+  const centerX = gx + W/2;
+
+  // Realistic monitor
+  drawRealisticMonitor(centerX - 50, gy + 8, 100, 45, agent.color);
+
+  // Keyboard area
+  ctx.fillStyle = '#1A1A1A';
+  ctx.fillRect(centerX - 40, gy + 65, 80, 12);
+  for (let kx = centerX - 35; kx < centerX + 40; kx += 8) {
+    for (let ky = gy + 68; ky < gy + 75; ky += 3) {
+      ctx.fillStyle = '#2A2A2A';
+      ctx.fillRect(kx, ky, 6, 2);
+    }
+  }
+
+  // Mouse
+  ctx.fillStyle = '#1A1A1A';
+  ctx.fillRect(centerX + 50, gy + 70, 8, 6);
+
+  // Agent function label
   ctx.font = `${S(6.5)}px "Share Tech Mono", monospace`;
   ctx.fillStyle = agent.color;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
-  ctx.fillText(agent.job, sx(gx + W/2), sy(gy + H + 20));
+  ctx.fillText(agent.job, sx(centerX), sy(gy + H + 20));
 }
 
 // Removed - using drawDeskMonitorItem instead for consistency
 
-// ── Pixel-Art Office Desk (for 5 regular agents) - Warm Brown Style ──
+// ── Agent Office Desks - Premium Wood Style ──────────────────────────
 function drawSmallDesk(gx, gy, agent) {
-  const W = 200, H = 100;
+  const W = 220, H = 110;
 
-  // Main desk surface - warm maro deschis
-  fillR(gx + 10, gy + 20, W, H, '#C19A6B');  // Warm brown desktop
+  // Shadow under desk
+  drawDeskShadow(gx + 5, gy + 20 + H, W, 6);
 
-  // Desk top edge - lighter shade for depth
-  fillR(gx + 10, gy + 20, W, 3, '#D4A574');
+  // Main desk surface with wood texture
+  const deskColor = '#5A4B38';
+  drawWoodTexture(gx + 8, gy + 20, W, H, deskColor);
 
-  // Left side drawers (darker brown)
-  fillR(gx + 5, gy + 28, 14, H - 8, '#6B4423');
-  // Drawer divisions
-  fillR(gx + 5, gy + 35, 14, 12, '#5C3A1F');
-  fillR(gx + 5, gy + 50, 14, 12, '#5C3A1F');
-  fillR(gx + 5, gy + 65, 14, 12, '#5C3A1F');
+  // Top edge highlight
+  ctx.fillStyle = '#7B6A57';
+  ctx.globalAlpha = 0.4;
+  ctx.fillRect(gx + 8, gy + 20, W, 2);
+  ctx.globalAlpha = 1;
 
-  // Right side drawers (darker brown)
-  fillR(gx + W + 6, gy + 28, 14, H - 8, '#6B4423');
-  // Drawer divisions
-  fillR(gx + W + 6, gy + 35, 14, 12, '#5C3A1F');
-  fillR(gx + W + 6, gy + 50, 14, 12, '#5C3A1F');
-  fillR(gx + W + 6, gy + 65, 14, 12, '#5C3A1F');
+  // LEFT SIDE DRAWER (2 visible drawers)
+  const drawerLeft = gx + 3;
+  const drawerW = 14;
+  const drawerH = 14;
+  const drawerYSpacing = 18;
+  const drawerY = gy + 32;
 
-  // Drawer handles (small knobs)
-  fillR(gx + 8, gy + 40, 3, 3, '#8B7355');
-  fillR(gx + 8, gy + 55, 3, 3, '#8B7355');
-  fillR(gx + 8, gy + 70, 3, 3, '#8B7355');
+  for (let i = 0; i < 2; i++) {
+    const dy = drawerY + i * drawerYSpacing;
+    ctx.fillStyle = '#4A3B2A';
+    ctx.fillRect(drawerLeft, dy, drawerW, drawerH);
 
-  fillR(gx + W + 10, gy + 40, 3, 3, '#8B7355');
-  fillR(gx + W + 10, gy + 55, 3, 3, '#8B7355');
-  fillR(gx + W + 10, gy + 70, 3, 3, '#8B7355');
+    drawWoodTexture(drawerLeft + 1, dy + 1, drawerW - 2, drawerH - 2, '#5A4B38');
 
-  // Desk items on surface
+    ctx.fillStyle = '#0F0F14';
+    ctx.globalAlpha = 0.25;
+    ctx.fillRect(drawerLeft, dy + drawerH - 1, drawerW, 1);
+    ctx.globalAlpha = 1;
+
+    drawBrassHandle(drawerLeft + drawerW - 2, dy + drawerH/2, 2);
+  }
+
+  // RIGHT SIDE DRAWER (2 visible drawers) - mirrored
+  const drawerRight = gx + W + 4;
+
+  for (let i = 0; i < 2; i++) {
+    const dy = drawerY + i * drawerYSpacing;
+    ctx.fillStyle = '#4A3B2A';
+    ctx.fillRect(drawerRight, dy, drawerW, drawerH);
+
+    drawWoodTexture(drawerRight + 1, dy + 1, drawerW - 2, drawerH - 2, '#5A4B38');
+
+    ctx.fillStyle = '#0F0F14';
+    ctx.globalAlpha = 0.25;
+    ctx.fillRect(drawerRight, dy + drawerH - 1, drawerW, 1);
+    ctx.globalAlpha = 1;
+
+    drawBrassHandle(drawerRight + 2, dy + drawerH/2, 2);
+  }
+
+  // Support legs
+  ctx.fillStyle = '#3A3A2A';
+  ctx.fillRect(gx + 12, gy + 20 + H - 3, 7, 3);
+  ctx.fillRect(gx + W + 8, gy + 20 + H - 3, 7, 3);
+
+  // Desktop monitor - positioned based on agent
+  const centerX = gx + W/2 + 4;
+
   switch(agent.id) {
     case 'alexa':
-      // Alexa: Monitor on left side
-      drawDeskMonitorItem(gx + 30, gy + 10, 60, 35, agent.color);
+      drawRealisticMonitor(centerX - 35, gy + 12, 70, 40, agent.color);
       break;
-
     case 'scout':
-      // Scout: Monitor in center
-      drawDeskMonitorItem(gx + 35, gy + 12, 60, 35, agent.color);
+      drawRealisticMonitor(centerX - 35, gy + 12, 70, 40, agent.color);
       break;
-
     case 'memo':
-      // Memo: Monitor on right side
-      drawDeskMonitorItem(gx + 35, gy + 10, 65, 38, agent.color);
+      drawRealisticMonitor(centerX - 35, gy + 10, 70, 42, agent.color);
       break;
-
     case 'doc':
-      // Doc: Monitor center
-      drawDeskMonitorItem(gx + 30, gy + 8, 70, 40, agent.color);
+      drawRealisticMonitor(centerX - 38, gy + 8, 76, 44, agent.color);
       break;
-
     case 'cal':
-      // Cal: Monitor on left
-      drawDeskMonitorItem(gx + 25, gy + 12, 55, 32, agent.color);
+      drawRealisticMonitor(centerX - 30, gy + 14, 60, 38, agent.color);
       break;
   }
 
@@ -831,7 +974,7 @@ function drawSmallDesk(gx, gy, agent) {
   ctx.fillStyle = agent.color;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
-  ctx.fillText(agent.job, sx(gx + 10 + W/2), sy(gy + H + 18));
+  ctx.fillText(agent.job, sx(gx + 8 + W/2), sy(gy + H + 16));
 }
 
 // ── Pixel-Art Desk Monitor Item (simple) ────────────────────────────
@@ -1426,37 +1569,62 @@ function drawBG() {
   ctx.fillStyle = '#8B7355';
   ctx.fillRect(0, sy(237), canvas.width, S(2));
 
-  // FLOOR SECTION (starts at y: ~240)
+  // PREMIUM WOODEN PARQUET FLOOR (starts at y: ~240)
   // ════════════════════════════════════════════════════════════════
-  const tileWidth = S(50);
-  const tileHeight = S(18);
+  const plankWidth = S(65);   // Wide planks for realistic look
+  const plankHeight = S(16);  // Proportional height
 
-  for (let y = sy(240); y < canvas.height; y += tileHeight) {
-    for (let x = -tileWidth; x < canvas.width; x += tileWidth) {
-      const isAlternate = (Math.floor((y - sy(240)) / tileHeight) + Math.floor(x / tileWidth)) % 2;
-      const tileColor = isAlternate === 0 ? '#3D4456' : '#4A5165';
+  for (let y = sy(240); y < canvas.height; y += plankHeight) {
+    for (let x = -plankWidth; x < canvas.width; x += plankWidth) {
+      // Alternating plank shades for wood effect
+      const plankRow = Math.floor((y - sy(240)) / plankHeight);
+      const plankCol = Math.floor(x / plankWidth);
+      const isLightPlank = (plankRow + plankCol) % 2 === 0;
 
-      ctx.fillStyle = tileColor;
-      ctx.fillRect(x, y, tileWidth, tileHeight);
+      // Base plank color
+      const plankColor = isLightPlank ? '#5A4F3E' : '#4A3F2E';
+      ctx.fillStyle = plankColor;
+      ctx.fillRect(x, y, plankWidth, plankHeight);
 
-      ctx.strokeStyle = '#2F3541';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(x, y + tileHeight);
-      ctx.lineTo(x + tileWidth, y + tileHeight);
-      ctx.stroke();
-
-      ctx.strokeStyle = '#35394A';
+      // Wood grain texture within plank
+      ctx.strokeStyle = '#2A1F0E';
       ctx.lineWidth = 0.5;
-      ctx.beginPath();
-      ctx.moveTo(x + tileWidth, y);
-      ctx.lineTo(x + tileWidth, y + tileHeight);
-      ctx.stroke();
+
+      // Multiple grain lines for wood effect
+      for (let i = 0; i < 3; i++) {
+        const grainY = y + (i + 1) * (plankHeight / 4) + Math.sin(x * 0.01 + i) * 2;
+        ctx.globalAlpha = 0.1 + Math.random() * 0.1;
+        ctx.beginPath();
+        ctx.moveTo(x, grainY);
+        ctx.lineTo(x + plankWidth, grainY + 1);
+        ctx.stroke();
+      }
+
+      // Wood highlights/shine on some planks
+      if (isLightPlank && Math.random() > 0.4) {
+        ctx.fillStyle = '#7B6A57';
+        ctx.globalAlpha = 0.08;
+        ctx.fillRect(x + plankWidth * 0.1, y, plankWidth * 0.6, plankHeight);
+      }
+
+      ctx.globalAlpha = 1;
+
+      // Shadow between planks (depth)
+      ctx.fillStyle = '#1A0F00';
+      ctx.globalAlpha = 0.25;
+      ctx.fillRect(x, y + plankHeight - 1.5, plankWidth, 1.5);
+
+      // Right edge shadow on planks
+      ctx.globalAlpha = 0.15;
+      ctx.fillRect(x + plankWidth - 2, y, 2, plankHeight);
+
+      ctx.globalAlpha = 1;
     }
   }
 
+  // Overall floor shadow/vignette
   ctx.fillStyle = '#000000';
-  ctx.globalAlpha = 0.02;
+  ctx.globalAlpha = 0.01;
   ctx.fillRect(0, sy(240), canvas.width, canvas.height - sy(240));
   ctx.globalAlpha = 1;
 }
