@@ -1285,50 +1285,186 @@ function runAutoScene() {
 
   sceneTimer++;
 
-  // 5-Scene Narrative Loop
-  // Scene 1: Morning (0-80) - Show office
-  if (sceneTimer === 20) {
-    showToast(t('morning'), 'gold');
+  // ═══════════════════════════════════════════════════════════════════
+  // DETAILED ANIMATION SEQUENCE - CommandOS Office Loop
+  // ═══════════════════════════════════════════════════════════════════
+
+  // SCENE 1: AGENTS SLEEPING AT DESKS (0-60)
+  if (sceneTimer <= 60) {
+    if (sceneTimer === 30) {
+      showToast('💤 Agentii adorm la birourile lor...', 'gold');
+    }
   }
 
-  // Scene 2: Commander distributes tasks (80-250)
-  if (sceneTimer === 100) {
-    walkTo('commander', GRID[0].x + 60, GRID[0].y + 200);  // Go to Alexa
+  // SCENE 2: COMMANDER WAKES UP (61-150)
+  if (sceneTimer === 61) {
+    const commander = AGENTS.find(a => a.id === 'commander');
+    if (commander) commander.state = 'idle';
+    addBubble('commander', '☕ Ziua!', C.gold, 100);
+    showToast('☕ Comandantul se ridică primul', 'gold');
   }
-  if (sceneTimer === 140) {
-    assignTask('alexa', 'Procesează cereri client', false);
-    playAgentChatter();  // Agent responds with voice
+
+  // SCENE 3: TASK BOARD - COMMANDER WRITES TASKS (150-200)
+  if (sceneTimer === 151) {
+    showToast('Se duc la tabla de activități și scriu pe ea', 'gold');
   }
-  if (sceneTimer === 160) {
-    walkTo('commander', GRID[1].x + 60, GRID[1].y + 200);  // Go to Scout
+  if (sceneTimer === 175) {
+    showToast('📋 "SARCINILE ZILEI" → lista apare linie cu linie', 'gold');
   }
+
+  // SCENE 4: COMMANDER APPROACHES EACH AGENT & ASSIGNS TASKS (200-450)
   if (sceneTimer === 200) {
-    assignTask('scout', 'Analizează rapoarte', false);
-    playAgentChatter();  // Agent responds with voice
-  }
-  if (sceneTimer === 220) {
-    walkTo('commander', GRID[3].x + 60, GRID[3].y + 200);  // Go to Doc
-  }
-  if (sceneTimer === 260) {
-    assignTask('doc', 'Actualizează KB', false);
-    playAgentChatter();  // Agent responds with voice
+    showToast('👑 Comandantul se apropie de agenti...', 'gold');
   }
 
-  // Scene 3: Agents working (250-350)
-  // (automatic - agents display eye glow when working)
+  // Task distribution with detailed queue:
+  // Memo: 🎙️ Procesează întâlnirea
+  if (sceneTimer === 240) {
+    const memo = AGENTS.find(a => a.id === 'memo');
+    if (memo) {
+      const idx = AGENTS.indexOf(memo);
+      walkTo('commander', GRID[idx].x + 120, GRID[idx].y + 170);
+      addBubble('memo', '🎙️ Procesează întâlnirea', C.purple, 90);
+      addStatus('memo', '✓ SARCINĂ ATRIBUITĂ', 70);
+      memo.state = 'sit_work';
+      showToast('✓ Memo: 🎙️ Procesează întâlnirea', 'green');
+      playAgentChatter();
+    }
+  }
 
-  // Scene 4: Interaction moment (350-450)
+  // Scout: 🔍 Analiză Chaturi Telegram
+  if (sceneTimer === 280) {
+    const scout = AGENTS.find(a => a.id === 'scout');
+    if (scout) {
+      const idx = AGENTS.indexOf(scout);
+      walkTo('commander', GRID[idx].x + 120, GRID[idx].y + 170);
+      addBubble('scout', '🔍 Analiză Telegram', C.green, 90);
+      addStatus('scout', '✓ SARCINĂ ATRIBUITĂ', 70);
+      scout.state = 'sit_work';
+      showToast('✓ Scout: 🔍 Analiză Chaturi Telegram', 'green');
+      playAgentChatter();
+    }
+  }
+
+  // Alexa: 🤖 Răspunde la întrebări
+  if (sceneTimer === 320) {
+    const alexa = AGENTS.find(a => a.id === 'alexa');
+    if (alexa) {
+      const idx = AGENTS.indexOf(alexa);
+      walkTo('commander', GRID[idx].x + 120, GRID[idx].y + 170);
+      addBubble('alexa', '🤖 Răspunde la întrebări', C.blue, 90);
+      addStatus('alexa', '✓ SARCINĂ ATRIBUITĂ', 70);
+      alexa.state = 'sit_work';
+      showToast('✓ Alexa: 🤖 Răspunde la întrebări', 'green');
+      playAgentChatter();
+    }
+  }
+
+  // Doc: 📚 Actualizează cunoștințe bază
   if (sceneTimer === 360) {
-    addBubble('memo', 'Raport gata!', C.purple, 80);
+    const doc = AGENTS.find(a => a.id === 'doc');
+    if (doc) {
+      const idx = AGENTS.indexOf(doc);
+      walkTo('commander', GRID[idx].x + 120, GRID[idx].y + 170);
+      addBubble('doc', '📚 Actualizează KB', C.teal, 90);
+      addStatus('doc', '✓ SARCINĂ ATRIBUITĂ', 70);
+      doc.state = 'sit_work';
+      showToast('✓ Doc: 📚 Actualizează cunoștințele bază', 'green');
+      playAgentChatter();
+    }
   }
 
-  // Scene 5: Day summary (450-500)
-  if (sceneTimer === 460) {
-    showToast(`✓ Ziua finalizata: ${totalTaskCount} sarcini`, 'gold');
+  // Cal: 📅 Organizează termene limită
+  if (sceneTimer === 400) {
+    const cal = AGENTS.find(a => a.id === 'cal');
+    if (cal) {
+      const idx = AGENTS.indexOf(cal);
+      walkTo('commander', GRID[idx].x + 120, GRID[idx].y + 170);
+      addBubble('cal', '📅 Organizează termene', C.orange, 90);
+      addStatus('cal', '✓ SARCINĂ ATRIBUITĂ', 70);
+      cal.state = 'sit_work';
+      showToast('✓ Cal: 📅 Organizează termene limită', 'green');
+      playAgentChatter();
+    }
+  }
+
+  // SCENE 5: AGENTS WORKING (450-700)
+  if (sceneTimer === 451) {
+    showToast('⚙️ Agentii lucreaza la sarcinile lor...', 'green');
+  }
+
+  // Agents interact - waving at each other
+  if (sceneTimer % 100 === 0 && sceneTimer > 450 && sceneTimer < 700) {
+    const alive = AGENTS.filter(a => a.state !== 'dead' && a.id !== 'commander');
+    if (alive.length >= 2) {
+      const idx1 = Math.floor(Math.random() * alive.length);
+      waveAnim[alive[idx1].id] = 50;
+      // Alexa typing bubble
+      if (Math.random() > 0.5 && alive[idx1].id === 'alexa') {
+        addBubble('alexa', '💬 ...tastând', C.blue, 60);
+      }
+    }
+  }
+
+  // SCENE 6: PROBLEM DETECTED (700-800)
+  if (sceneTimer === 700) {
+    const scout = AGENTS.find(a => a.id === 'scout');
+    if (scout) {
+      addBubble('scout', '⚠️ Conflict în dept.!', C.orange, 100);
+      showToast('⚠️ Scout găsește o problemă - pictograma ⚠️ apare!', 'warn');
+      playAgentChatter();
+    }
+  }
+
+  // Commander responds to alert
+  if (sceneTimer === 740) {
+    const commander = AGENTS.find(a => a.id === 'commander');
+    if (commander) {
+      addBubble('commander', '⚠️ Alert primit!', C.gold, 80);
+      showToast('🔔 Scout → Commander: notificare primită', 'gold');
+    }
+  }
+
+  // Memo creates emergency meeting
+  if (sceneTimer === 770) {
+    const memo = AGENTS.find(a => a.id === 'memo');
+    if (memo) {
+      addBubble('memo', '🎙️ Apelează Întâlnire!', C.purple, 100);
+      assignTask('memo', 'Apelează Întâlnire de Urgență', false);
+      showToast('🎙️ Memo ia pictograma microfonului - înregistrare...', 'gold');
+      playAgentChatter();
+    }
+  }
+
+  // Auto-tasks created
+  if (sceneTimer === 800) {
+    showToast('✅ AI a creat automat 3 sarcini!', 'gold');
+    showToast('✓ Bifele apar una câte una pe panoul de sarcini', 'gold');
+  }
+
+  // SCENE 7: SUCCESS & VICTORY (800-850)
+  if (sceneTimer === 820) {
+    const commander = AGENTS.find(a => a.id === 'commander');
+    if (commander) {
+      waveAnim['commander'] = 80;  // Victory wave
+    }
+    AGENTS.forEach(a => {
+      if (a.id !== 'commander') {
+        addStatus(a.id, '✓ GARAT', 100);
+      }
+    });
+    showToast('✅ Toți agentii: GARAT ✓', 'gold');
+  }
+
+  // SCENE 8: LEGEND TEXT (850-900)
+  if (sceneTimer === 851) {
+    showToast('════════════════════════════════════════════════════', 'gold');
+    showToast('⬡ CommandOS. Vocea devine o sarcină.', 'gold');
+    showToast('════════════════════════════════════════════════════', 'gold');
   }
 
   // Loop reset
-  if (sceneTimer > 500) sceneTimer = 0;
+  if (sceneTimer > 900) sceneTimer = 0;
 
   // ── Commander patrol route logic ────────────────────────────────────
   const commander = AGENTS.find(a => a.id === 'commander');
