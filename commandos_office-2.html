@@ -474,7 +474,7 @@ function buildAgentButtons() {
   AGENTS.filter(a => a.id !== 'commander').forEach(a => {
     const btn = document.createElement('button');
     btn.className = 'agent-btn';
-    btn.textContent = a.name;
+    btn.textContent = a.job;
     btn.style.borderColor = a.color;
     btn.style.color = a.color;
     btn.dataset.id = a.id;
