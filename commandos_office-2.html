@@ -1455,6 +1455,59 @@ function drawStatusAbove(agentId, gx, gy) {
 
 // ── CommandOS Brand Background ──────────────────────────────────────
 function drawBG() {
+  // FULL PREMIUM WOODEN PARQUET FLOOR (entire background)
+  // ════════════════════════════════════════════════════════════════
+  const plankWidth = S(65);   // Wide planks for realistic look
+  const plankHeight = S(16);  // Proportional height
+
+  for (let y = 0; y < canvas.height; y += plankHeight) {
+    for (let x = -plankWidth; x < canvas.width; x += plankWidth) {
+      // Alternating plank shades for wood effect
+      const plankRow = Math.floor(y / plankHeight);
+      const plankCol = Math.floor(x / plankWidth);
+      const isLightPlank = (plankRow + plankCol) % 2 === 0;
+
+      // Base plank color
+      const plankColor = isLightPlank ? '#5A4F3E' : '#4A3F2E';
+      ctx.fillStyle = plankColor;
+      ctx.fillRect(x, y, plankWidth, plankHeight);
+
+      // Wood grain texture within plank
+      ctx.strokeStyle = '#2A1F0E';
+      ctx.lineWidth = 0.5;
+
+      // Multiple grain lines for wood effect
+      for (let i = 0; i < 3; i++) {
+        const grainY = y + (i + 1) * (plankHeight / 4) + Math.sin(x * 0.01 + i) * 2;
+        ctx.globalAlpha = 0.1 + Math.random() * 0.1;
+        ctx.beginPath();
+        ctx.moveTo(x, grainY);
+        ctx.lineTo(x + plankWidth, grainY + 1);
+        ctx.stroke();
+      }
+
+      // Wood highlights/shine on some planks
+      if (isLightPlank && Math.random() > 0.4) {
+        ctx.fillStyle = '#7B6A57';
+        ctx.globalAlpha = 0.08;
+        ctx.fillRect(x + plankWidth * 0.1, y, plankWidth * 0.6, plankHeight);
+      }
+
+      ctx.globalAlpha = 1;
+
+      // Shadow between planks (depth)
+      ctx.fillStyle = '#1A0F00';
+      ctx.globalAlpha = 0.25;
+      ctx.fillRect(x, y + plankHeight - 1.5, plankWidth, 1.5);
+
+      // Right edge shadow on planks
+      ctx.globalAlpha = 0.15;
+      ctx.fillRect(x + plankWidth - 2, y, 2, plankHeight);
+
+      ctx.globalAlpha = 1;
+    }
+  }
+
   // WALL SECTION (Upper 20% of screen - y: 54 to ~240)
   // ════════════════════════════════════════════════════════════════
 
@@ -1597,63 +1650,27 @@ function drawBG() {
   ctx.fillStyle = '#8B7355';
   ctx.fillRect(0, sy(237), canvas.width, S(2));
 
-  // PREMIUM WOODEN PARQUET FLOOR (starts at y: ~240)
-  // ════════════════════════════════════════════════════════════════
-  const plankWidth = S(65);   // Wide planks for realistic look
-  const plankHeight = S(16);  // Proportional height
+  // Draw top-left text: CommandOS
+  ctx.save();
+  ctx.font = 'bold 24px "Press Start 2P", monospace';
+  ctx.fillStyle = '#00FF88';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.fillText('CommandOS', S(20), S(10));
 
-  for (let y = sy(240); y < canvas.height; y += plankHeight) {
-    for (let x = -plankWidth; x < canvas.width; x += plankWidth) {
-      // Alternating plank shades for wood effect
-      const plankRow = Math.floor((y - sy(240)) / plankHeight);
-      const plankCol = Math.floor(x / plankWidth);
-      const isLightPlank = (plankRow + plankCol) % 2 === 0;
-
-      // Base plank color
-      const plankColor = isLightPlank ? '#5A4F3E' : '#4A3F2E';
-      ctx.fillStyle = plankColor;
-      ctx.fillRect(x, y, plankWidth, plankHeight);
-
-      // Wood grain texture within plank
-      ctx.strokeStyle = '#2A1F0E';
-      ctx.lineWidth = 0.5;
-
-      // Multiple grain lines for wood effect
-      for (let i = 0; i < 3; i++) {
-        const grainY = y + (i + 1) * (plankHeight / 4) + Math.sin(x * 0.01 + i) * 2;
-        ctx.globalAlpha = 0.1 + Math.random() * 0.1;
-        ctx.beginPath();
-        ctx.moveTo(x, grainY);
-        ctx.lineTo(x + plankWidth, grainY + 1);
-        ctx.stroke();
-      }
-
-      // Wood highlights/shine on some planks
-      if (isLightPlank && Math.random() > 0.4) {
-        ctx.fillStyle = '#7B6A57';
-        ctx.globalAlpha = 0.08;
-        ctx.fillRect(x + plankWidth * 0.1, y, plankWidth * 0.6, plankHeight);
-      }
-
-      ctx.globalAlpha = 1;
-
-      // Shadow between planks (depth)
-      ctx.fillStyle = '#1A0F00';
-      ctx.globalAlpha = 0.25;
-      ctx.fillRect(x, y + plankHeight - 1.5, plankWidth, 1.5);
-
-      // Right edge shadow on planks
-      ctx.globalAlpha = 0.15;
-      ctx.fillRect(x + plankWidth - 2, y, 2, plankHeight);
-
-      ctx.globalAlpha = 1;
-    }
-  }
+  // Draw top-right text: Current hour
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const timeStr = `${hours}:${minutes}`;
+  ctx.textAlign = 'right';
+  ctx.fillText(timeStr, CANVAS_WIDTH - S(20), S(10));
+  ctx.restore();
 
   // Overall floor shadow/vignette
   ctx.fillStyle = '#000000';
   ctx.globalAlpha = 0.01;
-  ctx.fillRect(0, sy(240), canvas.width, canvas.height - sy(240));
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.globalAlpha = 1;
 }
 
