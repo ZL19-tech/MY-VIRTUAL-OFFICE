@@ -1483,6 +1483,134 @@ function drawStatusAbove(agentId, gx, gy) {
   // Disabled - status text removed
 }
 
+// ── Office Decoration Helper Functions ──────────────────────────────
+
+// Helper to check if a rectangle overlaps with any blocked areas
+function checkCollision(x, y, w, h, blockedAreas) {
+  return blockedAreas.some(area => {
+    return !(x + w < area.x || x > area.x + area.w ||
+             y + h < area.y || y > area.y + area.h);
+  });
+}
+
+// Draw an indoor plant with pot
+function drawPlant(x, y, size) {
+  // Pot
+  ctx.fillStyle = '#8B6F47';
+  ctx.beginPath();
+  ctx.ellipse(sx(x), sy(y) + S(size * 0.8), S(size * 0.4), S(size * 0.3), 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Pot detail
+  ctx.strokeStyle = '#6A5A3A';
+  ctx.lineWidth = S(1);
+  ctx.stroke();
+
+  // Soil
+  ctx.fillStyle = '#654321';
+  ctx.fillRect(sx(x - size * 0.35), sy(y + size * 0.5), S(size * 0.7), S(size * 0.3));
+
+  // Leaves - green foliage
+  ctx.fillStyle = '#2D7A2D';
+  ctx.beginPath();
+  ctx.arc(sx(x - size * 0.25), sy(y - size * 0.2), S(size * 0.35), 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#3A9D3A';
+  ctx.beginPath();
+  ctx.arc(sx(x + size * 0.25), sy(y - size * 0.15), S(size * 0.3), 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#2D7A2D';
+  ctx.beginPath();
+  ctx.arc(sx(x), sy(y - size * 0.4), S(size * 0.25), 0, Math.PI * 2);
+  ctx.fill();
+}
+
+// Draw framed artwork on wall
+function drawArtwork(x, y, w, h, frameColor) {
+  // Frame
+  ctx.fillStyle = frameColor;
+  ctx.fillRect(sx(x), sy(y), S(w), S(h));
+
+  // Frame border
+  ctx.strokeStyle = '#0F0F14';
+  ctx.lineWidth = S(2);
+  ctx.strokeRect(sx(x), sy(y), S(w), S(h));
+
+  // Canvas/artwork area
+  ctx.fillStyle = '#F5F5DC';
+  ctx.fillRect(sx(x + 2), sy(y + 2), S(w - 4), S(h - 4));
+
+  // Decorative pattern in artwork
+  ctx.fillStyle = frameColor;
+  ctx.globalAlpha = 0.3;
+  ctx.fillRect(sx(x + 4), sy(y + 4), S(w - 8), S(h - 8));
+  ctx.globalAlpha = 1;
+}
+
+// Draw bookshelf against wall
+function drawBookshelf(x, y, w, h) {
+  // Bookshelf background
+  ctx.fillStyle = '#8B6F47';
+  ctx.fillRect(sx(x), sy(y), S(w), S(h));
+
+  // Bookshelf border
+  ctx.strokeStyle = '#5A4A3A';
+  ctx.lineWidth = S(1);
+  ctx.strokeRect(sx(x), sy(y), S(w), S(h));
+
+  // Shelves (3 shelves)
+  for (let i = 0; i <= 3; i++) {
+    const shelfY = y + (h / 3) * i;
+    ctx.fillStyle = '#6A5A3A';
+    ctx.fillRect(sx(x), sy(shelfY), S(w), S(2));
+  }
+
+  // Books - colorful rectangles on shelves
+  const bookColors = ['#FF6B35', '#00BFFF', '#FFD700', '#9D4EDD', '#20B2AA', '#FF3355'];
+  let colorIdx = 0;
+
+  for (let shelf = 0; shelf < 3; shelf++) {
+    const shelfY = y + (h / 3) * shelf + 4;
+    const shelfSpacing = w / 5;
+
+    for (let i = 0; i < 4; i++) {
+      const bookX = x + 2 + i * shelfSpacing;
+      const bookW = shelfSpacing - 2;
+      const bookH = (h / 3) - 6;
+
+      ctx.fillStyle = bookColors[colorIdx % bookColors.length];
+      ctx.fillRect(sx(bookX), sy(shelfY), S(bookW), S(bookH));
+
+      ctx.strokeStyle = '#0F0F14';
+      ctx.lineWidth = 0.5;
+      ctx.strokeRect(sx(bookX), sy(shelfY), S(bookW), S(bookH));
+
+      colorIdx++;
+    }
+  }
+}
+
+// Draw company logo/sign on wall
+function drawCompanyLogo(x, y) {
+  // Sign background
+  ctx.fillStyle = '#2D3344';
+  ctx.fillRect(sx(x - 20), sy(y - 10), S(40), S(20));
+
+  // Sign border
+  ctx.strokeStyle = '#D4A574';
+  ctx.lineWidth = S(2);
+  ctx.strokeRect(sx(x - 20), sy(y - 10), S(40), S(20));
+
+  // Logo text
+  ctx.font = `${S(8)}px "Press Start 2P", monospace`;
+  ctx.fillStyle = '#00FF88';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('CMD', sx(x), sy(y));
+}
+
 // ── CommandOS Brand Background ──────────────────────────────────────
 function drawBG() {
   // FULL PREMIUM WOODEN PARQUET FLOOR (entire background)
@@ -1763,6 +1891,86 @@ function drawBG() {
 
   ctx.fillStyle = '#8B7355';
   ctx.fillRect(0, sy(237), canvas.width, S(2));
+
+  // ──── FULL SIDE WALLS ────
+  // LEFT WALL (x = 0 to ~35)
+  ctx.fillStyle = '#3D4456';
+  ctx.fillRect(0, 0, S(35), canvas.height);
+
+  // RIGHT WALL (x = ~1165 to 1200)
+  ctx.fillStyle = '#3D4456';
+  ctx.fillRect(sx(1165), 0, S(35), canvas.height);
+
+  // LEFT WALL TRIM/DETAILS
+  ctx.fillStyle = '#8B7355';
+  ctx.fillRect(0, sy(235), S(35), S(2));
+
+  // RIGHT WALL TRIM/DETAILS
+  ctx.fillStyle = '#8B7355';
+  ctx.fillRect(sx(1165), sy(235), S(35), S(2));
+
+  // ──── OFFICE DECORATIONS (checked for collisions) ────
+
+  // Define blocked areas (windows, desks, agents)
+  const blocked = [
+    // Windows (top wall) - x: 145-790, y: 70-170
+    { x: 145, y: 70, w: 645, h: 100 },
+    // Desks
+    { x: 50, y: 150, w: 220, h: 110 },      // Alexa
+    { x: 380, y: 150, w: 220, h: 110 },    // Scout
+    { x: 710, y: 150, w: 220, h: 110 },    // Memo
+    { x: 80, y: 420, w: 220, h: 110 },     // Doc
+    { x: 680, y: 420, w: 220, h: 110 },    // Cal
+    { x: 300, y: 620, w: 220, h: 110 },    // Commander
+  ];
+
+  // PLANTS - Corner positions only (safe from desks and windows)
+  // Bottom-left corner (away from desks)
+  if (!checkCollision(15, 750, 40, 60, blocked)) {
+    drawPlant(35, 800, 30);
+  }
+
+  // Bottom-right corner
+  if (!checkCollision(1150, 750, 40, 60, blocked)) {
+    drawPlant(1170, 800, 30);
+  }
+
+  // Upper-left (beside left wall, away from windows)
+  if (!checkCollision(10, 180, 40, 50, blocked)) {
+    drawPlant(35, 210, 25);
+  }
+
+  // Upper-right (beside right wall, away from windows)
+  if (!checkCollision(1150, 180, 40, 50, blocked)) {
+    drawPlant(1170, 210, 25);
+  }
+
+  // ARTWORK - Only on solid wall sections between windows
+  // Left solid wall section (below left lamp area)
+  if (!checkCollision(50, 170, 50, 40, blocked)) {
+    drawArtwork(55, 175, 40, 35, '#8B4513');
+  }
+
+  // Right solid wall section (below right lamp area)
+  if (!checkCollision(1100, 170, 50, 40, blocked)) {
+    drawArtwork(1105, 175, 40, 35, '#556B2F');
+  }
+
+  // BOOKSHELVES - On side walls, below window line
+  // Left wall bookshelf
+  if (!checkCollision(10, 280, 25, 100, blocked)) {
+    drawBookshelf(12, 285, 22, 95);
+  }
+
+  // Right wall bookshelf
+  if (!checkCollision(1165, 280, 25, 100, blocked)) {
+    drawBookshelf(1170, 285, 22, 95);
+  }
+
+  // COMPANY LOGO - Left wall middle
+  if (!checkCollision(10, 380, 25, 25, blocked)) {
+    drawCompanyLogo(22, 390);
+  }
 
   // Draw top-left text: CommandOS
   ctx.save();
