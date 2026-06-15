@@ -1611,6 +1611,139 @@ function drawCompanyLogo(x, y) {
   ctx.fillText('CMD', sx(x), sy(y));
 }
 
+// ── Wall Shadow Effect ──────────────────────────────────────────────
+function drawWallShadows() {
+  // Shadow on left wall edge (depth effect)
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+  ctx.fillRect(sx(78), sy(0), S(2), canvas.height);
+
+  // Shadow on right wall edge
+  ctx.fillRect(sx(1198), sy(0), S(2), canvas.height);
+
+  // Shadow on top wall edge
+  ctx.fillRect(0, sy(68), canvas.width, S(2));
+
+  // Shadow on bottom wall edge
+  ctx.fillRect(0, sy(918), canvas.width, S(2));
+}
+
+// ── Baseboard (Plinte) ──────────────────────────────────────────────
+function drawBaseboards() {
+  // Baseboard color - slightly darker/richer than walls
+  ctx.fillStyle = '#2A3340';
+
+  // Left wall baseboard
+  ctx.fillRect(0, sy(918), S(80), S(32));
+
+  // Right wall baseboard
+  ctx.fillRect(sx(1120), sy(918), S(80), S(32));
+
+  // Center floor baseboard shadow
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+  ctx.fillRect(S(80), sy(918), canvas.width - S(160), S(4));
+
+  // Baseboard trim details - gold accent
+  ctx.fillStyle = '#D4A574';
+  ctx.fillRect(0, sy(918), canvas.width, S(2));
+}
+
+// ── Hanging Lamp Light Effect (improved) ──────────────────────────
+function drawLampLighting() {
+  const lampPositions = [200, 600, 1000];
+
+  lampPositions.forEach(lx => {
+    // Lamp light glow on floor (subtle radial effect)
+    ctx.fillStyle = '#FFD700';
+    ctx.globalAlpha = 0.08;
+    ctx.beginPath();
+    ctx.ellipse(sx(lx), sy(200), S(80), S(60), 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Slightly darker glow
+    ctx.fillStyle = '#FF8C00';
+    ctx.globalAlpha = 0.04;
+    ctx.beginPath();
+    ctx.ellipse(sx(lx), sy(220), S(100), S(80), 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.globalAlpha = 1;
+  });
+}
+
+// ── Corner Decorative Plants ────────────────────────────────────────
+function drawCornerPlants() {
+  // Bottom-left corner plant
+  drawSmallPlant(40, 880, 25, '#2D7A2D', '#3A9D3A');
+
+  // Bottom-right corner plant
+  drawSmallPlant(1160, 880, 25, '#2D7A2D', '#3A9D3A');
+
+  // Top-left corner plant (smaller)
+  drawSmallPlant(30, 100, 20, '#1F5A1F', '#2D7A2D');
+
+  // Top-right corner plant (smaller)
+  drawSmallPlant(1170, 100, 20, '#1F5A1F', '#2D7A2D');
+}
+
+// ── Small Plant Helper ──────────────────────────────────────────────
+function drawSmallPlant(x, y, size, darkColor, lightColor) {
+  // Pot
+  ctx.fillStyle = '#8B6F47';
+  ctx.fillRect(sx(x - size/3), sy(y), S(size * 0.66), S(size * 0.4));
+  ctx.strokeStyle = '#6A5A3A';
+  ctx.lineWidth = S(1);
+  ctx.strokeRect(sx(x - size/3), sy(y), S(size * 0.66), S(size * 0.4));
+
+  // Leaves - simple circles for pixel-art style
+  ctx.fillStyle = darkColor;
+  ctx.beginPath();
+  ctx.arc(sx(x - size/4), sy(y - size/2), S(size/3), 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = lightColor;
+  ctx.beginPath();
+  ctx.arc(sx(x + size/4), sy(y - size/3), S(size/2.5), 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = darkColor;
+  ctx.beginPath();
+  ctx.arc(sx(x), sy(y - size*0.7), S(size/2.8), 0, Math.PI * 2);
+  ctx.fill();
+}
+
+// ── Floor Texture Variation ──────────────────────────────────────────
+function addFloorVariation() {
+  // Add subtle color variation to existing floor for depth
+  // Use darker spots in a pseudo-random pattern for worn look
+
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.03)';
+
+  // Create variation pattern across floor
+  for (let y = 240; y < 918; y += 40) {
+    for (let x = 80; x < 1120; x += 50) {
+      // Pseudo-random darkening
+      const seed = (Math.sin(x * 0.01) + Math.sin(y * 0.01)) * 100;
+      if (Math.floor(seed) % 3 === 0) {
+        ctx.fillRect(sx(x), sy(y), S(30), S(40));
+      }
+    }
+  }
+}
+
+// ── Top Wall Windows (improved pixel-art) ────────────────────────
+function enhanceWindowFrames() {
+  const windowPositions = [150, 450, 750];
+  const windowY = sy(70);
+  const windowH = S(100);
+
+  windowPositions.forEach(wx => {
+    // Window frame shadow for depth
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+    ctx.fillRect(sx(wx - 5), windowY - S(5), S(150), S(2));
+    ctx.fillRect(sx(wx - 5), windowY - S(5), S(2), windowH + S(10));
+  });
+}
+
 // ── CommandOS Brand Background ──────────────────────────────────────
 function drawBG() {
   // FULL PREMIUM WOODEN PARQUET FLOOR (entire background)
@@ -1868,6 +2001,9 @@ function drawBG() {
     ctx.globalAlpha = 1;
   });
 
+  // Add lamp lighting effects on floor
+  drawLampLighting();
+
   // WALL DECORATION - Planning board on left wall
   ctx.fillStyle = '#8B6F47';
   ctx.fillRect(sx(50), sy(80), S(80), S(90));
@@ -2005,6 +2141,23 @@ function drawBG() {
   if (!checkCollision(85, 450, 25, 30, blocked)) {
     drawCompanyLogo(97, 465);
   }
+
+  // ──── PREMIUM OFFICE ENHANCEMENTS ────
+
+  // Add wall shadows for depth
+  drawWallShadows();
+
+  // Add baseboards between walls and floor
+  drawBaseboards();
+
+  // Enhance window frames with shadows
+  enhanceWindowFrames();
+
+  // Add floor texture variation for depth
+  addFloorVariation();
+
+  // Add decorative plants in corners
+  drawCornerPlants();
 
   // Draw top-left text: CommandOS
   ctx.save();
