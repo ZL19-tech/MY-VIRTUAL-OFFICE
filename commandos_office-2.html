@@ -1545,6 +1545,14 @@ function drawBG() {
   ctx.fillStyle = '#3D4456';
   ctx.fillRect(0, sy(54), canvas.width, sy(186));
 
+  // RIGHT SIDE WALL (vertical)
+  ctx.fillStyle = '#2D3344';
+  ctx.fillRect(CANVAS_WIDTH - 80, 0, 80, canvas.height);
+
+  // BOTTOM WALL (horizontal)
+  ctx.fillStyle = '#2D3344';
+  ctx.fillRect(0, CANVAS_HEIGHT - 60, canvas.width, 60);
+
   // Upper wall molding/trim (gold accent)
   ctx.fillStyle = '#D4A574';
   ctx.fillRect(0, sy(54), canvas.width, S(6));
