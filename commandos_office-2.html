@@ -425,32 +425,30 @@ let sceneTimer = 0;
 let totalTaskCount = 0;
 
 // ── Commander patrol route ───────────────────────────────────────────
-// Desks to AVOID (agent desks - circled): 
-//   Alexa (40-240, 80-280), Scout (360-560, 80-280), Memo (680-880, 80-280)
-//   Doc (40-240, 380-580), Cal (680-880, 380-580)
-// Commander CAN use his own desk at (390-590, 700-850)
-// Route: perimeter outside agent desks + his own desk
+// Desks to AVOID (ALL desks - NO ENTRY):
+//   Agent desks: Alexa (40-240, 80-280), Scout (360-560, 80-280), Memo (680-880, 80-280)
+//                Doc (40-240, 380-580), Cal (680-880, 380-580)
+//   Commander desk: (390-590, 700-850)
+// Route: ONLY perimeter outside all desks
 const COMMANDER_ROUTE = [
   // TOP AREA - far above all desks
   { x: 50, y: 25 },     // Top left corner
   { x: 600, y: 25 },    // Top center
   { x: 1050, y: 25 },   // Top right corner
   
-  // RIGHT SIDE - far right of agent desks  
-  { x: 1100, y: 200 },  // Right side upper
-  { x: 1100, y: 450 },  // Right side middle
+  // RIGHT SIDE - far right
+  { x: 1100, y: 200 },  // Right upper
+  { x: 1100, y: 450 },  // Right middle
+  { x: 1100, y: 800 },  // Right lower
   
-  // RIGHT TO CENTER-BOTTOM - approach own desk from right
-  { x: 750, y: 700 },   // Right side of own desk
-  { x: 490, y: 750 },   // At own desk (center)
+  // BOTTOM AREA - far below all desks
+  { x: 600, y: 920 },   // Bottom center
+  { x: 50, y: 900 },    // Bottom left
   
-  // LEFT TO CENTER-BOTTOM - leave desk to left
-  { x: 250, y: 700 },   // Left side of own desk
-  { x: 50, y: 750 },    // Bottom left
-  
-  // LEFT SIDE - far left of agent desks
-  { x: 10, y: 450 },    // Left side middle
-  { x: 10, y: 200 },    // Left side upper
+  // LEFT SIDE - far left
+  { x: 10, y: 800 },    // Left lower
+  { x: 10, y: 450 },    // Left middle
+  { x: 10, y: 200 },    // Left upper
 ];
 let commanderRouteIdx = 0;
 let commanderWalkTimer = 0;      // Timer pentru 5 secunde de mers
