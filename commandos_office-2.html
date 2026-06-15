@@ -976,25 +976,68 @@ function drawSmallDesk(gx, gy, agent) {
   ctx.fillRect(gx + 12, gy + 20 + H - 3, 7, 3);
   ctx.fillRect(gx + W + 8, gy + 20 + H - 3, 7, 3);
 
-  // Desktop monitor - positioned based on agent
-  const centerX = gx + W/2 + 4;
+  // DESKTOP ITEMS - Like pixel art image
+  // Monitor on LEFT
+  const monX = gx + 20;
+  const monY = gy + 10;
+  // Monitor frame
+  ctx.fillStyle = '#0F0F14';
+  ctx.fillRect(monX, monY, 50, 42);
+  // Monitor screen
+  ctx.fillStyle = '#1A3A4D';
+  ctx.fillRect(monX + 2, monY + 2, 46, 35);
+  // Monitor glow
+  ctx.fillStyle = agent.color;
+  ctx.globalAlpha = 0.15;
+  ctx.fillRect(monX + 2, monY + 2, 46, 35);
+  ctx.globalAlpha = 1;
+  // Monitor stand
+  ctx.fillStyle = '#4A4A4A';
+  ctx.fillRect(monX + 18, monY + 38, 14, 4);
 
-  switch(agent.id) {
-    case 'alexa':
-      drawRealisticMonitor(centerX - 35, gy + 12, 70, 40, agent.color);
-      break;
-    case 'scout':
-      drawRealisticMonitor(centerX - 35, gy + 12, 70, 40, agent.color);
-      break;
-    case 'memo':
-      drawRealisticMonitor(centerX - 35, gy + 10, 70, 42, agent.color);
-      break;
-    case 'doc':
-      drawRealisticMonitor(centerX - 38, gy + 8, 76, 44, agent.color);
-      break;
-    case 'cal':
-      drawRealisticMonitor(centerX - 30, gy + 14, 60, 38, agent.color);
-      break;
+  // TOWER/CPU in CENTER
+  const towerX = gx + 80;
+  const towerY = gy + 12;
+  // Main tower body
+  ctx.fillStyle = '#3A3A3A';
+  ctx.fillRect(towerX, towerY, 35, 40);
+  // Tower details - window
+  ctx.fillStyle = '#1A2A3D';
+  ctx.fillRect(towerX + 4, towerY + 6, 15, 15);
+  ctx.fillStyle = agent.color;
+  ctx.globalAlpha = 0.2;
+  ctx.fillRect(towerX + 4, towerY + 6, 15, 15);
+  ctx.globalAlpha = 1;
+  // Tower vents/details
+  ctx.fillStyle = '#1A1A1A';
+  for (let i = 0; i < 3; i++) {
+    ctx.fillRect(towerX + 3, towerY + 26 + i * 4, 29, 2);
+  }
+  // Power light
+  ctx.fillStyle = '#FFD700';
+  ctx.beginPath();
+  ctx.arc(towerX + 4, towerY + 4, 2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // CALCULATOR/DEVICE on RIGHT
+  const calcX = gx + 135;
+  const calcY = gy + 15;
+  // Calculator body
+  ctx.fillStyle = '#4A4A4A';
+  ctx.fillRect(calcX, calcY, 40, 35);
+  // Calculator screen
+  ctx.fillStyle = '#0F1F2A';
+  ctx.fillRect(calcX + 4, calcY + 4, 32, 12);
+  ctx.fillStyle = '#00FF88';
+  ctx.globalAlpha = 0.3;
+  ctx.fillRect(calcX + 4, calcY + 4, 32, 12);
+  ctx.globalAlpha = 1;
+  // Calculator buttons - grid
+  ctx.fillStyle = '#2A2A2A';
+  for (let row = 0; row < 3; row++) {
+    for (let col = 0; col < 4; col++) {
+      ctx.fillRect(calcX + 4 + col * 8, calcY + 18 + row * 5, 7, 4);
+    }
   }
 
   // Agent function label
