@@ -1711,11 +1711,12 @@ function handleCommandButton(action) {
 // ── Init ─────────────────────────────────────────────────────────────
 buildAgentButtons();
 setLang('ro');
-// Place agents at their desk positions - much closer to the desk
+// Place agents at their desk positions
 AGENTS.forEach((a, i) => {
   if (a.id === 'commander') {
-    a.x = GRID[i].x + 100;
-    a.y = GRID[i].y + 170;  // Adjusted for expanded canvas
+    // Commander starts ABOVE his desk (outside collision zone)
+    a.x = GRID[i].x + 190;   // Center x of desk
+    a.y = GRID[i].y - 50;    // Well above desk (y < 776)
     a.state = 'idle';  // Commander can walk and manage
   } else {
     // Regular agents positioned right at their desks
