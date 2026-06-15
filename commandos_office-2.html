@@ -2068,7 +2068,8 @@ function render() {
 
   // Apply zoom transformation for responsive scaling
   ctx.save();
-  ctx.setTransform(zoomLevel, 0, 0, zoomLevel, offsetX, offsetY);
+  ctx.translate(offsetX, offsetY);
+  ctx.scale(zoomLevel, zoomLevel);
 
   drawBG();
 
