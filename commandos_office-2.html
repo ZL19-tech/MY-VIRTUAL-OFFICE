@@ -1474,53 +1474,7 @@ function runAutoScene() {
   // Loop reset
   if (sceneTimer > 900) sceneTimer = 0;
 
-  // ── Commander patrol route logic ────────────────────────────────────
-  const commander = AGENTS.find(a => a.id === 'commander');
-  if (commander && systemState === 'running') {
-    if (commanderRestTimer > 0) {
-      // Resting - don't move
-      commanderRestTimer--;
-      commander.state = 'idle';
-    } else if (commanderWalkTimer > 0) {
-      // Walking to next waypoint
-      commanderWalkTimer--;
-      const waypoint = COMMANDER_ROUTE[commanderRouteIdx];
-      const dx = waypoint.x - commander.x;
-      const dy = waypoint.y - commander.y;
-      const dist = Math.sqrt(dx*dx + dy*dy);
-
-      if (dist > 2) {
-        const speed = 2;
-        let newX = commander.x + dx/dist * speed;
-        let newY = commander.y + dy/dist * speed;
-
-        // Check collision with ALL desks - do NOT allow walking on them
-        const onAlexaDesk = newX >= 40 && newX <= 240 && newY >= 80 && newY <= 280;
-        const onScoutDesk = newX >= 360 && newX <= 560 && newY >= 80 && newY <= 280;
-        const onMemoDesk = newX >= 680 && newX <= 880 && newY >= 80 && newY <= 280;
-        const onDocDesk = newX >= 40 && newX <= 240 && newY >= 380 && newY <= 580;
-        const onCalDesk = newX >= 680 && newX <= 880 && newY >= 380 && newY <= 580;
-        const onCommanderDesk = newX >= 380 && newX <= 690 && newY >= 680 && newY <= 920;
-
-        // Only move if NOT on any desk
-        if (!onAlexaDesk && !onScoutDesk && !onMemoDesk && !onDocDesk && !onCalDesk && !onCommanderDesk) {
-          commander.x = newX;
-          commander.y = newY;
-        }
-        commander.state = 'walk';
-      } else {
-        // Reached waypoint, start resting
-        commander.x = waypoint.x;
-        commander.y = waypoint.y;
-        commanderWalkTimer = 0;
-        commanderRestTimer = COMMANDER_REST_DURATION;
-      }
-    } else {
-      // Start walking to next waypoint
-      commanderRouteIdx = (commanderRouteIdx + 1) % COMMANDER_ROUTE.length;
-      commanderWalkTimer = COMMANDER_WALK_DURATION;
-    }
-  }
+  // Commander patrol disabled - uses walkTo() only
 
   // Walk home occasionally
   AGENTS.forEach(a => {
@@ -1714,15 +1668,13 @@ setLang('ro');
 // Place agents at their desk positions
 AGENTS.forEach((a, i) => {
   if (a.id === 'commander') {
-    // Commander starts ABOVE his desk (outside collision zone)
-    a.x = GRID[i].x + 190;   // Center x of desk
-    a.y = GRID[i].y - 50;    // Well above desk (y < 776)
-    a.state = 'idle';  // Commander can walk and manage
+    a.x = GRID[i].x + 100;
+    a.y = GRID[i].y + 170;
+    a.state = 'idle';
   } else {
-    // Regular agents positioned right at their desks
     a.x = GRID[i].x + 80;
-    a.y = GRID[i].y + 90;   // Adjusted for expanded canvas
-    a.state = 'sit_work';  // Always sitting at their desks
+    a.y = GRID[i].y + 90;
+    a.state = 'sit_work';
   }
   a.homeX = a.x;
   a.homeY = a.y;
