@@ -1545,13 +1545,89 @@ function drawBG() {
   ctx.fillStyle = '#3D4456';
   ctx.fillRect(0, sy(54), canvas.width, sy(186));
 
-  // RIGHT SIDE WALL (vertical)
-  ctx.fillStyle = '#2D3344';
-  ctx.fillRect(CANVAS_WIDTH - 80, 0, 80, canvas.height);
+  // RIGHT SIDE WALL (vertical with window)
+  ctx.fillStyle = '#3D4456';
+  ctx.fillRect(sx(1100), sy(54), S(100), sy(186));
 
-  // BOTTOM WALL (horizontal)
-  ctx.fillStyle = '#2D3344';
-  ctx.fillRect(0, CANVAS_HEIGHT - 60, canvas.width, 60);
+  // Right wall window
+  const rightWinX = 1120;
+  const rightWinY = 70;
+  ctx.fillStyle = '#1A1A1A';
+  ctx.fillRect(sx(rightWinX - 5), sy(rightWinY - 5), S(60), S(100) + S(10));
+  ctx.fillStyle = '#2D4A6A';
+  ctx.fillRect(sx(rightWinX), sy(rightWinY), S(50), S(100));
+
+  // Right window gradient
+  const rightGrad = ctx.createLinearGradient(sx(rightWinX), sy(rightWinY), sx(rightWinX), sy(rightWinY + 100));
+  rightGrad.addColorStop(0, '#6B2C7A');
+  rightGrad.addColorStop(0.4, '#D4A574');
+  rightGrad.addColorStop(1, '#FF6B35');
+  ctx.fillStyle = rightGrad;
+  ctx.globalAlpha = 0.4;
+  ctx.fillRect(sx(rightWinX), sy(rightWinY), S(50), S(100));
+  ctx.globalAlpha = 1;
+
+  // Right window panes
+  ctx.strokeStyle = '#0F0F14';
+  ctx.lineWidth = S(2);
+  ctx.beginPath();
+  ctx.moveTo(sx(rightWinX), sy(rightWinY + 33));
+  ctx.lineTo(sx(rightWinX + 50), sy(rightWinY + 33));
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(sx(rightWinX), sy(rightWinY + 66));
+  ctx.lineTo(sx(rightWinX + 50), sy(rightWinY + 66));
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(sx(rightWinX + 17), sy(rightWinY));
+  ctx.lineTo(sx(rightWinX + 17), sy(rightWinY + 100));
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(sx(rightWinX + 33), sy(rightWinY));
+  ctx.lineTo(sx(rightWinX + 33), sy(rightWinY + 100));
+  ctx.stroke();
+
+  // BOTTOM WALL (horizontal with window)
+  ctx.fillStyle = '#3D4456';
+  ctx.fillRect(0, sy(870), canvas.width, S(80));
+
+  // Bottom wall window
+  const bottomWinX = 300;
+  const bottomWinY = 885;
+  ctx.fillStyle = '#1A1A1A';
+  ctx.fillRect(sx(bottomWinX - 5), sy(bottomWinY - 5), S(150) + S(10), S(50));
+  ctx.fillStyle = '#2D4A6A';
+  ctx.fillRect(sx(bottomWinX), sy(bottomWinY), S(140), S(40));
+
+  // Bottom window gradient
+  const bottomGrad = ctx.createLinearGradient(sx(bottomWinX), sy(bottomWinY), sx(bottomWinX), sy(bottomWinY + 40));
+  bottomGrad.addColorStop(0, '#6B2C7A');
+  bottomGrad.addColorStop(0.4, '#D4A574');
+  bottomGrad.addColorStop(1, '#FF6B35');
+  ctx.fillStyle = bottomGrad;
+  ctx.globalAlpha = 0.4;
+  ctx.fillRect(sx(bottomWinX), sy(bottomWinY), S(140), S(40));
+  ctx.globalAlpha = 1;
+
+  // Bottom window panes
+  ctx.strokeStyle = '#0F0F14';
+  ctx.lineWidth = S(2);
+  ctx.beginPath();
+  ctx.moveTo(sx(bottomWinX), sy(bottomWinY + 13));
+  ctx.lineTo(sx(bottomWinX + 140), sy(bottomWinY + 13));
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(sx(bottomWinX), sy(bottomWinY + 26));
+  ctx.lineTo(sx(bottomWinX + 140), sy(bottomWinY + 26));
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(sx(bottomWinX + 47), sy(bottomWinY));
+  ctx.lineTo(sx(bottomWinX + 47), sy(bottomWinY + 40));
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(sx(bottomWinX + 93), sy(bottomWinY));
+  ctx.lineTo(sx(bottomWinX + 93), sy(bottomWinY + 40));
+  ctx.stroke();
 
   // Upper wall molding/trim (gold accent)
   ctx.fillStyle = '#D4A574';
