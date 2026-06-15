@@ -1757,7 +1757,12 @@ function drawBG() {
   ctx.lineTo(sx(bottomWinX + 93), sy(bottomWinY + 40));
   ctx.stroke();
 
-  // Upper wall molding/trim (gold accent)
+  // ──── TOP WALL (thick physical wall with windows embedded) ────
+  // Top wall background (full width, 70px high)
+  ctx.fillStyle = '#3D4456';  // Dark blue-gray wall color
+  ctx.fillRect(0, 0, canvas.width, sy(70));
+
+  // Top wall molding/trim (gold accent)
   ctx.fillStyle = '#D4A574';
   ctx.fillRect(0, sy(54), canvas.width, S(6));
 
@@ -1765,7 +1770,7 @@ function drawBG() {
   ctx.fillStyle = '#8B7355';
   ctx.fillRect(0, sy(54) + S(2), canvas.width, S(2));
 
-  // WINDOWS - 3 large windows with city skyline
+  // WINDOWS - 3 large windows embedded into the wall
   const windowY = sy(70);
   const windowH = S(100);
   const windowPositions = [150, 450, 750];
@@ -1885,33 +1890,64 @@ function drawBG() {
     ctx.strokeRect(sx(pos[0]), sy(pos[1]), S(15), S(15));
   });
 
-  // Lower wall molding (separates wall from floor)
+  // ──── THICK LEFT WALL (80px wide, full height) ────
+  // Main wall surface
+  ctx.fillStyle = '#3D4456';
+  ctx.fillRect(0, 0, S(80), canvas.height);
+
+  // Wall panel lines (vertical divisions for visual interest)
+  ctx.strokeStyle = '#2A3340';
+  ctx.lineWidth = S(1);
+  ctx.beginPath();
+  ctx.moveTo(S(40), 0);
+  ctx.lineTo(S(40), canvas.height);
+  ctx.stroke();
+
+  // Wall edge highlight (left side, light reflection)
+  ctx.fillStyle = '#4D5566';
+  ctx.fillRect(0, 0, S(2), canvas.height);
+
+  // Wall trim/baseboard (where wall meets floor)
+  ctx.fillStyle = '#D4A574';
+  ctx.fillRect(0, sy(235), S(80), S(6));
+
+  ctx.fillStyle = '#8B7355';
+  ctx.fillRect(0, sy(237), S(80), S(2));
+
+  // ──── THICK RIGHT WALL (80px wide, full height) ────
+  // Main wall surface
+  ctx.fillStyle = '#3D4456';
+  ctx.fillRect(sx(1120), 0, S(80), canvas.height);
+
+  // Wall panel lines (vertical divisions for visual interest)
+  ctx.strokeStyle = '#2A3340';
+  ctx.lineWidth = S(1);
+  ctx.beginPath();
+  ctx.moveTo(sx(1160), 0);
+  ctx.lineTo(sx(1160), canvas.height);
+  ctx.stroke();
+
+  // Wall edge highlight (right side, light reflection)
+  ctx.fillStyle = '#4D5566';
+  ctx.fillRect(sx(1198), 0, S(2), canvas.height);
+
+  // Wall trim/baseboard (where wall meets floor)
+  ctx.fillStyle = '#D4A574';
+  ctx.fillRect(sx(1120), sy(235), S(80), S(6));
+
+  ctx.fillStyle = '#8B7355';
+  ctx.fillRect(sx(1120), sy(237), S(80), S(2));
+
+  // Bottom wall molding (separates wall from floor)
   ctx.fillStyle = '#D4A574';
   ctx.fillRect(0, sy(235), canvas.width, S(6));
 
   ctx.fillStyle = '#8B7355';
   ctx.fillRect(0, sy(237), canvas.width, S(2));
 
-  // ──── FULL SIDE WALLS ────
-  // LEFT WALL (x = 0 to ~35)
-  ctx.fillStyle = '#3D4456';
-  ctx.fillRect(0, 0, S(35), canvas.height);
+  // ──── OFFICE DECORATIONS (with safe placement inside thick walls) ────
 
-  // RIGHT WALL (x = ~1165 to 1200)
-  ctx.fillStyle = '#3D4456';
-  ctx.fillRect(sx(1165), 0, S(35), canvas.height);
-
-  // LEFT WALL TRIM/DETAILS
-  ctx.fillStyle = '#8B7355';
-  ctx.fillRect(0, sy(235), S(35), S(2));
-
-  // RIGHT WALL TRIM/DETAILS
-  ctx.fillStyle = '#8B7355';
-  ctx.fillRect(sx(1165), sy(235), S(35), S(2));
-
-  // ──── OFFICE DECORATIONS (checked for collisions) ────
-
-  // Define blocked areas (windows, desks, agents)
+  // Define blocked areas (windows, desks, agents - NO side walls blocking)
   const blocked = [
     // Windows (top wall) - x: 145-790, y: 70-170
     { x: 145, y: 70, w: 645, h: 100 },
@@ -1924,52 +1960,50 @@ function drawBG() {
     { x: 300, y: 620, w: 220, h: 110 },    // Commander
   ];
 
-  // PLANTS - Corner positions only (safe from desks and windows)
-  // Bottom-left corner (away from desks)
-  if (!checkCollision(15, 750, 40, 60, blocked)) {
-    drawPlant(35, 800, 30);
+  // PLANTS - Placed on the INSIDE of walls, not blocking access
+  // Bottom-left corner (inside left wall, on floor)
+  if (!checkCollision(85, 750, 40, 60, blocked)) {
+    drawPlant(105, 800, 30);
   }
 
-  // Bottom-right corner
-  if (!checkCollision(1150, 750, 40, 60, blocked)) {
-    drawPlant(1170, 800, 30);
+  // Bottom-right corner (inside right wall, on floor)
+  if (!checkCollision(1080, 750, 40, 60, blocked)) {
+    drawPlant(1100, 800, 30);
   }
 
-  // Upper-left (beside left wall, away from windows)
-  if (!checkCollision(10, 180, 40, 50, blocked)) {
-    drawPlant(35, 210, 25);
+  // Upper-left (inside left wall, below window area)
+  if (!checkCollision(85, 180, 40, 50, blocked)) {
+    drawPlant(105, 210, 25);
   }
 
-  // Upper-right (beside right wall, away from windows)
-  if (!checkCollision(1150, 180, 40, 50, blocked)) {
-    drawPlant(1170, 210, 25);
+  // Upper-right (inside right wall, below window area)
+  if (!checkCollision(1080, 180, 40, 50, blocked)) {
+    drawPlant(1100, 210, 25);
   }
 
-  // ARTWORK - Only on solid wall sections between windows
-  // Left solid wall section (below left lamp area)
-  if (!checkCollision(50, 170, 50, 40, blocked)) {
-    drawArtwork(55, 175, 40, 35, '#8B4513');
+  // ARTWORK - On left wall interior surface between windows and decorations
+  if (!checkCollision(100, 280, 50, 40, blocked)) {
+    drawArtwork(105, 285, 40, 35, '#8B4513');
   }
 
-  // Right solid wall section (below right lamp area)
-  if (!checkCollision(1100, 170, 50, 40, blocked)) {
-    drawArtwork(1105, 175, 40, 35, '#556B2F');
+  // ARTWORK - On right wall interior surface
+  if (!checkCollision(1050, 280, 50, 40, blocked)) {
+    drawArtwork(1055, 285, 40, 35, '#556B2F');
   }
 
-  // BOOKSHELVES - On side walls, below window line
-  // Left wall bookshelf
-  if (!checkCollision(10, 280, 25, 100, blocked)) {
-    drawBookshelf(12, 285, 22, 95);
+  // BOOKSHELVES - Inside left wall, below window line
+  if (!checkCollision(85, 350, 25, 100, blocked)) {
+    drawBookshelf(87, 355, 22, 95);
   }
 
-  // Right wall bookshelf
-  if (!checkCollision(1165, 280, 25, 100, blocked)) {
-    drawBookshelf(1170, 285, 22, 95);
+  // BOOKSHELVES - Inside right wall, below window line
+  if (!checkCollision(1090, 350, 25, 100, blocked)) {
+    drawBookshelf(1092, 355, 22, 95);
   }
 
-  // COMPANY LOGO - Left wall middle
-  if (!checkCollision(10, 380, 25, 25, blocked)) {
-    drawCompanyLogo(22, 390);
+  // COMPANY LOGO - Left wall interior, middle height
+  if (!checkCollision(85, 450, 25, 30, blocked)) {
+    drawCompanyLogo(97, 465);
   }
 
   // Draw top-left text: CommandOS
