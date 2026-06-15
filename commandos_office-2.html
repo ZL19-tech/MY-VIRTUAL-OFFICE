@@ -749,12 +749,12 @@ function drawDesk(gx, gy, agent) {
   // Mouse
   fillR(gx + 185, gy + 32, 22, 16, '#1A2133');
 
-  // Agent role/function label - shows function
+  // Agent name label - shows agent name
   ctx.font = `${S(7)}px "Share Tech Mono", monospace`;
   ctx.fillStyle = agent.color;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(agent.job, sx(gx + W/2), sy(gy + 22 + H + 14));
+  ctx.fillText(agent.name, sx(gx + W/2), sy(gy + 22 + H + 14));
 }
 
 // ── Modern Desk (for 6 regular agents) - Colorful with Various Devices ──
@@ -805,12 +805,12 @@ function drawSmallDesk(gx, gy, agent) {
       break;
   }
 
-  // Agent name/function label - shows function
+  // Agent name label - shows agent name
   ctx.font = `${S(6)}px "Share Tech Mono", monospace`;
   ctx.fillStyle = agent.color;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(agent.job, sx(gx + 30 + W/2), sy(gy + 22 + H + 12));
+  ctx.fillText(agent.name, sx(gx + 30 + W/2), sy(gy + 22 + H + 12));
 }
 
 // ── Desk item helpers ────────────────────────────────────────────────
