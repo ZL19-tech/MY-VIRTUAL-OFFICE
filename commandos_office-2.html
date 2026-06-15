@@ -393,14 +393,14 @@ const AGENTS = [
 ];
 
 // Grid layout for 6 agents: 3 in first row, 2 in second, Commander big at bottom center
-// EXPANDED for full screen visibility
+// OPTIMIZED for fullscreen with proper spacing
 const GRID = [
-  { x: 40,  y: 80   },   // alexa     (row1 col1)
-  { x: 360, y: 80   },   // scout     (row1 col2)
-  { x: 680, y: 80   },   // memo      (row1 col3)
-  { x: 40,  y: 380  },   // doc       (row2 col1)
-  { x: 680, y: 380  },   // cal       (row2 col2)
-  { x: 390, y: 700  },   // commander (row3 - centered, big desk)
+  { x: 50,  y: 90   },   // alexa     (row1 col1 - left)
+  { x: 380, y: 90   },   // scout     (row1 col2 - center)
+  { x: 710, y: 90   },   // memo      (row1 col3 - right)
+  { x: 80,  y: 380  },   // doc       (row2 col1 - left-center)
+  { x: 680, y: 380  },   // cal       (row2 col2 - right-center)
+  { x: 390, y: 680  },   // commander (row3 - centered, moved up for better floor space)
 ];
 
 // Agent home positions (in front of desk)
