@@ -710,195 +710,151 @@ function drawHPBar(agent, gx, gy) {
   }
 }
 
-// ── Premium Professional Commander Desk ──────────────────────────────
+// ── Pixel-Art Office Desk - Warm Brown Style (Top-Down View) ──────
 function drawDesk(gx, gy, agent) {
-  const W = 300, H = 140;
+  const W = 280, H = 130;
 
-  // Premium desk body - dark professional
-  fillR(gx - 10, gy + 22, W + 20, H, '#1F2329');  // Main desk surface
-  fillR(gx - 10, gy + 22, W + 20, 6, '#2A3038');  // Subtle top edge
+  // Main desk surface - warm maro deschis (like image)
+  fillR(gx - 5, gy + 20, W + 10, H, '#C19A6B');  // Warm brown desktop
 
-  // Premium metal frame legs - minimal design
-  fillR(gx, gy + 22 + H, 8, 32, '#0F0F14');  // Left leg
-  fillR(gx + W - 8, gy + 22 + H, 8, 32, '#0F0F14');  // Right leg
+  // Desk top surface with subtle border
+  fillR(gx - 3, gy + 20, W + 6, 4, '#D4A574');   // Lighter edge
 
-  // Desk accessories - organizers
-  fillR(gx + 10, gy + 35, 25, 20, '#2A3038');  // Left organizer
-  fillR(gx + W - 35, gy + 35, 25, 20, '#2A3038');  // Right organizer
+  // Left side drawers stack (darker brown)
+  fillR(gx - 5, gy + 28, 18, H - 8, '#6B4423');
+  fillR(gx - 5, gy + 35, 18, 14, '#5C3A1F');     // Drawer 1
+  fillR(gx - 5, gy + 52, 18, 14, '#5C3A1F');     // Drawer 2
+  fillR(gx - 5, gy + 69, 18, 14, '#5C3A1F');     // Drawer 3
 
-  // Center curved monitor stand
-  fillR(gx + 110, gy + 22 + H - 20, 80, 6, '#1A1F27');  // Stand base
-  fillR(gx + 135, gy + 22 + H - 30, 30, 12, '#1A1F27');  // Stand arm
+  // Right side drawers stack (darker brown) - mirrored
+  fillR(gx + W - 13, gy + 28, 18, H - 8, '#6B4423');
+  fillR(gx + W - 13, gy + 35, 18, 14, '#5C3A1F');
+  fillR(gx + W - 13, gy + 52, 18, 14, '#5C3A1F');
+  fillR(gx + W - 13, gy + 69, 18, 14, '#5C3A1F');
 
-  // Dual Monitor Setup - Premium curved displays
-  const mx1 = gx + 40, my = gy - 60;
-  drawPremiumMonitor(mx1, my, 90, 65, agent.color);
+  // Drawer handles (small gold accents)
+  fillR(gx - 2, gy + 40, 4, 4, '#8B7355');
+  fillR(gx - 2, gy + 57, 4, 4, '#8B7355');
+  fillR(gx - 2, gy + 74, 4, 4, '#8B7355');
 
-  const mx2 = gx + 150, my2 = gy - 60;
-  drawPremiumMonitor(mx2, my2, 90, 65, agent.color);
+  fillR(gx + W - 2, gy + 40, 4, 4, '#8B7355');
+  fillR(gx + W - 2, gy + 57, 4, 4, '#8B7355');
+  fillR(gx + W - 2, gy + 74, 4, 4, '#8B7355');
 
-  // Monitor content - only on main monitor
-  drawMonitorContent(agent, mx1 + 4, my + 4, 82, 57);
+  // Desktop items - center area
+  const centerX = gx + W/2;
 
-  // Premium keyboard - mechanical
-  fillR(gx + 50, gy + 28, 140, 16, '#1A1A1F');
-  for (let ki = 0; ki < 14; ki++)
-    for (let kj = 0; kj < 2; kj++)
-      fillR(gx + 54 + ki * 10, gy + 31 + kj * 6, 8, 4, '#2A2A30');
-
-  // Premium mouse pad
-  fillR(gx + 70, gy + 50, 80, 35, '#1F2329');
-  // Mouse on pad
-  fillR(gx + 160, gy + 60, 20, 14, '#0F0F14');
-
-  // Phone/Desk phone
-  fillR(gx + W - 50, gy + 50, 22, 28, '#1A1F27');
-  fillR(gx + W - 48, gy + 52, 18, 8, '#0F0F14');
-
-  // Agent function label - Premium style
-  ctx.font = `${S(8)}px "Share Tech Mono", monospace`;
-  ctx.fillStyle = agent.color;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('👑 ' + agent.job, sx(gx + W/2), sy(gy + 22 + H + 16));
-}
-
-function drawPremiumMonitor(x, y, w, h, color) {
-  // Ultra-modern curved monitor frame
-  fillR(x - 2, y - 2, w + 4, h + 2, '#0A0A0F');  // Outer bezel
-  fillR(x, y, w, h, C.monitor);  // Screen
-
-  // Screen glow - premium effect
-  ctx.fillStyle = color;
-  ctx.globalAlpha = 0.08 + 0.04 * Math.sin(tick * 0.05);
-  ctx.fillRect(sx(x), sy(y), S(w), S(h));
-  ctx.globalAlpha = 1;
-
-  // Curved stand
-  fillR(x + w/2 - 18, y + h + 1, 36, 4, '#1A1F27');
-}
-
-// ── Modern Professional Desk (for 6 regular agents) ──
-function drawSmallDesk(gx, gy, agent) {
-  const W = 220, H = 110;
-
-  // Desk body - Modern gray/white professional finish
-  fillR(gx + 15, gy + 22, W, H, '#2D3139');  // Dark gray modern desk
-  fillR(gx + 15, gy + 22, W, 5, '#3E4452');  // Slightly lighter desk top edge
-
-  // Metal desk frame - sleek and modern
-  fillR(gx + 18, gy + 127, 8, 26, '#1A1A1F');  // Left front leg
-  fillR(gx + 15 + W - 8, gy + 127, 8, 26, '#1A1A1F');  // Right front leg
-
-  // Modern cable management tray on desk side
-  fillR(gx + 10, gy + 28, 6, 40, '#1F2229');
-
-  // Desk items - Professional setup
+  // Monitor placement (based on agent)
   switch(agent.id) {
-    case 'alexa':
-      // Alexa: Dual Monitor Setup
-      drawModernMonitor(gx + 30, gy - 5, 70, 50, agent.color, '#0A1628');
-      drawModernMonitor(gx + 105, gy - 5, 70, 50, agent.color, '#0A1628');
-      drawDeskKeyboard(gx + 45, gy + 55, 90, 14, '#1F2229');
+    case 'commander':
+      // Commander: Single large center monitor
+      drawDeskMonitorItem(centerX - 50, gy + 5, 100, 45, agent.color);
       break;
-
-    case 'scout':
-      // Scout: Laptop + Analytics Display
-      drawModernLaptop(gx + 35, gy + 5, 90, 55, agent.color);
-      drawAnalyticsDashboard(gx + 130, gy + 10, 60, 40, agent.color);
-      break;
-
-    case 'memo':
-      // Memo: Curved Monitor + Audio Interface
-      drawModernMonitor(gx + 35, gy - 8, 75, 55, agent.color, agent.color);
-      drawAudioInterface(gx + 115, gy + 20, 55, 30, agent.color);
-      break;
-
-    case 'doc':
-      // Doc: Large Monitor + Document Holder
-      drawModernMonitor(gx + 28, gy - 10, 85, 60, agent.color, '#0A1628');
-      drawDocumentHolder(gx + 115, gy + 25, 40, 35, agent.color);
-      break;
-
-    case 'cal':
-      // Cal: Tablet + Keyboard + Phone Stand
-      drawModernTablet(gx + 40, gy + 8, 65, 55, agent.color);
-      drawModernPhone(gx + 115, gy + 30, 35, 50, agent.color);
-      break;
+    default:
+      // Regular agents: smaller monitor positioning
+      drawDeskMonitorItem(centerX - 40, gy + 10, 80, 40, agent.color);
   }
 
-  // Agent function label - Professional style
+  // Agent function label - positioned below desk
   ctx.font = `${S(6.5)}px "Share Tech Mono", monospace`;
   ctx.fillStyle = agent.color;
   ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(agent.job, sx(gx + 15 + W/2), sy(gy + 22 + H + 14));
+  ctx.textBaseline = 'top';
+  ctx.fillText(agent.job, sx(gx + W/2), sy(gy + H + 20));
 }
 
-// ── Professional Desk item helpers ──────────────────────────────────
-function drawModernMonitor(x, y, w, h, color, screenColor) {
-  // Ultra-thin bezel monitor frame
-  fillR(x, y, w, h, '#0F1015');  // Outer frame
-  fillR(x + 1, y + 1, w - 2, h - 8, screenColor || C.monitor);
+// Removed - using drawDeskMonitorItem instead for consistency
 
-  // Monitor glow - Professional
+// ── Pixel-Art Office Desk (for 5 regular agents) - Warm Brown Style ──
+function drawSmallDesk(gx, gy, agent) {
+  const W = 200, H = 100;
+
+  // Main desk surface - warm maro deschis
+  fillR(gx + 10, gy + 20, W, H, '#C19A6B');  // Warm brown desktop
+
+  // Desk top edge - lighter shade for depth
+  fillR(gx + 10, gy + 20, W, 3, '#D4A574');
+
+  // Left side drawers (darker brown)
+  fillR(gx + 5, gy + 28, 14, H - 8, '#6B4423');
+  // Drawer divisions
+  fillR(gx + 5, gy + 35, 14, 12, '#5C3A1F');
+  fillR(gx + 5, gy + 50, 14, 12, '#5C3A1F');
+  fillR(gx + 5, gy + 65, 14, 12, '#5C3A1F');
+
+  // Right side drawers (darker brown)
+  fillR(gx + W + 6, gy + 28, 14, H - 8, '#6B4423');
+  // Drawer divisions
+  fillR(gx + W + 6, gy + 35, 14, 12, '#5C3A1F');
+  fillR(gx + W + 6, gy + 50, 14, 12, '#5C3A1F');
+  fillR(gx + W + 6, gy + 65, 14, 12, '#5C3A1F');
+
+  // Drawer handles (small knobs)
+  fillR(gx + 8, gy + 40, 3, 3, '#8B7355');
+  fillR(gx + 8, gy + 55, 3, 3, '#8B7355');
+  fillR(gx + 8, gy + 70, 3, 3, '#8B7355');
+
+  fillR(gx + W + 10, gy + 40, 3, 3, '#8B7355');
+  fillR(gx + W + 10, gy + 55, 3, 3, '#8B7355');
+  fillR(gx + W + 10, gy + 70, 3, 3, '#8B7355');
+
+  // Desk items on surface
+  switch(agent.id) {
+    case 'alexa':
+      // Alexa: Monitor on left side
+      drawDeskMonitorItem(gx + 30, gy + 10, 60, 35, agent.color);
+      break;
+
+    case 'scout':
+      // Scout: Monitor in center
+      drawDeskMonitorItem(gx + 35, gy + 12, 60, 35, agent.color);
+      break;
+
+    case 'memo':
+      // Memo: Monitor on right side
+      drawDeskMonitorItem(gx + 35, gy + 10, 65, 38, agent.color);
+      break;
+
+    case 'doc':
+      // Doc: Monitor center
+      drawDeskMonitorItem(gx + 30, gy + 8, 70, 40, agent.color);
+      break;
+
+    case 'cal':
+      // Cal: Monitor on left
+      drawDeskMonitorItem(gx + 25, gy + 12, 55, 32, agent.color);
+      break;
+  }
+
+  // Agent function label
+  ctx.font = `${S(6)}px "Share Tech Mono", monospace`;
+  ctx.fillStyle = agent.color;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  ctx.fillText(agent.job, sx(gx + 10 + W/2), sy(gy + H + 18));
+}
+
+// ── Pixel-Art Desk Monitor Item (simple) ────────────────────────────
+function drawDeskMonitorItem(x, y, w, h, color) {
+  // Monitor frame - dark border
+  fillR(x - 2, y - 2, w + 4, h + 3, '#0F0F14');
+
+  // Monitor screen - blue-gray tone
+  fillR(x, y, w, h, '#1A2A3D');
+
+  // Screen glow with agent color
   ctx.fillStyle = color;
-  ctx.globalAlpha = 0.06 + 0.03 * Math.sin(tick * 0.05);
-  ctx.fillRect(sx(x + 1), sy(y + 1), S(w - 2), S(h - 8));
+  ctx.globalAlpha = 0.08 + 0.03 * Math.sin(tick * 0.05);
+  ctx.fillRect(sx(x), sy(y), S(w), S(h));
   ctx.globalAlpha = 1;
 
-  // Slim stand
-  fillR(x + w/2 - 4, y + h - 6, 8, 8, '#1F2229');
-  // Stand base
-  fillR(x + w/2 - 12, y + h, 24, 3, '#1F2229');
+  // Monitor stand - simple pixel style
+  const standX = x + w/2 - 8;
+  const standY = y + h + 1;
+  fillR(standX, standY, 16, 2, '#4A4A4A');  // Stand base
 }
 
-function drawModernLaptop(x, y, w, h, color) {
-  // Laptop base
-  fillR(x, y, w, h, '#1A1F26');
-  // Laptop screen
-  fillR(x + 3, y + 2, w - 6, h - 8, C.monitor);
-
-  // Screen glow
-  ctx.fillStyle = color;
-  ctx.globalAlpha = 0.08;
-  ctx.fillRect(sx(x + 3), sy(y + 2), S(w - 6), S(h - 8));
-  ctx.globalAlpha = 1;
-
-  // Keyboard area
-  fillR(x + 5, y + h - 5, w - 10, 4, '#0F1015');
-}
-
-function drawModernTablet(x, y, w, h, color) {
-  // Tablet device
-  fillR(x, y, w, h, '#0F1015');
-  fillR(x + 2, y + 2, w - 4, h - 4, color, 0.1);
-
-  // Screen
-  fillR(x + 3, y + 3, w - 6, h - 6, C.monitor);
-
-  // Screen glow
-  ctx.fillStyle = color;
-  ctx.globalAlpha = 0.07;
-  ctx.fillRect(sx(x + 3), sy(y + 3), S(w - 6), S(h - 6));
-  ctx.globalAlpha = 1;
-}
-
-function drawModernPhone(x, y, w, h, color) {
-  // Phone device - slim modern design
-  fillR(x, y, w, h, '#0A0A0F');
-  // Phone screen
-  fillR(x + 1, y + 3, w - 2, h - 6, C.monitor);
-
-  // Screen glow
-  ctx.fillStyle = color;
-  ctx.globalAlpha = 0.08;
-  ctx.fillRect(sx(x + 1), sy(y + 3), S(w - 2), S(h - 6));
-  ctx.globalAlpha = 1;
-
-  // Phone camera bump
-  fillR(x + w/2 - 4, y + 1, 8, 6, '#1A1A1F');
-}
+// Removed - using drawDeskMonitorItem for all desk monitors for consistency
 
 function drawDeskKeyboard(x, y, w, h, color) {
   fillR(x, y, w, h, color);
@@ -1001,43 +957,7 @@ function drawDeskCalendar(x, y, w, h, color) {
   ctx.fillText('📅', sx(x + w / 2), sy(y + 4));
 }
 
-function drawAnalyticsDashboard(x, y, w, h, color) {
-  // Dashboard display
-  fillR(x, y, w, h, '#0F1015');
-  fillR(x + 2, y + 2, w - 4, h - 4, '#1A1F26');
-
-  // Chart bars
-  const barColors = [color, C.green, C.blue];
-  for (let i = 0; i < 3; i++) {
-    const barH = 8 + Math.sin(tick * 0.05 + i) * 3;
-    fillR(x + 8 + i * 14, y + h - 8 - barH, 10, barH, barColors[i], 0.7);
-  }
-}
-
-function drawAudioInterface(x, y, w, h, color) {
-  // Audio interface device
-  fillR(x, y, w, h, '#1F2229');
-
-  // Faders/sliders
-  for (let i = 0; i < 4; i++) {
-    fillR(x + 6 + i * 12, y + 5, 6, 20, '#0F1015');
-    fillR(x + 7 + i * 12, y + 8 + Math.sin(tick * 0.1 + i) * 4, 4, 3, color);
-  }
-  // Knobs
-  for (let i = 0; i < 2; i++) {
-    ctx.fillStyle = '#2A2F37';
-    ctx.fillRect(sx(x + 12 + i * 20), sy(y + h - 12), S(8), S(8));
-  }
-}
-
-function drawDocumentHolder(x, y, w, h, color) {
-  // Vertical document holder
-  fillR(x, y, w, h, '#8B6F47');
-  // Document sheets inside
-  fillR(x + 3, y + 5, w - 6, h - 10, '#E6EDF3');
-  fillR(x + 5, y + 3, w - 10, h - 12, '#D0D0D0');
-  fillR(x + 7, y + 1, w - 14, h - 14, '#FFFFFF');
-}
+// Removed - using simple drawDeskMonitorItem for all desk items
 
 
 // ── Monitor Content per agent ────────────────────────────────────────
@@ -1364,44 +1284,43 @@ function drawStatusAbove(agentId, gx, gy) {
 
 // ── CommandOS Brand Background ──────────────────────────────────────
 function drawBG() {
-  // Professional Wood Floor - Full office floor covering
-  const plankWidth = S(80);
-  const plankHeight = S(20);
+  // Pixel-art Office Floor - Dark blue-gray tile pattern (like first image)
+  const tileWidth = S(50);   // Wider horizontal tiles
+  const tileHeight = S(18);  // Proportional height
 
-  // Draw wood floor across entire office background
-  for (let x = -plankWidth; x < canvas.width; x += plankWidth) {
-    for (let y = sy(54); y < canvas.height; y += plankHeight) {
-      // Alternate wood colors for plank effect - realistic wood grain pattern
-      const variation = Math.sin(x * 0.01 + y * 0.02) > 0 ? '#3D4047' : '#454A52';
-      ctx.fillStyle = variation;
-      ctx.fillRect(x, y, plankWidth, plankHeight);
+  // Draw horizontal tile floor across entire office
+  for (let y = sy(54); y < canvas.height; y += tileHeight) {
+    for (let x = -tileWidth; x < canvas.width; x += tileWidth) {
+      // Alternate subtle shades of gray-blue for depth
+      // Main colors: #3D4456 (darker) and #4A5165 (lighter)
+      const isAlternate = (Math.floor((y - sy(54)) / tileHeight) + Math.floor(x / tileWidth)) % 2;
+      const tileColor = isAlternate === 0 ? '#3D4456' : '#4A5165';
 
-      // Wood grain texture - diagonal grain pattern
-      ctx.strokeStyle = '#2A2D34';
+      ctx.fillStyle = tileColor;
+      ctx.fillRect(x, y, tileWidth, tileHeight);
+
+      // Subtle horizontal line between tiles (pixel-art style)
+      ctx.strokeStyle = '#2F3541';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x, y + tileHeight);
+      ctx.lineTo(x + tileWidth, y + tileHeight);
+      ctx.stroke();
+
+      // Subtle vertical line for pixel-art grid feel
+      ctx.strokeStyle = '#35394A';
       ctx.lineWidth = 0.5;
       ctx.beginPath();
-      ctx.moveTo(x, y + plankHeight);
-      ctx.lineTo(x + plankWidth, y);
+      ctx.moveTo(x + tileWidth, y);
+      ctx.lineTo(x + tileWidth, y + tileHeight);
       ctx.stroke();
     }
   }
 
-  // Floor shine/reflection effect - subtle glossy look
-  ctx.fillStyle = '#FFFFFF';
+  // Optional: Add very subtle shading variation for depth
+  ctx.fillStyle = '#000000';
   ctx.globalAlpha = 0.02;
   ctx.fillRect(0, sy(54), canvas.width, canvas.height - sy(54));
-  ctx.globalAlpha = 1;
-
-  // Add subtle wood knots/details
-  ctx.fillStyle = '#2A2D34';
-  ctx.globalAlpha = 0.05;
-  for (let i = 0; i < 50; i++) {
-    const x = Math.random() * canvas.width;
-    const y = sy(54) + Math.random() * (canvas.height - sy(54));
-    ctx.beginPath();
-    ctx.arc(x, y, Math.random() * 3, 0, Math.PI * 2);
-    ctx.fill();
-  }
   ctx.globalAlpha = 1;
 
   // Header bar - CommandOS style
