@@ -425,22 +425,29 @@ let sceneTimer = 0;
 let totalTaskCount = 0;
 
 // ── Commander patrol route ───────────────────────────────────────────
-// Desks: Alexa (40-240, 80-280), Scout (360-560, 80-280), Memo (680-880, 80-280)
-//        Doc (40-240, 380-580), Cal (680-880, 380-580), Commander (center bottom)
-// Route avoids all desks
+// Desks (CIRCLED - NO ENTRY ZONES): 
+//   Alexa (40-240, 80-280), Scout (360-560, 80-280), Memo (680-880, 80-280)
+//   Doc (40-240, 380-580), Cal (680-880, 380-580), Commander (center bottom)
+// Route stays COMPLETELY OUTSIDE all desk zones
 const COMMANDER_ROUTE = [
-  { x: 250, y: 100 },   // Between Alexa and Scout (top)
-  { x: 300, y: 50 },    // Top center (above desks)
-  { x: 600, y: 100 },   // Between Scout and Memo (top)
-  { x: 750, y: 50 },    // Top right area
-  { x: 900, y: 150 },   // Far right side
-  { x: 900, y: 320 },   // Right side between rows
-  { x: 950, y: 450 },   // Far right bottom
-  { x: 750, y: 620 },   // Right side of Commander desk
-  { x: 350, y: 700 },   // Bottom center (below desks)
-  { x: 150, y: 620 },   // Left side bottom
-  { x: 0, y: 450 },     // Far left side
-  { x: 0, y: 300 },     // Left side between rows
+  // TOP AREA - far above all desks
+  { x: 50, y: 25 },     // Top left corner
+  { x: 600, y: 25 },    // Top center
+  { x: 1050, y: 25 },   // Top right corner
+  
+  // RIGHT SIDE - far right of all desks  
+  { x: 1100, y: 200 },  // Right side upper
+  { x: 1100, y: 450 },  // Right side middle
+  { x: 1100, y: 750 },  // Right side lower
+  
+  // BOTTOM AREA - far below all desks
+  { x: 600, y: 880 },   // Bottom center
+  { x: 50, y: 850 },    // Bottom left
+  
+  // LEFT SIDE - far left of all desks
+  { x: 10, y: 750 },    // Left side lower
+  { x: 10, y: 450 },    // Left side middle
+  { x: 10, y: 200 },    // Left side upper
 ];
 let commanderRouteIdx = 0;
 let commanderWalkTimer = 0;      // Timer pentru 5 secunde de mers
@@ -1486,18 +1493,9 @@ function runAutoScene() {
         let newX = commander.x + dx/dist * speed;
         let newY = commander.y + dy/dist * speed;
 
-        // Check collision with desks
-        const onAlexaDesk = newX >= 40 && newX <= 240 && newY >= 80 && newY <= 280;
-        const onScoutDesk = newX >= 360 && newX <= 560 && newY >= 80 && newY <= 280;
-        const onMemoDesk = newX >= 680 && newX <= 880 && newY >= 80 && newY <= 280;
-        const onDocDesk = newX >= 40 && newX <= 240 && newY >= 380 && newY <= 580;
-        const onCalDesk = newX >= 680 && newX <= 880 && newY >= 380 && newY <= 580;
-
-        // Only move if NOT on desk
-        if (!onAlexaDesk && !onScoutDesk && !onMemoDesk && !onDocDesk && !onCalDesk) {
-          commander.x = newX;
-          commander.y = newY;
-        }
+        // Route is already designed to avoid all desks, so just move
+        commander.x = newX;
+        commander.y = newY;
         commander.state = 'walk';
       } else {
         // Reached waypoint, start resting
