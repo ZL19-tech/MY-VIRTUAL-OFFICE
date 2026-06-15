@@ -1494,9 +1494,19 @@ function runAutoScene() {
         let newX = commander.x + dx/dist * speed;
         let newY = commander.y + dy/dist * speed;
 
-        // Route is already designed to avoid all desks, so just move
-        commander.x = newX;
-        commander.y = newY;
+        // Check collision with ALL desks - do NOT allow walking on them
+        const onAlexaDesk = newX >= 40 && newX <= 240 && newY >= 80 && newY <= 280;
+        const onScoutDesk = newX >= 360 && newX <= 560 && newY >= 80 && newY <= 280;
+        const onMemoDesk = newX >= 680 && newX <= 880 && newY >= 80 && newY <= 280;
+        const onDocDesk = newX >= 40 && newX <= 240 && newY >= 380 && newY <= 580;
+        const onCalDesk = newX >= 680 && newX <= 880 && newY >= 380 && newY <= 580;
+        const onCommanderDesk = newX >= 280 && newX <= 580 && newY >= 620 && newY <= 850;
+
+        // Only move if NOT on any desk
+        if (!onAlexaDesk && !onScoutDesk && !onMemoDesk && !onDocDesk && !onCalDesk && !onCommanderDesk) {
+          commander.x = newX;
+          commander.y = newY;
+        }
         commander.state = 'walk';
       } else {
         // Reached waypoint, start resting
