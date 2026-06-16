@@ -1851,11 +1851,29 @@ function drawBG() {
   const sideWallWidth = 120;      // Side walls: 120px each
   const bottomWallHeight = 80;    // Bottom wall: 80px
 
-  // DRAW BACKGROUND IMAGE FIRST (or fallback solid color)
+  // DRAW BACKGROUND IMAGE FIRST - scale as "cover" (fill entire canvas, crop if needed)
   if (bgImage && bgImage.complete && bgImage.naturalWidth > 0) {
-    // Background image loaded successfully - scale to FILL entire canvas
-    // Source: entire image | Destination: entire canvas (0,0 to CANVAS_WIDTH, CANVAS_HEIGHT)
-    ctx.drawImage(bgImage, 0, 0, bgImage.width, bgImage.height, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    // Calculate scaling to fill entire canvas while maintaining aspect ratio (cover mode)
+    const imgAspect = bgImage.width / bgImage.height;      // 1710 / 1478 ≈ 1.157
+    const canvasAspect = CANVAS_WIDTH / CANVAS_HEIGHT;     // 1200 / 950 ≈ 1.263
+
+    let srcX = 0, srcY = 0, srcW = bgImage.width, srcH = bgImage.height;
+
+    // Cover mode: scale so image fills canvas (may crop excess)
+    if (imgAspect > canvasAspect) {
+      // Image is wider - scale by height, crop left/right
+      srcH = bgImage.height;
+      srcW = Math.ceil(bgImage.height * canvasAspect);
+      srcX = Math.floor((bgImage.width - srcW) / 2);  // Center crop horizontally
+    } else {
+      // Image is taller - scale by width, crop top/bottom
+      srcW = bgImage.width;
+      srcH = Math.ceil(bgImage.width / canvasAspect);
+      srcY = Math.floor((bgImage.height - srcH) / 2);  // Center crop vertically
+    }
+
+    // Draw the cropped/scaled image to fill entire canvas
+    ctx.drawImage(bgImage, srcX, srcY, srcW, srcH, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
   } else {
     // Fallback: solid color if image not loaded
     ctx.fillStyle = '#2A3245';
