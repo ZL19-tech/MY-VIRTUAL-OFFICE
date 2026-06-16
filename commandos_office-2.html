@@ -1611,19 +1611,14 @@ function drawCompanyLogo(x, y) {
   ctx.fillText('CMD', sx(x), sy(y));
 }
 
-// ── RESPONSIVE ROOM WALLS - Scale with viewport ──────────────────
+// ── RESPONSIVE ROOM WALLS - Exact dimensions ──────────────────
 function drawRoomWalls() {
   const WALL_COLOR = '#2A3245';   // Dark blue-gray
 
-  // Calculate wall dimensions based on current canvas size
-  // Top wall: proportional to canvas height (e.g., 10% or 80px minimum)
-  const topWallHeight = Math.max(canvas.height * 0.08, 80);
-
-  // Side walls: proportional to canvas width (e.g., 2% or 40px minimum)
-  const sideWallWidth = Math.max(canvas.width * 0.03, 40);
-
-  // Bottom wall: proportional to canvas height
-  const bottomWallHeight = Math.max(canvas.height * 0.06, 60);
+  // Fixed wall dimensions (exact from screenshot analysis)
+  const topWallHeight = 100;      // Top wall: 100px
+  const sideWallWidth = 50;       // Side walls: 50px each
+  const bottomWallHeight = 40;    // Bottom wall: 40px
 
   // ═══════════════════════════════════════════════════════════════
   // TOP WALL - Full width at the top, scales with height
@@ -1644,10 +1639,10 @@ function drawRoomWalls() {
   ctx.fillRect(canvas.width - sideWallWidth, 0, sideWallWidth, canvas.height);
 
   // ═══════════════════════════════════════════════════════════════
-  // BOTTOM WALL - Thin trim at the very bottom edge (visual border only)
+  // BOTTOM WALL - Full width at the bottom
   // ═══════════════════════════════════════════════════════════════
   ctx.fillStyle = WALL_COLOR;
-  ctx.fillRect(0, canvas.height - 15, canvas.width, 15);
+  ctx.fillRect(0, canvas.height - bottomWallHeight, canvas.width, bottomWallHeight);
 
   // ═══════════════════════════════════════════════════════════════
   // WINDOWS - Only on TOP WALL, scale with canvas
@@ -1836,20 +1831,21 @@ function enhanceWindowFrames() {
 
 // ── CommandOS Brand Background ──────────────────────────────────────
 function drawBG() {
-  // Calculate responsive wall dimensions
-  const topWallHeight = Math.max(canvas.height * 0.08, 80);
-  const sideWallWidth = Math.max(canvas.width * 0.03, 40);
+  // Fixed wall dimensions (exact)
+  const topWallHeight = 100;      // Top wall: 100px
+  const sideWallWidth = 50;       // Side walls: 50px each
+  const bottomWallHeight = 40;    // Bottom wall: 40px
 
   // FILL ENTIRE BACKGROUND WITH WALL COLOR FIRST (will be covered by walls and floor)
   ctx.fillStyle = '#2A3245';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // DEFINE INTERIOR OFFICE AREA (where floor and agents are)
-  // Interior extends to FULL canvas height - floor fills entire game area
+  // Interior: between walls, full height used for gameplay
   const interiorLeft = sideWallWidth;
   const interiorTop = topWallHeight;
   const interiorRight = canvas.width - sideWallWidth;
-  const interiorBottom = canvas.height;  // Full height - no bottom wall reduction
+  const interiorBottom = canvas.height - bottomWallHeight;
   const interiorWidth = interiorRight - interiorLeft;
   const interiorHeight = interiorBottom - interiorTop;
 
