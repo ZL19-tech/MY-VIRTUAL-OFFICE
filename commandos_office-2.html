@@ -1643,16 +1643,16 @@ function drawCompanyLogo(x, y) {
   ctx.fillText('CMD', sx(x), sy(y));
 }
 
-// ── ENTRANCE DOORS - Bottom Left Corner ──────────────────
+// ── ENTRANCE DOORS - Top Left Corner ──────────────────
 let doorOpenTimer = 0;
 let doorOpenDuration = 200;  // Animation duration
 
 function drawEntranceDoors() {
-  // Door positions in BOTTOM LEFT CORNER
-  const doorWidth = 50;
-  const doorHeight = 65;
-  const doorX = 40;  // Left side, near wall
-  const doorY = CANVAS_HEIGHT - doorHeight - 8;  // Bottom area
+  // Door positions in TOP LEFT CORNER (above top wall)
+  const doorWidth = 60;
+  const doorHeight = 80;
+  const doorX = 40;  // Left side, near edge
+  const doorY = 100;  // Top area
 
   let doorOpen = doorOpenTimer;  // 0 = closed, 200 = fully open
   let doorOffset = doorOpen * (doorWidth / doorOpenDuration);
@@ -1674,7 +1674,7 @@ function drawEntranceDoors() {
   if (doorOpenTimer > 0) {
     ctx.fillStyle = '#FFD700';
     ctx.globalAlpha = 0.2 * (doorOpenTimer / doorOpenDuration);
-    ctx.fillRect(0, doorY - 30, 100, 30);
+    ctx.fillRect(0, doorY - 20, 100, 20);
     ctx.globalAlpha = 1;
   }
 }
@@ -2551,9 +2551,9 @@ setLang('ro');
 // Place agents at their desk positions
 AGENTS.forEach((a, i) => {
   if (a.id === 'commander') {
-    // CommandOS starts OUTSIDE at bottom-left door, will enter through it
+    // CommandOS starts OUTSIDE at top-left door, will enter through it
     a.x = 20;   // LEFT side (outside)
-    a.y = 880;  // Bottom area (near door)
+    a.y = 100;  // TOP area (near door)
     a.state = 'walk';
     // Schedule door opening and walking to desk
     setTimeout(() => {
