@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CommandOS — Agent Office</title>
+<!-- Face Recognition Library - Real Camera Detection -->
+<script async src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;image-rendering:pixelated;}
@@ -160,8 +162,16 @@ canvas{display:block;width:100%;height:100%;}
   margin:20px 0;position:relative;overflow:hidden;border-radius:2px;
   display:flex;align-items:center;justify-content:center;
 }
-#faceIdCamera video,#faceIdCamera canvas{
-  width:100%;height:100%;object-fit:cover;
+#faceIdCamera video{
+  width:100%;height:100%;object-fit:cover;display:block;
+}
+#faceIdCamera canvas{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+}
+#faceLoadingStatus{
+  position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);
+  color:var(--blue);font-family:'Press Start 2P', monospace;font-size:12px;
+  text-align:center;z-index:10;text-shadow:0 0 10px rgba(0,191,255,0.5);
 }
 #faceIdCamera.scanning::before{
   content:'🔍 SCANNING...';position:absolute;top:50%;left:50%;
@@ -261,8 +271,9 @@ canvas{display:block;width:100%;height:100%;}
       SCAN YOUR FACE TO OPEN DOOR
     </p>
     <div id="faceIdCamera" class="scanning">
-      <video id="faceVideo" style="display:none;"></video>
-      <canvas id="faceCanvas"></canvas>
+      <video id="faceVideo" autoplay playsinline muted style="width:100%; height:100%; object-fit: cover; display: block;"></video>
+      <canvas id="faceDetectionCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
+      <div id="faceLoadingStatus" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00FF88; font-family: 'Press Start 2P', monospace; font-size: 12px; text-align: center; z-index: 10;">⏳ LOADING CAMERA...</div>
     </div>
     <div id="faceScanResult"></div>
     <div id="faceIdButtons">
@@ -1719,127 +1730,214 @@ function drawCompanyLogo(x, y) {
   ctx.fillText('CMD', sx(x), sy(y));
 }
 
-// ── FACEID SYSTEM ───────────────────────────────────────────────
+// ── FACEID SYSTEM - REAL CAMERA DETECTION ───────────────────────
 let faceIdPending = false;
 let faceIdApproved = false;
 let faceIdScanProgress = 0;
 let faceIdScanTimer = null;
+let faceVideoStream = null;
+let faceDetected = false;
+let faceInPosition = false;
+let detectionConfidence = 0;
+let cameraPermission = 'pending'; // 'pending' | 'granted' | 'denied'
+let detectionModel = null;
+let modelLoading = false;
 
-function openFaceIdModal() {
+async function openFaceIdModal() {
   faceIdApproved = false;
   faceIdPending = true;
   faceIdScanProgress = 0;
+  faceDetected = false;
+  faceInPosition = false;
+  detectionConfidence = 0;
+  cameraPermission = 'pending';
+
   const modal = document.getElementById('faceIdModal');
   modal.classList.add('active');
 
-  // Start scanning animation
   const camera = document.getElementById('faceIdCamera');
   camera.classList.add('scanning');
 
-  // Draw animated face scanning visualization
-  const canvas = document.getElementById('faceCanvas');
-  const ctx = canvas.getContext('2d');
-  canvas.width = camera.clientWidth;
-  canvas.height = camera.clientHeight;
+  const video = document.getElementById('faceVideo');
+  const canvas = document.getElementById('faceDetectionCanvas');
+  const loadingStatus = document.getElementById('faceLoadingStatus');
 
-  // Start scan simulation
-  let scanFrame = 0;
-  faceIdScanTimer = setInterval(() => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  try {
+    // Step 1: Request camera permission
+    loadingStatus.textContent = '📷 REQUESTING CAMERA...';
 
-    // Background
-    ctx.fillStyle = '#1A2A3A';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Scanning circles (facial recognition animation)
-    ctx.strokeStyle = '#00BFFF';
-    ctx.lineWidth = 2;
-    for (let i = 0; i < 3; i++) {
-      const radius = 50 + i * 30 + Math.sin(scanFrame * 0.1 + i) * 10;
-      const opacity = 1 - (i / 3);
-      ctx.globalAlpha = opacity * 0.6;
-      ctx.beginPath();
-      ctx.arc(canvas.width / 2, canvas.height / 2, radius, 0, Math.PI * 2);
-      ctx.stroke();
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error('Camera not supported');
     }
-    ctx.globalAlpha = 1;
 
-    // Face outline rectangle
-    ctx.strokeStyle = '#00FF88';
-    ctx.lineWidth = 3;
-    const faceW = canvas.width * 0.5;
-    const faceH = canvas.height * 0.7;
-    const faceX = (canvas.width - faceW) / 2;
-    const faceY = (canvas.height - faceH) / 2;
-    ctx.strokeRect(faceX, faceY, faceW, faceH);
+    faceVideoStream = await navigator.mediaDevices.getUserMedia({
+      video: { width: 640, height: 480 },
+      audio: false
+    });
 
-    // Scanning line
-    const lineY = faceY + (faceH * (scanFrame % 100) / 100);
-    ctx.strokeStyle = '#00FF88';
-    ctx.lineWidth = 2;
-    ctx.globalAlpha = 0.7;
-    ctx.beginPath();
-    ctx.moveTo(faceX, lineY);
-    ctx.lineTo(faceX + faceW, lineY);
-    ctx.stroke();
-    ctx.globalAlpha = 1;
+    cameraPermission = 'granted';
+    video.srcObject = faceVideoStream;
 
-    // Corner brackets
-    const bracketSize = 30;
-    ctx.strokeStyle = '#FFD700';
-    ctx.lineWidth = 2;
+    // Step 2: Load face-api models
+    loadingStatus.textContent = '🧠 LOADING AI MODELS...';
 
-    // Top-left
-    ctx.beginPath();
-    ctx.moveTo(faceX, faceY);
-    ctx.lineTo(faceX + bracketSize, faceY);
-    ctx.moveTo(faceX, faceY);
-    ctx.lineTo(faceX, faceY + bracketSize);
-    ctx.stroke();
+    if (!modelLoading) {
+      modelLoading = true;
+      const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
 
-    // Top-right
-    ctx.beginPath();
-    ctx.moveTo(faceX + faceW, faceY);
-    ctx.lineTo(faceX + faceW - bracketSize, faceY);
-    ctx.moveTo(faceX + faceW, faceY);
-    ctx.lineTo(faceX + faceW, faceY + bracketSize);
-    ctx.stroke();
-
-    // Bottom-left
-    ctx.beginPath();
-    ctx.moveTo(faceX, faceY + faceH);
-    ctx.lineTo(faceX + bracketSize, faceY + faceH);
-    ctx.moveTo(faceX, faceY + faceH);
-    ctx.lineTo(faceX, faceY + faceH - bracketSize);
-    ctx.stroke();
-
-    // Bottom-right
-    ctx.beginPath();
-    ctx.moveTo(faceX + faceW, faceY + faceH);
-    ctx.lineTo(faceX + faceW - bracketSize, faceY + faceH);
-    ctx.moveTo(faceX + faceW, faceY + faceH);
-    ctx.lineTo(faceX + faceW, faceY + faceH - bracketSize);
-    ctx.stroke();
-
-    // Progress percentage
-    const progress = Math.min(100, scanFrame * 2);
-    faceIdScanProgress = progress;
-    ctx.fillStyle = '#00FF88';
-    ctx.font = '16px "Press Start 2P", monospace';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'bottom';
-    ctx.fillText(`${progress}%`, canvas.width / 2, canvas.height - 10);
-
-    scanFrame++;
-
-    // Auto-complete after 50 frames
-    if (scanFrame > 50) {
-      clearInterval(faceIdScanTimer);
-      showFaceScanResult('✓ FACE RECOGNIZED - READY TO APPROVE', 'success');
+      try {
+        await Promise.all([
+          faceapi.nets.tinyFaceDetector.load(MODEL_URL),
+          faceapi.nets.faceLandmark68Net.load(MODEL_URL),
+          faceapi.nets.faceExpressionNet.load(MODEL_URL),
+        ]);
+      } catch (e) {
+        console.warn('Some models failed to load, trying minimal detection', e);
+      }
     }
-  }, 50);
 
-  showFaceScanResult('⏳ SCANNING FACE...', 'normal');
+    // Wait for video to load
+    await new Promise(resolve => {
+      video.onloadedmetadata = () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        resolve();
+      };
+    });
+
+    loadingStatus.style.display = 'none';
+    showFaceScanResult('🔍 SCANNING FACE...', 'normal');
+
+    // Step 3: Detection loop
+    let stableDetectionCount = 0;
+
+    const detectFace = async () => {
+      if (!faceIdPending) return;
+
+      try {
+        const detections = await faceapi.detectAllFaces(
+          video,
+          new faceapi.TinyFaceDetectorOptions()
+        ).withFaceLandmarks().withFaceExpressions();
+
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (detections.length === 1) {
+          const detection = detections[0];
+          const box = detection.detection.box;
+
+          // Calculate confidence (0-100)
+          const score = Math.round(detection.detection.score * 100);
+          detectionConfidence = score;
+
+          // Check if face is centered and well-positioned
+          const centerX = canvas.width / 2;
+          const centerY = canvas.height / 2;
+          const faceCenter = {
+            x: box.x + box.width / 2,
+            y: box.y + box.height / 2
+          };
+
+          const distFromCenter = Math.sqrt(
+            Math.pow(faceCenter.x - centerX, 2) +
+            Math.pow(faceCenter.y - centerY, 2)
+          );
+          const maxDist = Math.min(canvas.width, canvas.height) * 0.15;
+
+          faceDetected = true;
+          faceInPosition = distFromCenter < maxDist && score >= 80;
+
+          // Draw bounding box
+          ctx.strokeStyle = faceInPosition ? '#00FF88' : '#FF6B35';
+          ctx.lineWidth = 3;
+          ctx.strokeRect(box.x, box.y, box.width, box.height);
+
+          // Draw landmarks
+          ctx.fillStyle = '#00BFFF';
+          const landmarks = detection.landmarks.positions;
+          landmarks.forEach(point => {
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, 2, 0, Math.PI * 2);
+            ctx.fill();
+          });
+
+          // Draw confidence
+          ctx.fillStyle = faceInPosition ? '#00FF88' : '#FF6B35';
+          ctx.font = '14px "Press Start 2P", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(`${score}%`, canvas.width / 2, 30);
+
+          // Auto-approve if good position
+          if (faceInPosition) {
+            stableDetectionCount++;
+            faceIdScanProgress = Math.min(100, stableDetectionCount * 10);
+
+            if (stableDetectionCount >= 5) {
+              // Auto-approve!
+              clearTimeout(faceIdScanTimer);
+              showFaceScanResult('✓✓✓ FACE VERIFIED ✓✓✓', 'success');
+              setTimeout(() => {
+                closeFaceIdModal();
+                doorIsOpen = true;
+                showToast('🔐 FACE ID APPROVED - Welcome!', 'green');
+
+                // Trigger CommandOS entry
+                setTimeout(() => {
+                  commanderShouldEnter = true;
+                  const commander = AGENTS.find(a => a.id === 'commander');
+                  if (commander) {
+                    commander.state = 'walk';
+                    const i = AGENTS.indexOf(commander);
+                    const targetX = GRID[i].x + 100;
+                    const targetY = GRID[i].y + 170;
+                    walkTo('commander', targetX, targetY);
+                  }
+                }, 500);
+              }, 500);
+              return;
+            }
+          } else {
+            stableDetectionCount = Math.max(0, stableDetectionCount - 1);
+            faceIdScanProgress = Math.max(0, stableDetectionCount * 15);
+            showFaceScanResult('📍 CENTER YOUR FACE...', 'normal');
+          }
+        } else {
+          faceDetected = false;
+          faceInPosition = false;
+          stableDetectionCount = 0;
+          faceIdScanProgress = Math.max(0, faceIdScanProgress - 5);
+          ctx.fillStyle = '#FF6B35';
+          ctx.font = '14px "Press Start 2P", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(detections.length === 0 ? 'NO FACE DETECTED' : 'MULTIPLE FACES', canvas.width / 2, 30);
+          showFaceScanResult(detections.length === 0 ? '❌ NO FACE DETECTED' : '❌ MULTIPLE FACES', 'error');
+        }
+      } catch (err) {
+        console.error('Detection error:', err);
+      }
+
+      if (faceIdPending) {
+        requestAnimationFrame(detectFace);
+      }
+    };
+
+    detectFace();
+
+  } catch (err) {
+    console.error('Face ID Error:', err);
+    cameraPermission = 'denied';
+
+    // BLOCK ACCESS - show error
+    loadingStatus.textContent = '❌ CAMERA REQUIRED';
+    loadingStatus.style.color = '#FF6B35';
+    showFaceScanResult('🔐 Camera required for Face ID', 'error');
+    showToast('❌ Camera access denied or not available', 'warn');
+
+    // Disable approve button
+    document.getElementById('approveFaceBtn').disabled = true;
+    document.getElementById('approveFaceBtn').style.opacity = '0.5';
+  }
 }
 
 function showFaceScanResult(text, status) {
@@ -1851,14 +1949,53 @@ function showFaceScanResult(text, status) {
 function closeFaceIdModal() {
   faceIdPending = false;
   faceIdApproved = false;
-  if (faceIdScanTimer) clearInterval(faceIdScanTimer);
+
+  // Stop video stream
+  if (faceVideoStream) {
+    faceVideoStream.getTracks().forEach(track => track.stop());
+    faceVideoStream = null;
+  }
+
+  // Stop detection loop
+  if (faceIdScanTimer) {
+    clearTimeout(faceIdScanTimer);
+    faceIdScanTimer = null;
+  }
+
+  // Clear canvas
+  const canvas = document.getElementById('faceDetectionCanvas');
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  // Reset states
+  faceDetected = false;
+  faceInPosition = false;
+  detectionConfidence = 0;
+
+  // Hide modal
   document.getElementById('faceIdModal').classList.remove('active');
+
+  // Show loading status again
+  const loadingStatus = document.getElementById('faceLoadingStatus');
+  if (loadingStatus) {
+    loadingStatus.style.display = 'block';
+    loadingStatus.textContent = '⏳ LOADING CAMERA...';
+  }
 }
 
 function approveFaceId() {
-  if (faceIdScanProgress >= 90) {
+  // Manual approval (only for fallback or user override)
+  if (cameraPermission === 'denied') {
+    showFaceScanResult('❌ CAMERA REQUIRED', 'error');
+    showToast('❌ Camera access is required', 'warn');
+    return;
+  }
+
+  if (faceDetected && faceInPosition) {
     faceIdApproved = true;
-    showFaceScanResult('✓✓✓ FACE VERIFIED - DOOR OPENING ✓✓✓', 'success');
+    showFaceScanResult('✓✓✓ FACE VERIFIED ✓✓✓', 'success');
 
     // Close modal and open door
     setTimeout(() => {
@@ -1878,9 +2015,9 @@ function approveFaceId() {
           walkTo('commander', targetX, targetY);
         }
       }, 500);
-    }, 800);
+    }, 500);
   } else {
-    showFaceScanResult('⚠ FACE NOT FULLY SCANNED - TRY AGAIN', 'error');
+    showFaceScanResult('⚠ POSITION YOUR FACE AND WAIT...', 'error');
   }
 }
 
