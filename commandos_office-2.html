@@ -1822,9 +1822,6 @@ function enhanceWindowFrames() {
 
 // ── CommandOS Brand Background ──────────────────────────────────────
 function drawBG() {
-  // Draw room walls FIRST (so they're behind everything except floor background)
-  drawRoomWalls();
-
   // FULL PREMIUM WOODEN PARQUET FLOOR (entire background)
   // ════════════════════════════════════════════════════════════════
   const plankWidth = S(65);   // Wide planks for realistic look
@@ -1877,7 +1874,6 @@ function drawBG() {
       ctx.globalAlpha = 1;
     }
   }
-
 
   // Add floor texture variation for depth
   addFloorVariation();
@@ -1982,6 +1978,74 @@ function drawBG() {
   ctx.globalAlpha = 0.01;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.globalAlpha = 1;
+
+  // ═══════════════════════════════════════════════════════════════
+  // REDRAW WALLS ON TOP (so they're visible over everything)
+  // ═══════════════════════════════════════════════════════════════
+  const WALL_COLOR = '#2A3245';
+  const TOP_WALL_HEIGHT = 100;
+  const LEFT_WALL_WIDTH = 32;
+  const RIGHT_WALL_WIDTH = 32;
+
+  // TOP WALL - Full width
+  ctx.fillStyle = WALL_COLOR;
+  ctx.fillRect(0, 0, canvas.width, sy(TOP_WALL_HEIGHT));
+
+  // LEFT WALL - Full height
+  ctx.fillStyle = WALL_COLOR;
+  ctx.fillRect(0, 0, S(LEFT_WALL_WIDTH), canvas.height);
+
+  // RIGHT WALL - Full height
+  ctx.fillStyle = WALL_COLOR;
+  ctx.fillRect(sx(CANVAS_WIDTH - RIGHT_WALL_WIDTH), 0, S(RIGHT_WALL_WIDTH), canvas.height);
+
+  // WINDOWS on TOP WALL
+  const windowY = sy(20);
+  const windowH = S(80);
+  const windowPositions = [100, 350, 600, 850];
+
+  windowPositions.forEach(wx => {
+    const windowW = S(90);
+
+    // Window frame
+    ctx.fillStyle = '#0F0F14';
+    ctx.fillRect(sx(wx), windowY, windowW, windowH);
+
+    // Window glass
+    ctx.fillStyle = '#2D4A6A';
+    ctx.fillRect(sx(wx + 3), windowY + S(3), windowW - S(6), windowH - S(6));
+
+    // Gradient
+    const gradient = ctx.createLinearGradient(sx(wx), windowY, sx(wx), windowY + windowH);
+    gradient.addColorStop(0, '#6B2C7A');
+    gradient.addColorStop(0.4, '#D4A574');
+    gradient.addColorStop(1, '#FF6B35');
+    ctx.fillStyle = gradient;
+    ctx.globalAlpha = 0.3;
+    ctx.fillRect(sx(wx + 3), windowY + S(3), windowW - S(6), windowH - S(6));
+    ctx.globalAlpha = 1;
+
+    // Panes
+    ctx.strokeStyle = '#0F0F14';
+    ctx.lineWidth = S(1.5);
+
+    // Vertical
+    ctx.beginPath();
+    ctx.moveTo(sx(wx + windowW / 2), windowY + S(3));
+    ctx.lineTo(sx(wx + windowW / 2), windowY + windowH - S(3));
+    ctx.stroke();
+
+    // Horizontal
+    ctx.beginPath();
+    ctx.moveTo(sx(wx + 3), windowY + windowH / 3);
+    ctx.lineTo(sx(wx) + windowW - S(3), windowY + windowH / 3);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(sx(wx + 3), windowY + 2 * windowH / 3);
+    ctx.lineTo(sx(wx) + windowW - S(3), windowY + 2 * windowH / 3);
+    ctx.stroke();
+  });
 }
 
 // ── Charts canvas (right panel) ──────────────────────────────────────
