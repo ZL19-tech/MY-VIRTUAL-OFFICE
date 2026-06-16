@@ -293,6 +293,21 @@ function playAgentChatter() {
   }
 }
 
+// ── Background Image Asset Loader ──────────────────────────────────
+let bgImage = null;
+const bgImagePath = 'background.png';  // Relative path in project directory
+
+const imgLoader = new Image();
+imgLoader.onload = function() {
+  bgImage = imgLoader;
+  console.log('✓ Background image loaded successfully');
+};
+imgLoader.onerror = function() {
+  console.warn('⚠ Could not load background.png. Using fallback solid color.');
+  bgImage = null;
+};
+imgLoader.src = bgImagePath;
+
 // ── Language ────────────────────────────────────────────────────────
 let LANG = 'ro';
 const T = {
@@ -1836,11 +1851,17 @@ function drawBG() {
   const sideWallWidth = 120;      // Side walls: 120px each
   const bottomWallHeight = 80;    // Bottom wall: 80px
 
-  // FILL ENTIRE BACKGROUND WITH WALL COLOR FIRST (will be covered by walls and floor)
-  ctx.fillStyle = '#2A3245';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // DRAW BACKGROUND IMAGE FIRST (or fallback solid color)
+  if (bgImage && bgImage.complete && bgImage.naturalWidth > 0) {
+    // Background image loaded successfully - scale to fit canvas
+    ctx.drawImage(bgImage, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+  } else {
+    // Fallback: solid color if image not loaded
+    ctx.fillStyle = '#2A3245';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
 
-  // DEFINE INTERIOR OFFICE AREA (where floor and agents are)
+  // INTERIOR AREA BOUNDARIES (for reference, but no floor drawing since image has it)
   // Interior: between walls, full height used for gameplay
   const interiorLeft = sideWallWidth;
   const interiorTop = topWallHeight;
@@ -1849,140 +1870,13 @@ function drawBG() {
   const interiorWidth = interiorRight - interiorLeft;
   const interiorHeight = interiorBottom - interiorTop;
 
-  // PREMIUM WOODEN PARQUET FLOOR - Fill entire interior between walls
-  // ════════════════════════════════════════════════════════════════
-  const plankWidth = S(65);
-  const plankHeight = S(16);
+  // NOTE: Floor rendering DISABLED - background.png includes the floor
+  // No need to draw wooden planks or floor variation since background image has them
 
-  for (let y = interiorTop; y < interiorBottom; y += plankHeight) {
-    for (let x = interiorLeft; x < interiorRight; x += plankWidth) {
-
-      // Alternating plank shades for wood effect
-      const plankRow = Math.floor(y / plankHeight);
-      const plankCol = Math.floor(x / plankWidth);
-      const isLightPlank = (plankRow + plankCol) % 2 === 0;
-
-      // Base plank color
-      const plankColor = isLightPlank ? '#5A4F3E' : '#4A3F2E';
-      ctx.fillStyle = plankColor;
-      ctx.fillRect(x, y, plankWidth, plankHeight);
-
-      // Wood grain texture within plank
-      ctx.strokeStyle = '#2A1F0E';
-      ctx.lineWidth = 0.5;
-
-      // Multiple grain lines for wood effect
-      for (let i = 0; i < 3; i++) {
-        const grainY = y + (i + 1) * (plankHeight / 4) + Math.sin(x * 0.01 + i) * 2;
-        ctx.globalAlpha = 0.1 + Math.random() * 0.1;
-        ctx.beginPath();
-        ctx.moveTo(x, grainY);
-        ctx.lineTo(x + plankWidth, grainY + 1);
-        ctx.stroke();
-      }
-
-      // Wood highlights/shine on some planks
-      if (isLightPlank && Math.random() > 0.4) {
-        ctx.fillStyle = '#7B6A57';
-        ctx.globalAlpha = 0.08;
-        ctx.fillRect(x + plankWidth * 0.1, y, plankWidth * 0.6, plankHeight);
-      }
-
-      ctx.globalAlpha = 1;
-
-      // Shadow between planks (depth)
-      ctx.fillStyle = '#1A0F00';
-      ctx.globalAlpha = 0.25;
-      ctx.fillRect(x, y + plankHeight - 1.5, plankWidth, 1.5);
-
-      // Right edge shadow on planks
-      ctx.globalAlpha = 0.15;
-      ctx.fillRect(x + plankWidth - 2, y, 2, plankHeight);
-
-      ctx.globalAlpha = 1;
-    }
-  }
-
-  // Add floor texture variation for depth
-  addFloorVariation();
-
-  // ──── OFFICE DECORATIONS (with safe placement inside thick walls) ────
-
-  // Define blocked areas (windows, desks, agents - NO side walls blocking)
-  const blocked = [
-    // Windows (top wall) - x: 145-790, y: 70-170
-    { x: 145, y: 70, w: 645, h: 100 },
-    // Desks
-    { x: 50, y: 150, w: 220, h: 110 },      // Alexa
-    { x: 380, y: 150, w: 220, h: 110 },    // Scout
-    { x: 710, y: 150, w: 220, h: 110 },    // Memo
-    { x: 80, y: 420, w: 220, h: 110 },     // Doc
-    { x: 680, y: 420, w: 220, h: 110 },    // Cal
-    { x: 300, y: 620, w: 220, h: 110 },    // Commander
-  ];
-
-  // PLANTS - Placed on the INSIDE of walls, not blocking access
-  // Bottom-left corner (inside left wall, on floor)
-  if (!checkCollision(85, 750, 40, 60, blocked)) {
-    drawPlant(105, 800, 30);
-  }
-
-  // Bottom-right corner (inside right wall, on floor)
-  if (!checkCollision(1080, 750, 40, 60, blocked)) {
-    drawPlant(1100, 800, 30);
-  }
-
-  // Upper-left (inside left wall, below window area)
-  if (!checkCollision(85, 180, 40, 50, blocked)) {
-    drawPlant(105, 210, 25);
-  }
-
-  // Upper-right (inside right wall, below window area)
-  if (!checkCollision(1080, 180, 40, 50, blocked)) {
-    drawPlant(1100, 210, 25);
-  }
-
-  // ARTWORK - On left wall interior surface between windows and decorations
-  if (!checkCollision(100, 280, 50, 40, blocked)) {
-    drawArtwork(105, 285, 40, 35, '#8B4513');
-  }
-
-  // ARTWORK - On right wall interior surface
-  if (!checkCollision(1050, 280, 50, 40, blocked)) {
-    drawArtwork(1055, 285, 40, 35, '#556B2F');
-  }
-
-  // BOOKSHELVES - Inside left wall, below window line
-  if (!checkCollision(85, 350, 25, 100, blocked)) {
-    drawBookshelf(87, 355, 22, 95);
-  }
-
-  // BOOKSHELVES - Inside right wall, below window line
-  if (!checkCollision(1090, 350, 25, 100, blocked)) {
-    drawBookshelf(1092, 355, 22, 95);
-  }
-
-  // COMPANY LOGO - Left wall interior, middle height
-  if (!checkCollision(85, 450, 25, 30, blocked)) {
-    drawCompanyLogo(97, 465);
-  }
-
-  // ──── PREMIUM OFFICE ENHANCEMENTS ────
-
-  // Add wall shadows for depth
-  drawWallShadows();
-
-  // Add baseboards between walls and floor
-  drawBaseboards();
-
-  // Enhance window frames with shadows
-  enhanceWindowFrames();
-
-  // Add floor texture variation for depth
-  addFloorVariation();
-
-  // Add decorative plants in corners
-  drawCornerPlants();
+  // NOTE: OFFICE DECORATIONS DISABLED
+  // Plants, artwork, bookshelves, baseboards, and other decorations
+  // are now included in the background.png image
+  // This keeps the canvas clean and performance high
 
   // Draw top-left text: CommandOS
   ctx.save();
@@ -2001,17 +1895,14 @@ function drawBG() {
   ctx.fillText(timeStr, CANVAS_WIDTH - S(20), S(10));
   ctx.restore();
 
-  // Overall floor shadow/vignette
-  ctx.fillStyle = '#000000';
-  ctx.globalAlpha = 0.01;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.globalAlpha = 1;
+  // NOTE: Walls are now part of the background.png image - no redrawing needed
+  // The background fills the entire canvas area with walls, floor, windows, decorations
 
-  // ═══════════════════════════════════════════════════════════════
-  // REDRAW WALLS ON TOP (so they're visible over everything)
-  // Use responsive dimensions that scale with viewport
-  // ═══════════════════════════════════════════════════════════════
-  drawRoomWalls();
+  // Optional subtle vignette for depth (can be removed if background has it)
+  // ctx.fillStyle = '#000000';
+  // ctx.globalAlpha = 0.01;
+  // ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // ctx.globalAlpha = 1;
 }
 
 // ── Charts canvas (right panel) ──────────────────────────────────────
