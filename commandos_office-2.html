@@ -931,125 +931,68 @@ function drawDesk(gx, gy, agent) {
 
 // Removed - using drawDeskMonitorItem instead for consistency
 
-// ── Agent Office Desks - Premium Wood Style ──────────────────────────
-function drawSmallDesk(gx, gy, agent) {
-  const W = 220, H = 80;
+// ── Professional Office Desks - Modern Minimalist Style ─────────────
+function drawProfessionalDesk(gx, gy, agent, isCommander = false) {
+  let W, H;
 
-  // SIMPLE PIXEL ART DESK - Clean minimalist style
-  // Desk top surface - orange/brown solid color
-  ctx.fillStyle = '#A0826D';
-  ctx.fillRect(gx, gy + 30, W, H);
-
-  // Top edge highlight
-  ctx.fillStyle = '#C0A68D';
-  ctx.fillRect(gx, gy + 30, W, 2);
-
-  // Bottom edge shadow
-  ctx.fillStyle = '#6A5A4D';
-  ctx.fillRect(gx, gy + 30 + H - 2, W, 2);
-
-  // LEFT SIDE - Single simple drawer
-  const drawerLeft = gx + 5;
-  const drawerW = 20;
-  const drawerH = 18;
-  const drawerY = gy + 45;
-
-  // Drawer body
-  ctx.fillStyle = '#8A6F5A';
-  ctx.fillRect(drawerLeft, drawerY, drawerW, drawerH);
-  // Drawer border
-  ctx.strokeStyle = '#5A4A3A';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(drawerLeft, drawerY, drawerW, drawerH);
-  // Handle
-  ctx.fillStyle = '#6A5A4A';
-  ctx.fillRect(drawerLeft + 8, drawerY + 8, 4, 2);
-
-  // RIGHT SIDE - Single simple drawer
-  const drawerRight = gx + W - 25;
-  ctx.fillStyle = '#8A6F5A';
-  ctx.fillRect(drawerRight, drawerY, drawerW, drawerH);
-  ctx.strokeStyle = '#5A4A3A';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(drawerRight, drawerY, drawerW, drawerH);
-  ctx.fillStyle = '#6A5A4A';
-  ctx.fillRect(drawerRight + 8, drawerY + 8, 4, 2);
-
-  // Support legs - simple vertical lines
-  ctx.fillStyle = '#5A4A3A';
-  ctx.fillRect(gx + 10, gy + 30 + H, 4, 10);
-  ctx.fillRect(gx + W - 14, gy + 30 + H, 4, 10);
-
-  // DESKTOP ITEMS - Like pixel art image
-  // Monitor on LEFT
-  const monX = gx + 20;
-  const monY = gy + 10;
-  // Monitor frame
-  ctx.fillStyle = '#0F0F14';
-  ctx.fillRect(monX, monY, 50, 42);
-  // Monitor screen
-  ctx.fillStyle = '#1A3A4D';
-  ctx.fillRect(monX + 2, monY + 2, 46, 35);
-  // Monitor glow
-  ctx.fillStyle = agent.color;
-  ctx.globalAlpha = 0.15;
-  ctx.fillRect(monX + 2, monY + 2, 46, 35);
-  ctx.globalAlpha = 1;
-  // Monitor stand
-  ctx.fillStyle = '#4A4A4A';
-  ctx.fillRect(monX + 18, monY + 38, 14, 4);
-
-  // TOWER/CPU in CENTER
-  const towerX = gx + 80;
-  const towerY = gy + 12;
-  // Main tower body
-  ctx.fillStyle = '#3A3A3A';
-  ctx.fillRect(towerX, towerY, 35, 40);
-  // Tower details - window
-  ctx.fillStyle = '#1A2A3D';
-  ctx.fillRect(towerX + 4, towerY + 6, 15, 15);
-  ctx.fillStyle = agent.color;
-  ctx.globalAlpha = 0.2;
-  ctx.fillRect(towerX + 4, towerY + 6, 15, 15);
-  ctx.globalAlpha = 1;
-  // Tower vents/details
-  ctx.fillStyle = '#1A1A1A';
-  for (let i = 0; i < 3; i++) {
-    ctx.fillRect(towerX + 3, towerY + 26 + i * 4, 29, 2);
+  if (isCommander) {
+    // COMMANDER DESK - Larger and more prominent
+    W = 280;
+    H = 100;
+  } else {
+    // STANDARD AGENT DESK - Clean and compact
+    W = 200;
+    H = 70;
   }
-  // Power light
-  ctx.fillStyle = '#FFD700';
+
+  const deskTopY = gy + 20;
+
+  // MODERN DESK TOP - Clean surface with subtle shadow
+  ctx.fillStyle = '#8B7355';  // Medium wood tone
+  ctx.fillRect(gx, deskTopY, W, H);
+
+  // Top edge highlight (reflects light)
+  ctx.fillStyle = '#A0876B';
+  ctx.fillRect(gx, deskTopY, W, 2);
+
+  // Subtle shadow at bottom
+  ctx.fillStyle = '#6B5345';
+  ctx.fillRect(gx, deskTopY + H - 2, W, 2);
+
+  // Sleek metal frame legs (modern minimalist)
+  const legX1 = gx + 15;
+  const legX2 = gx + W - 20;
+  const legY = deskTopY + H;
+  const legW = 6;
+  const legH = 20;
+
+  ctx.fillStyle = '#454545';  // Dark metal gray
+  ctx.fillRect(legX1, legY, legW, legH);
+  ctx.fillRect(legX2, legY, legW, legH);
+
+  // Subtle desk accent line
+  ctx.strokeStyle = agent.color;
+  ctx.lineWidth = 1.5;
+  ctx.globalAlpha = 0.4;
   ctx.beginPath();
-  ctx.arc(towerX + 4, towerY + 4, 2, 0, Math.PI * 2);
-  ctx.fill();
-
-  // CALCULATOR/DEVICE on RIGHT
-  const calcX = gx + 135;
-  const calcY = gy + 15;
-  // Calculator body
-  ctx.fillStyle = '#4A4A4A';
-  ctx.fillRect(calcX, calcY, 40, 35);
-  // Calculator screen
-  ctx.fillStyle = '#0F1F2A';
-  ctx.fillRect(calcX + 4, calcY + 4, 32, 12);
-  ctx.fillStyle = '#00FF88';
-  ctx.globalAlpha = 0.3;
-  ctx.fillRect(calcX + 4, calcY + 4, 32, 12);
+  ctx.moveTo(gx + 5, deskTopY + 3);
+  ctx.lineTo(gx + W - 5, deskTopY + 3);
+  ctx.stroke();
   ctx.globalAlpha = 1;
-  // Calculator buttons - grid
-  ctx.fillStyle = '#2A2A2A';
-  for (let row = 0; row < 3; row++) {
-    for (let col = 0; col < 4; col++) {
-      ctx.fillRect(calcX + 4 + col * 8, calcY + 18 + row * 5, 7, 4);
-    }
-  }
 
-  // Agent function label
-  ctx.font = `${S(6)}px "Share Tech Mono", monospace`;
-  ctx.fillStyle = agent.color;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'top';
-  ctx.fillText(agent.job, sx(gx + 8 + W/2), sy(gy + H + 16));
+  // Minimal desk decoration - agent color accent
+  if (!isCommander) {
+    ctx.fillStyle = agent.color;
+    ctx.globalAlpha = 0.25;
+    ctx.fillRect(gx + W - 25, deskTopY + 10, 20, 3);  // Small colored bar
+    ctx.globalAlpha = 1;
+  } else {
+    // COMMANDER DESK - two colored bars for prestige
+    ctx.fillStyle = agent.color;
+    ctx.globalAlpha = 0.3;
+    ctx.fillRect(gx + W - 40, deskTopY + 15, 35, 3);
+    ctx.globalAlpha = 1;
+  }
 }
 
 // ── Pixel-Art Desk Monitor Item (simple) ────────────────────────────
@@ -2368,10 +2311,13 @@ function render() {
   // Draw HUD (time, text) on top of background
   drawHUD();
 
-  // Draw all agents on top of background
-  // Desks removed - using clean laminate floor
+  // Draw all professional desks and agents
   AGENTS.forEach((a, i) => {
     const g = GRID[i];
+    // Draw professional desk for this agent
+    const isCommander = a.id === 'commander';
+    drawProfessionalDesk(g.x, g.y + 54, a, isCommander);
+    // Draw agent on top of desk
     drawAgent(a);
   });
 
