@@ -506,7 +506,7 @@ const AGENTS = [
   { id:'memo',      name:'Memo',      job:'Management',     color:C.purple, accent:'#FFFFFF', icon:'♪', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'tshirt' },
   { id:'doc',       name:'Doc',       job:'Content Creator', color:C.teal,   accent:'#FFFFFF', icon:'⊞', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'tshirt' },
   { id:'cal',       name:'Cal',       job:'Ads Manager',     color:C.orange, accent:'#FFFFFF', icon:'◫', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'tshirt' },
-  { id:'commander', name:'CommandOS', job:'CEO',             color:C.gold,   accent:'#B8860B', icon:'♛', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'classic' },
+  { id:'commander', name:'CommandOS', job:'CEO',             color:C.gold,   accent:'#B8860B', icon:'♛', hp:100, maxHp:100, tasks:0, state:'hidden', x:20, y:100, deadTimer:0, deadAnim:0, clothing:'classic' },
 ];
 
 // Grid layout for 6 agents with EQUAL SPACING
@@ -1389,7 +1389,7 @@ function drawMonCal(a, x, y, w, h) {
 function drawAgent(agent) {
   const a = agent;
   if (a.state === 'hidden') {
-    return;  // Don't draw hidden agents (lunch time)
+    return;  // Don't draw hidden agents (CommandOS not arrived yet, or lunch time)
   }
   if (a.state === 'dead') {
     drawDeadAgent(a);
@@ -1722,6 +1722,7 @@ let faceVideoStream = null;
 let faceDetected = false;
 let cameraPermission = 'pending'; // 'pending' | 'granted' | 'denied'
 let modelLoading = false;
+let faceDetectStartTime = null;  // Track when face first detected for 5-second scanning
 
 async function openFaceIdModal() {
   faceIdApproved = false;
@@ -1785,7 +1786,7 @@ async function openFaceIdModal() {
     loadingStatus.style.display = 'none';
     showFaceScanResult('🔍 SCANNING FACE...', 'normal');
 
-    // Step 3: Detection loop - AUTO-APPROVE ANY FACE INSTANTLY
+    // Step 3: Detection loop - 5 SECOND SCANNING BEFORE AUTO-APPROVE
     const detectFace = async () => {
       if (!faceIdPending) return;
 
@@ -1799,13 +1800,22 @@ async function openFaceIdModal() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         if (detections.length >= 1) {
-          // ANY FACE DETECTED = INSTANT AUTO-APPROVE
+          // FACE DETECTED - START 5 SECOND SCAN
           const detection = detections[0];
           const box = detection.detection.box;
 
+          // Initialize scan start time on first detection
+          if (!faceDetectStartTime) {
+            faceDetectStartTime = Date.now();
+          }
+
           faceDetected = true;
 
-          // Draw bounding box (always GREEN for instant approval)
+          // Calculate scan duration and progress
+          const scanDuration = Date.now() - faceDetectStartTime;
+          const scanPercent = Math.min(100, Math.floor((scanDuration / 5000) * 100));
+
+          // Draw bounding box (always GREEN)
           ctx.strokeStyle = '#00FF88';
           ctx.lineWidth = 3;
           ctx.strokeRect(box.x, box.y, box.width, box.height);
@@ -1819,31 +1829,47 @@ async function openFaceIdModal() {
             ctx.fill();
           });
 
-          // INSTANT AUTO-APPROVE - NO CONDITIONS
-          showFaceScanResult('✓ FACE APPROVED', 'success');
-          faceIdPending = false;
+          // Show progress percentage
+          ctx.fillStyle = '#00FF88';
+          ctx.font = '16px "Press Start 2P", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(`${scanPercent}%`, canvas.width / 2, 30);
 
-          setTimeout(() => {
-            closeFaceIdModal();
-            doorIsOpen = true;
-            showToast('🔐 FACE ID APPROVED - Welcome!', 'green');
+          // Update status with progress
+          showFaceScanResult(`SCANNING FACE... ${scanPercent}%`, 'normal');
 
-            // Trigger CommandOS entry
+          // AUTO-APPROVE AFTER 5 SECONDS
+          if (scanDuration >= 5000) {
+            showFaceScanResult('✓ FACE APPROVED', 'success');
+            faceIdPending = false;
+            faceDetectStartTime = null;
+
             setTimeout(() => {
-              commanderShouldEnter = true;
-              const commander = AGENTS.find(a => a.id === 'commander');
-              if (commander) {
-                commander.state = 'walk';
-                const i = AGENTS.indexOf(commander);
-                const targetX = GRID[i].x + 100;
-                const targetY = GRID[i].y + 170;
-                walkTo('commander', targetX, targetY);
-              }
-            }, 500);
-          }, 300);
-          return;
+              closeFaceIdModal();
+              doorIsOpen = true;
+              showToast('🔐 FACE ID APPROVED - Welcome!', 'green');
+
+              // Trigger CommandOS entry - MAKE HIM VISIBLE AND WALK
+              setTimeout(() => {
+                commanderShouldEnter = true;
+                const commander = AGENTS.find(a => a.id === 'commander');
+                if (commander) {
+                  // Make CommandOS visible by changing from 'hidden' to 'walk'
+                  commander.state = 'walk';
+                  const i = AGENTS.indexOf(commander);
+                  const targetX = GRID[i].x + 100;
+                  const targetY = GRID[i].y + 170;
+                  walkTo('commander', targetX, targetY);
+                  showToast('🚪 DOOR OPENED - CommandOS entering...', 'green');
+                }
+              }, 500);
+            }, 300);
+            return;
+          }
         } else {
+          // NO FACE DETECTED - RESET TIMER
           faceDetected = false;
+          faceDetectStartTime = null;
           ctx.fillStyle = '#FF6B35';
           ctx.font = '14px "Press Start 2P", monospace';
           ctx.textAlign = 'center';
