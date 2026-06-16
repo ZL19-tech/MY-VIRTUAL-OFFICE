@@ -1643,40 +1643,89 @@ function drawCompanyLogo(x, y) {
   ctx.fillText('CMD', sx(x), sy(y));
 }
 
-// ── ENTRANCE DOORS - Top Left Corner ──────────────────
-let doorOpenTimer = 0;
-let doorOpenDuration = 200;  // Animation duration
+// ── ENTRANCE DOOR & CONTROL - Top Left Corner ──────────────────
+let doorIsOpen = false;  // Door state: true = open, false = closed
+let commanderShouldEnter = false;
 
-function drawEntranceDoors() {
+function drawEntranceDoor() {
   // Door positions in TOP LEFT CORNER (above top wall)
-  const doorWidth = 60;
-  const doorHeight = 80;
-  const doorX = 40;  // Left side, near edge
-  const doorY = 100;  // Top area
+  const doorWidth = 80;   // LARGER DOOR
+  const doorHeight = 100;  // LARGER DOOR
+  const doorX = 30;  // Left side, near edge
+  const doorY = 80;  // Top area
 
-  let doorOpen = doorOpenTimer;  // 0 = closed, 200 = fully open
-  let doorOffset = doorOpen * (doorWidth / doorOpenDuration);
+  // DOOR FRAME (always visible)
+  ctx.fillStyle = '#5A4A3A';  // Dark wood frame
+  ctx.fillRect(doorX - 5, doorY - 5, doorWidth + 10, doorHeight + 10);  // Frame border
 
-  // SINGLE DOOR - Opens from left (slides left to reveal entrance)
-  ctx.fillStyle = '#6B5345';  // Door frame color
-  ctx.fillRect(doorX - doorOffset, doorY, doorWidth, doorHeight);
+  // DOOR BODY (slides based on state)
+  ctx.fillStyle = '#6B5345';  // Door color
 
-  // Door frame decoration
+  if (doorIsOpen) {
+    // Door slides left when open (fully hidden)
+    ctx.fillRect(doorX - doorWidth, doorY, doorWidth, doorHeight);
+  } else {
+    // Door stays in place when closed
+    ctx.fillRect(doorX, doorY, doorWidth, doorHeight);
+  }
+
+  // Door frame decoration (window/glass)
   ctx.strokeStyle = '#D4A574';
   ctx.lineWidth = 2;
-  ctx.strokeRect(doorX - doorOffset + 2, doorY + 2, doorWidth - 4, doorHeight - 4);
+
+  if (doorIsOpen) {
+    ctx.strokeRect(doorX - doorWidth + 2, doorY + 2, doorWidth - 4, doorHeight - 4);
+    // Glass reflection when open
+    ctx.fillStyle = '#FFD700';
+    ctx.globalAlpha = 0.15;
+    ctx.fillRect(doorX - doorWidth + 2, doorY + 2, doorWidth - 4, doorHeight - 4);
+    ctx.globalAlpha = 1;
+  } else {
+    ctx.strokeRect(doorX + 2, doorY + 2, doorWidth - 4, doorHeight - 4);
+  }
 
   // Door handle (brass)
   ctx.fillStyle = '#D4A574';
-  ctx.fillRect(doorX - doorOffset + doorWidth - 8, doorY + doorHeight/2 - 3, 5, 6);
+  if (doorIsOpen) {
+    ctx.fillRect(doorX - doorWidth + doorWidth - 8, doorY + doorHeight/2 - 3, 5, 6);
+  } else {
+    ctx.fillRect(doorX + doorWidth - 8, doorY + doorHeight/2 - 3, 5, 6);
+  }
 
-  // Opening effect - light from outside
-  if (doorOpenTimer > 0) {
+  // Light from outside when door is open
+  if (doorIsOpen) {
     ctx.fillStyle = '#FFD700';
-    ctx.globalAlpha = 0.2 * (doorOpenTimer / doorOpenDuration);
-    ctx.fillRect(0, doorY - 20, 100, 20);
+    ctx.globalAlpha = 0.15;
+    ctx.fillRect(0, doorY - 30, 150, 30);
     ctx.globalAlpha = 1;
   }
+}
+
+// Draw control button next to door
+function drawDoorButton() {
+  const buttonWidth = 40;
+  const buttonHeight = 40;
+  const buttonX = 130;  // Right of door
+  const buttonY = 95;   // Same level as door
+
+  // Button background
+  ctx.fillStyle = doorIsOpen ? '#00FF88' : '#FF3355';  // Green=OPEN, Red=CLOSED
+  ctx.fillRect(buttonX, buttonY, buttonWidth, buttonHeight);
+
+  // Button border
+  ctx.strokeStyle = '#FFFFFF';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(buttonX, buttonY, buttonWidth, buttonHeight);
+
+  // Button text
+  ctx.font = `${S(8)}px "Press Start 2P", monospace`;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(doorIsOpen ? 'OPEN' : 'CLOSED', buttonX + buttonWidth/2, buttonY + buttonHeight/2);
+
+  // Store button position for click detection
+  window.doorButtonRect = { x: buttonX, y: buttonY, w: buttonWidth, h: buttonHeight };
 }
 
 // ── RESPONSIVE ROOM WALLS - Ultra-Thin Professional Style ──────────────────
@@ -2444,8 +2493,9 @@ function render() {
   // Brown-coffee wood walls with windows
   drawRoomWalls();
 
-  // Entrance doors (opens when CommandOS arrives)
-  drawEntranceDoors();
+  // Entrance door and control button
+  drawEntranceDoor();
+  drawDoorButton();
 
   // Draw HUD (time, text) on top of background
   drawHUD();
@@ -2480,6 +2530,16 @@ canvas.addEventListener('click', (e) => {
   const clickX = (clickXScreen - offsetX) / zoomLevel;
   const clickY = (clickYScreen - offsetY) / zoomLevel;
 
+  // Check door button click
+  if (window.doorButtonRect) {
+    const btn = window.doorButtonRect;
+    if (clickX >= btn.x && clickX <= btn.x + btn.w &&
+        clickY >= btn.y && clickY <= btn.y + btn.h) {
+      handleDoorButtonClick();
+      return;
+    }
+  }
+
   if (window.cmdButtons && window.cmdButtons.length > 0) {
     for (let btn of window.cmdButtons) {
       if (clickX >= btn.x && clickX <= btn.x + btn.w &&
@@ -2490,6 +2550,28 @@ canvas.addEventListener('click', (e) => {
     }
   }
 });
+
+function handleDoorButtonClick() {
+  doorIsOpen = !doorIsOpen;  // Toggle door state
+
+  if (doorIsOpen) {
+    showToast('🚪 DOOR OPENED - CommandOS entering...', 'green');
+    // Schedule CommandOS to enter after short delay
+    setTimeout(() => {
+      commanderShouldEnter = true;
+      const commander = AGENTS.find(a => a.id === 'commander');
+      if (commander) {
+        commander.state = 'walk';
+        const i = AGENTS.indexOf(commander);
+        const targetX = GRID[i].x + 100;
+        const targetY = GRID[i].y + 170;
+        walkTo('commander', targetX, targetY);
+      }
+    }, 500);
+  } else {
+    showToast('🚪 DOOR CLOSED', 'orange');
+  }
+}
 
 function handleCommandButton(action) {
   console.log('Button pressed:', action);
@@ -2551,20 +2633,11 @@ setLang('ro');
 // Place agents at their desk positions
 AGENTS.forEach((a, i) => {
   if (a.id === 'commander') {
-    // CommandOS starts OUTSIDE at top-left door, will enter through it
+    // CommandOS starts OUTSIDE at top-left door, waits for user to open door
     a.x = 20;   // LEFT side (outside)
     a.y = 100;  // TOP area (near door)
-    a.state = 'walk';
-    // Schedule door opening and walking to desk
-    setTimeout(() => {
-      doorOpenTimer = 1;  // Start opening animation
-    }, 500);
-    setTimeout(() => {
-      // Walk from door entrance to desk position
-      const targetX = GRID[i].x + 100;
-      const targetY = GRID[i].y + 170;
-      walkTo('commander', targetX, targetY);
-    }, 1500);
+    a.state = 'idle';  // Wait for user to open door
+    // No automatic entry - user must click button!
   } else {
     a.x = GRID[i].x + 80;
     a.y = GRID[i].y + 90;
