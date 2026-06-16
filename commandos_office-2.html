@@ -1815,10 +1815,11 @@ function drawSmallPlant(x, y, size, darkColor, lightColor) {
 
 // ── Modern Laminate Floor with Wood Pattern ──────────────────────────
 function drawModernFloor() {
-  const floorY = 240;
-  const floorHeight = 678;  // From 240 to 918
-  const floorX = 120;
-  const floorWidth = 960;  // From 120 to 1080
+  // FULL SCREEN FLOOR - covers entire canvas
+  const floorY = 0;
+  const floorHeight = CANVAS_HEIGHT;  // Full height (0 to 950)
+  const floorX = 0;
+  const floorWidth = CANVAS_WIDTH;   // Full width (0 to 1200)
 
   // Base color - light wood laminate
   const baseColor = '#C4B5A0';
@@ -2361,26 +2362,16 @@ function render() {
   ctx.scale(zoomLevel, zoomLevel);
 
   // DRAW CLEAN BACKGROUND (no background image)
-  // Walls
-  drawRoomWalls();
-
-  // Modern laminate floor
+  // Modern laminate floor - full screen
   drawModernFloor();
-
-  // Baseboards
-  drawBaseboards();
-
-  // Wall shadows for depth
-  drawWallShadows();
 
   // Draw HUD (time, text) on top of background
   drawHUD();
 
-  // Draw all agents and their desks on top of background
+  // Draw all agents on top of background
+  // Desks removed - using clean laminate floor
   AGENTS.forEach((a, i) => {
     const g = GRID[i];
-    // All agents use the same desk size
-    drawSmallDesk(g.x, g.y + 54, a);
     drawAgent(a);
   });
 
