@@ -1611,80 +1611,85 @@ function drawCompanyLogo(x, y) {
   ctx.fillText('CMD', sx(x), sy(y));
 }
 
-// ── CLEAN ROOM WALLS - Border Only ──────────────────────────────
+// ── RESPONSIVE ROOM WALLS - Scale with viewport ──────────────────
 function drawRoomWalls() {
-  const TOP_WALL_HEIGHT = 100;    // Top wall: 100px high
-  const LEFT_WALL_WIDTH = 32;     // Left wall: 32px wide
-  const RIGHT_WALL_WIDTH = 32;    // Right wall: 32px wide
   const WALL_COLOR = '#2A3245';   // Dark blue-gray
 
+  // Calculate wall dimensions based on current canvas size
+  // Top wall: proportional to canvas height (e.g., 10% or 80px minimum)
+  const topWallHeight = Math.max(canvas.height * 0.08, 80);
+
+  // Side walls: proportional to canvas width (e.g., 2% or 40px minimum)
+  const sideWallWidth = Math.max(canvas.width * 0.03, 40);
+
   // ═══════════════════════════════════════════════════════════════
-  // TOP WALL - Full width at the top
+  // TOP WALL - Full width at the top, scales with height
   // ═══════════════════════════════════════════════════════════════
   ctx.fillStyle = WALL_COLOR;
-  ctx.fillRect(0, 0, canvas.width, sy(TOP_WALL_HEIGHT));
+  ctx.fillRect(0, 0, canvas.width, topWallHeight);
 
   // ═══════════════════════════════════════════════════════════════
-  // LEFT WALL - Attached to top wall, full height on left side
+  // LEFT WALL - Full height, scales with width
   // ═══════════════════════════════════════════════════════════════
   ctx.fillStyle = WALL_COLOR;
-  ctx.fillRect(0, 0, S(LEFT_WALL_WIDTH), canvas.height);
+  ctx.fillRect(0, 0, sideWallWidth, canvas.height);
 
   // ═══════════════════════════════════════════════════════════════
-  // RIGHT WALL - Attached to top wall, full height on right side
+  // RIGHT WALL - Full height, scales with width
   // ═══════════════════════════════════════════════════════════════
   ctx.fillStyle = WALL_COLOR;
-  ctx.fillRect(sx(CANVAS_WIDTH - RIGHT_WALL_WIDTH), 0, S(RIGHT_WALL_WIDTH), canvas.height);
+  ctx.fillRect(canvas.width - sideWallWidth, 0, sideWallWidth, canvas.height);
 
   // ═══════════════════════════════════════════════════════════════
-  // WINDOWS - Only on TOP WALL
+  // WINDOWS - Only on TOP WALL, scale with canvas
   // ═══════════════════════════════════════════════════════════════
-  const windowY = sy(20);
-  const windowH = S(80);
-  const windowPositions = [100, 350, 600, 850];  // Centered across top wall width
+  const windowY = topWallHeight * 0.25;
+  const windowH = topWallHeight * 0.75;
+  const windowCount = 4;
+  const windowW = (canvas.width - sideWallWidth * 2) / (windowCount + 1);
 
-  windowPositions.forEach(wx => {
-    const windowW = S(90);
+  for (let i = 0; i < windowCount; i++) {
+    const wx = sideWallWidth + (i + 1) * windowW + (windowW * 0.1);
 
     // Window frame - black border
     ctx.fillStyle = '#0F0F14';
-    ctx.fillRect(sx(wx), windowY, windowW, windowH);
+    ctx.fillRect(wx, windowY, windowW * 0.8, windowH);
 
     // Window glass - blue tint
     ctx.fillStyle = '#2D4A6A';
-    ctx.fillRect(sx(wx + 3), windowY + S(3), windowW - S(6), windowH - S(6));
+    ctx.fillRect(wx + 3, windowY + 3, windowW * 0.8 - 6, windowH - 6);
 
     // Window gradient (sunset effect)
-    const gradient = ctx.createLinearGradient(sx(wx), windowY, sx(wx), windowY + windowH);
+    const gradient = ctx.createLinearGradient(wx, windowY, wx, windowY + windowH);
     gradient.addColorStop(0, '#6B2C7A');      // Purple top
     gradient.addColorStop(0.4, '#D4A574');    // Orange middle
     gradient.addColorStop(1, '#FF6B35');      // Red bottom
     ctx.fillStyle = gradient;
     ctx.globalAlpha = 0.3;
-    ctx.fillRect(sx(wx + 3), windowY + S(3), windowW - S(6), windowH - S(6));
+    ctx.fillRect(wx + 3, windowY + 3, windowW * 0.8 - 6, windowH - 6);
     ctx.globalAlpha = 1;
 
     // Window panes - grid dividers
     ctx.strokeStyle = '#0F0F14';
-    ctx.lineWidth = S(1.5);
+    ctx.lineWidth = Math.max(1, canvas.width / 1200);
 
     // Vertical center divider
     ctx.beginPath();
-    ctx.moveTo(sx(wx + windowW / 2), windowY + S(3));
-    ctx.lineTo(sx(wx + windowW / 2), windowY + windowH - S(3));
+    ctx.moveTo(wx + (windowW * 0.4), windowY + 3);
+    ctx.lineTo(wx + (windowW * 0.4), windowY + windowH - 3);
     ctx.stroke();
 
     // Horizontal dividers
     ctx.beginPath();
-    ctx.moveTo(sx(wx + 3), windowY + windowH / 3);
-    ctx.lineTo(sx(wx) + windowW - S(3), windowY + windowH / 3);
+    ctx.moveTo(wx + 3, windowY + windowH / 3);
+    ctx.lineTo(wx + windowW * 0.8 - 3, windowY + windowH / 3);
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(sx(wx + 3), windowY + 2 * windowH / 3);
-    ctx.lineTo(sx(wx) + windowW - S(3), windowY + 2 * windowH / 3);
+    ctx.moveTo(wx + 3, windowY + 2 * windowH / 3);
+    ctx.lineTo(wx + windowW * 0.8 - 3, windowY + 2 * windowH / 3);
     ctx.stroke();
-  });
+  }
 }
 
 // ── Wall Shadow Effect ──────────────────────────────────────────────
@@ -1981,71 +1986,9 @@ function drawBG() {
 
   // ═══════════════════════════════════════════════════════════════
   // REDRAW WALLS ON TOP (so they're visible over everything)
+  // Use responsive dimensions that scale with viewport
   // ═══════════════════════════════════════════════════════════════
-  const WALL_COLOR = '#2A3245';
-  const TOP_WALL_HEIGHT = 100;
-  const LEFT_WALL_WIDTH = 32;
-  const RIGHT_WALL_WIDTH = 32;
-
-  // TOP WALL - Full width
-  ctx.fillStyle = WALL_COLOR;
-  ctx.fillRect(0, 0, canvas.width, sy(TOP_WALL_HEIGHT));
-
-  // LEFT WALL - Full height
-  ctx.fillStyle = WALL_COLOR;
-  ctx.fillRect(0, 0, S(LEFT_WALL_WIDTH), canvas.height);
-
-  // RIGHT WALL - Full height
-  ctx.fillStyle = WALL_COLOR;
-  ctx.fillRect(sx(CANVAS_WIDTH - RIGHT_WALL_WIDTH), 0, S(RIGHT_WALL_WIDTH), canvas.height);
-
-  // WINDOWS on TOP WALL
-  const windowY = sy(20);
-  const windowH = S(80);
-  const windowPositions = [100, 350, 600, 850];
-
-  windowPositions.forEach(wx => {
-    const windowW = S(90);
-
-    // Window frame
-    ctx.fillStyle = '#0F0F14';
-    ctx.fillRect(sx(wx), windowY, windowW, windowH);
-
-    // Window glass
-    ctx.fillStyle = '#2D4A6A';
-    ctx.fillRect(sx(wx + 3), windowY + S(3), windowW - S(6), windowH - S(6));
-
-    // Gradient
-    const gradient = ctx.createLinearGradient(sx(wx), windowY, sx(wx), windowY + windowH);
-    gradient.addColorStop(0, '#6B2C7A');
-    gradient.addColorStop(0.4, '#D4A574');
-    gradient.addColorStop(1, '#FF6B35');
-    ctx.fillStyle = gradient;
-    ctx.globalAlpha = 0.3;
-    ctx.fillRect(sx(wx + 3), windowY + S(3), windowW - S(6), windowH - S(6));
-    ctx.globalAlpha = 1;
-
-    // Panes
-    ctx.strokeStyle = '#0F0F14';
-    ctx.lineWidth = S(1.5);
-
-    // Vertical
-    ctx.beginPath();
-    ctx.moveTo(sx(wx + windowW / 2), windowY + S(3));
-    ctx.lineTo(sx(wx + windowW / 2), windowY + windowH - S(3));
-    ctx.stroke();
-
-    // Horizontal
-    ctx.beginPath();
-    ctx.moveTo(sx(wx + 3), windowY + windowH / 3);
-    ctx.lineTo(sx(wx) + windowW - S(3), windowY + windowH / 3);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(sx(wx + 3), windowY + 2 * windowH / 3);
-    ctx.lineTo(sx(wx) + windowW - S(3), windowY + 2 * windowH / 3);
-    ctx.stroke();
-  });
+  drawRoomWalls();
 }
 
 // ── Charts canvas (right panel) ──────────────────────────────────────
