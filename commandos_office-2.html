@@ -438,14 +438,14 @@ const AGENTS = [
 ];
 
 // Grid layout for 6 agents: 3 in first row, 2 in second, Commander big at bottom center
-// Original positions - DO NOT CHANGE
+// OPTIMIZED to fit within office with thin walls (50px walls)
 const GRID = [
-  { x: 100,  y: 150  },   // alexa     (row1 col1 - left)
-  { x: 450, y: 150  },   // scout     (row1 col2 - center)
-  { x: 800, y: 150  },   // memo      (row1 col3 - right)
-  { x: 150, y: 420  },   // doc       (row2 col1 - left-center)
-  { x: 750, y: 420  },   // cal       (row2 col2 - right-center)
-  { x: 450, y: 650  },   // commander (row3 - center)
+  { x: 80,   y: 240  },   // alexa     (row1 col1 - left)
+  { x: 380,  y: 240  },   // scout     (row1 col2 - center)
+  { x: 700,  y: 240  },   // memo      (row1 col3 - right)
+  { x: 180,  y: 500  },   // doc       (row2 col1 - left-center)
+  { x: 600,  y: 500  },   // cal       (row2 col2 - right-center)
+  { x: 380,  y: 730  },   // commander (row3 - center)
 ];
 
 // Agent home positions (in front of desk)
@@ -1635,15 +1635,15 @@ function drawCompanyLogo(x, y) {
   ctx.fillText('CMD', sx(x), sy(y));
 }
 
-// ── RESPONSIVE ROOM WALLS - Exact dimensions ──────────────────
+// ── RESPONSIVE ROOM WALLS - Thin Professional Style ──────────────────
 function drawRoomWalls() {
   const WALL_COLOR = '#8B7355';   // Coffee-brown wood color
   const WALL_DARK = '#6B5345';    // Darker shade for depth
 
-  // Fixed wall dimensions (exact from user specification)
-  const topWallHeight = 200;      // Top wall: 200px (taller for windows)
-  const sideWallWidth = 100;      // Side walls: 100px each
-  const bottomWallHeight = 100;   // Bottom wall: 100px
+  // THIN wall dimensions - optimized for office space
+  const topWallHeight = 220;      // Top wall: 220px (taller for windows)
+  const sideWallWidth = 50;       // Side walls: 50px each (THIN)
+  const bottomWallHeight = 80;    // Bottom wall: 80px (THIN)
 
   // ═══════════════════════════════════════════════════════════════
   // TOP WALL - Full width at the top
@@ -2320,16 +2320,16 @@ function runAutoScene() {
 
       // Commander can move freely everywhere EXCEPT on ANY desk
       if (a.id === 'commander') {
-        // Desk collision zones to AVOID
-        // Agent desks: Alexa (40-240, 80-280), Scout (360-560, 80-280), Memo (680-880, 80-280)
-        //              Doc (40-240, 380-580), Cal (680-880, 380-580)
-        // Commander desk: (390-670, 776-916)
-        const onAlexaDesk = newX >= 40 && newX <= 240 && newY >= 80 && newY <= 280;
-        const onScoutDesk = newX >= 360 && newX <= 560 && newY >= 80 && newY <= 280;
-        const onMemoDesk = newX >= 680 && newX <= 880 && newY >= 80 && newY <= 280;
-        const onDocDesk = newX >= 40 && newX <= 240 && newY >= 380 && newY <= 580;
-        const onCalDesk = newX >= 680 && newX <= 880 && newY >= 380 && newY <= 580;
-        const onCommanderDesk = newX >= 390 && newX <= 670 && newY >= 776 && newY <= 916;
+        // Desk collision zones to AVOID (UPDATED for new positions)
+        // Agent desks: Alexa (80-280, 240-310), Scout (380-580, 240-310), Memo (700-900, 240-310)
+        //              Doc (180-380, 500-570), Cal (600-800, 500-570)
+        // Commander desk: (280-660, 730-830)
+        const onAlexaDesk = newX >= 60 && newX <= 280 && newY >= 220 && newY <= 330;
+        const onScoutDesk = newX >= 360 && newX <= 580 && newY >= 220 && newY <= 330;
+        const onMemoDesk = newX >= 680 && newX <= 900 && newY >= 220 && newY <= 330;
+        const onDocDesk = newX >= 160 && newX <= 380 && newY >= 480 && newY <= 590;
+        const onCalDesk = newX >= 580 && newX <= 800 && newY >= 480 && newY <= 590;
+        const onCommanderDesk = newX >= 260 && newX <= 660 && newY >= 710 && newY <= 850;
 
         // If NOT on any desk and within bounds, allow movement
         if (!onAlexaDesk && !onScoutDesk && !onMemoDesk && !onDocDesk && !onCalDesk && !onCommanderDesk &&
