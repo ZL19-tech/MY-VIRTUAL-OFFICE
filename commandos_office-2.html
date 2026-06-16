@@ -1844,41 +1844,8 @@ function enhanceWindowFrames() {
   });
 }
 
-// ── CommandOS Brand Background ──────────────────────────────────────
-function drawBG() {
-  // Fixed wall dimensions (exact from user specification)
-  const topWallHeight = 170;      // Top wall: 170px
-  const sideWallWidth = 120;      // Side walls: 120px each
-  const bottomWallHeight = 80;    // Bottom wall: 80px
-
-  // DRAW BACKGROUND IMAGE - stretch to fill entire internal canvas (1200x950)
-  if (bgImage && bgImage.complete && bgImage.naturalWidth > 0) {
-    // Draw entire image scaled to fill the entire canvas
-    // Source: whole image (1710x1478) → Destination: entire canvas (0,0 to 1200,950)
-    ctx.drawImage(bgImage, 0, 0, bgImage.width, bgImage.height, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-  } else {
-    // Fallback: solid color if image not loaded
-    ctx.fillStyle = '#2A3245';
-    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-  }
-
-  // INTERIOR AREA BOUNDARIES (for reference, but no floor drawing since image has it)
-  // Interior: between walls, full height used for gameplay
-  const interiorLeft = sideWallWidth;
-  const interiorTop = topWallHeight;
-  const interiorRight = canvas.width - sideWallWidth;
-  const interiorBottom = canvas.height - bottomWallHeight;
-  const interiorWidth = interiorRight - interiorLeft;
-  const interiorHeight = interiorBottom - interiorTop;
-
-  // NOTE: Floor rendering DISABLED - background.png includes the floor
-  // No need to draw wooden planks or floor variation since background image has them
-
-  // NOTE: OFFICE DECORATIONS DISABLED
-  // Plants, artwork, bookshelves, baseboards, and other decorations
-  // are now included in the background.png image
-  // This keeps the canvas clean and performance high
-
+// ── Draw HUD (time, text) on top of scaled game ──────────────────────
+function drawHUD() {
   // Draw top-left text: CommandOS
   ctx.save();
   ctx.font = 'bold 24px "Press Start 2P", monospace';
@@ -1895,15 +1862,6 @@ function drawBG() {
   ctx.textAlign = 'right';
   ctx.fillText(timeStr, CANVAS_WIDTH - S(20), S(10));
   ctx.restore();
-
-  // NOTE: Walls are now part of the background.png image - no redrawing needed
-  // The background fills the entire canvas area with walls, floor, windows, decorations
-
-  // Optional subtle vignette for depth (can be removed if background has it)
-  // ctx.fillStyle = '#000000';
-  // ctx.globalAlpha = 0.01;
-  // ctx.fillRect(0, 0, canvas.width, canvas.height);
-  // ctx.globalAlpha = 1;
 }
 
 // ── Charts canvas (right panel) ──────────────────────────────────────
@@ -2314,30 +2272,32 @@ function runAutoScene() {
 function render() {
   resizeCanvas();
 
-  // Fill entire display canvas with background color FIRST (for responsive areas)
-  ctx.fillStyle = '#0D1117';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // DRAW BACKGROUND IMAGE ON FULL CANVAS BEFORE ANY TRANSFORMATIONS
+  // This fills entire viewport with background, no dark borders
+  if (bgImage && bgImage.complete && bgImage.naturalWidth > 0) {
+    // Scale background to fill entire physical canvas (responsive size)
+    ctx.drawImage(bgImage, 0, 0, bgImage.width, bgImage.height, 0, 0, canvas.width, canvas.height);
+  } else {
+    // Fallback: solid color
+    ctx.fillStyle = '#0D1117';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
 
   // Apply zoom transformation for responsive scaling
   ctx.save();
   ctx.translate(offsetX, offsetY);
   ctx.scale(zoomLevel, zoomLevel);
 
-  drawBG();
+  // Draw HUD (time, text) on top of background
+  drawHUD();
 
+  // Draw all agents and their desks on top of background
   AGENTS.forEach((a, i) => {
     const g = GRID[i];
     // All agents use the same desk size
     drawSmallDesk(g.x, g.y + 54, a);
-    // HP bars removed - only shown in right panel chart
-    // drawHPBar(a, g.x, g.y + 44);
     drawAgent(a);
-    // Status text disabled
-    // drawStatusAbove(a.id, g.x, g.y + 44);
   });
-
-  // Bubbles disabled
-  // bubbles.forEach(b => drawBubble(b));
 
   ctx.restore();
 
