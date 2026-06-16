@@ -931,6 +931,70 @@ function drawDesk(gx, gy, agent) {
 
 // Removed - using drawDeskMonitorItem instead for consistency
 
+// ── Office Items - Monitors, Phones, Keyboards ──────────────────
+function drawDeskItems(gx, gy, agent, isCommander = false) {
+  const itemY = gy + 5;  // Items on top of desk
+  let itemX = gx + 15;
+
+  // Monitor
+  ctx.fillStyle = '#1A1A1A';  // Monitor frame
+  ctx.fillRect(itemX, itemY, 35, 28);
+  ctx.fillStyle = '#1A3A5E';  // Monitor screen
+  ctx.fillRect(itemX + 2, itemY + 2, 31, 20);
+  ctx.fillStyle = agent.color;
+  ctx.globalAlpha = 0.2;
+  ctx.fillRect(itemX + 2, itemY + 2, 31, 20);
+  ctx.globalAlpha = 1;
+
+  // Monitor stand
+  ctx.fillStyle = '#454545';
+  ctx.fillRect(itemX + 14, itemY + 22, 7, 5);
+
+  // Keyboard
+  itemX += 45;
+  ctx.fillStyle = '#2A2A2A';
+  ctx.fillRect(itemX, itemY + 15, 28, 10);
+  for (let kx = itemX + 2; kx < itemX + 27; kx += 4) {
+    for (let ky = itemY + 17; ky < itemY + 23; ky += 3) {
+      ctx.fillStyle = '#454545';
+      ctx.fillRect(kx, ky, 3, 2);
+    }
+  }
+
+  // Phone
+  itemX += 32;
+  ctx.fillStyle = '#333333';
+  ctx.fillRect(itemX, itemY + 10, 12, 20);
+  ctx.fillStyle = '#1A2A3D';
+  ctx.fillRect(itemX + 1, itemY + 12, 10, 12);
+  ctx.fillStyle = agent.color;
+  ctx.globalAlpha = 0.3;
+  ctx.fillRect(itemX + 1, itemY + 12, 10, 12);
+  ctx.globalAlpha = 1;
+
+  if (isCommander) {
+    // Add extra items for Commander's larger desk
+    // Coffee cup
+    itemX += 16;
+    ctx.fillStyle = '#8B7355';
+    ctx.fillRect(itemX, itemY + 18, 8, 8);
+    ctx.fillStyle = '#654321';
+    ctx.fillRect(itemX + 1, itemY + 19, 6, 4);
+
+    // Notepad
+    itemX += 10;
+    ctx.fillStyle = '#F5F5DC';
+    ctx.fillRect(itemX, itemY + 8, 16, 14);
+    ctx.strokeStyle = '#A0826D';
+    ctx.lineWidth = 0.5;
+    ctx.strokeRect(itemX, itemY + 8, 16, 14);
+    ctx.fillStyle = '#CCCCCC';
+    for (let i = 0; i < 3; i++) {
+      ctx.fillRect(itemX + 2, itemY + 11 + i * 3, 12, 1);
+    }
+  }
+}
+
 // ── Professional Office Desks - Modern Minimalist Style ─────────────
 function drawProfessionalDesk(gx, gy, agent, isCommander = false) {
   let W, H;
@@ -1573,47 +1637,72 @@ function drawCompanyLogo(x, y) {
 
 // ── RESPONSIVE ROOM WALLS - Exact dimensions ──────────────────
 function drawRoomWalls() {
-  const WALL_COLOR = '#2A3245';   // Dark blue-gray
+  const WALL_COLOR = '#8B7355';   // Coffee-brown wood color
+  const WALL_DARK = '#6B5345';    // Darker shade for depth
 
   // Fixed wall dimensions (exact from user specification)
-  const topWallHeight = 170;      // Top wall: 170px
-  const sideWallWidth = 120;      // Side walls: 120px each
-  const bottomWallHeight = 80;    // Bottom wall: 80px
+  const topWallHeight = 200;      // Top wall: 200px (taller for windows)
+  const sideWallWidth = 100;      // Side walls: 100px each
+  const bottomWallHeight = 100;   // Bottom wall: 100px
 
   // ═══════════════════════════════════════════════════════════════
-  // TOP WALL - Full width at the top, scales with height
+  // TOP WALL - Full width at the top
   // ═══════════════════════════════════════════════════════════════
   ctx.fillStyle = WALL_COLOR;
-  ctx.fillRect(0, 0, canvas.width, topWallHeight);
+  ctx.fillRect(0, 0, CANVAS_WIDTH, topWallHeight);
+
+  // Top wall shadow
+  ctx.fillStyle = WALL_DARK;
+  ctx.globalAlpha = 0.3;
+  ctx.fillRect(0, topWallHeight - 5, CANVAS_WIDTH, 5);
+  ctx.globalAlpha = 1;
 
   // ═══════════════════════════════════════════════════════════════
-  // LEFT WALL - Full height, scales with width
+  // LEFT WALL - Full height
   // ═══════════════════════════════════════════════════════════════
   ctx.fillStyle = WALL_COLOR;
-  ctx.fillRect(0, 0, sideWallWidth, canvas.height);
+  ctx.fillRect(0, 0, sideWallWidth, CANVAS_HEIGHT);
+
+  // Left wall shadow
+  ctx.fillStyle = WALL_DARK;
+  ctx.globalAlpha = 0.3;
+  ctx.fillRect(sideWallWidth - 5, 0, 5, CANVAS_HEIGHT);
+  ctx.globalAlpha = 1;
 
   // ═══════════════════════════════════════════════════════════════
-  // RIGHT WALL - Full height, scales with width
+  // RIGHT WALL - Full height
   // ═══════════════════════════════════════════════════════════════
   ctx.fillStyle = WALL_COLOR;
-  ctx.fillRect(canvas.width - sideWallWidth, 0, sideWallWidth, canvas.height);
+  ctx.fillRect(CANVAS_WIDTH - sideWallWidth, 0, sideWallWidth, CANVAS_HEIGHT);
+
+  // Right wall shadow
+  ctx.fillStyle = WALL_DARK;
+  ctx.globalAlpha = 0.3;
+  ctx.fillRect(CANVAS_WIDTH - sideWallWidth, 0, 5, CANVAS_HEIGHT);
+  ctx.globalAlpha = 1;
 
   // ═══════════════════════════════════════════════════════════════
   // BOTTOM WALL - Full width at the bottom
   // ═══════════════════════════════════════════════════════════════
   ctx.fillStyle = WALL_COLOR;
-  ctx.fillRect(0, canvas.height - bottomWallHeight, canvas.width, bottomWallHeight);
+  ctx.fillRect(0, CANVAS_HEIGHT - bottomWallHeight, CANVAS_WIDTH, bottomWallHeight);
+
+  // Bottom wall shadow
+  ctx.fillStyle = WALL_DARK;
+  ctx.globalAlpha = 0.3;
+  ctx.fillRect(0, CANVAS_HEIGHT - bottomWallHeight, CANVAS_WIDTH, 5);
+  ctx.globalAlpha = 1;
 
   // ═══════════════════════════════════════════════════════════════
   // WINDOWS - Only on TOP WALL, scale with canvas
   // ═══════════════════════════════════════════════════════════════
-  const windowY = topWallHeight * 0.25;
-  const windowH = topWallHeight * 0.75;
-  const windowCount = 4;
-  const windowW = (canvas.width - sideWallWidth * 2) / (windowCount + 1);
+  const windowY = topWallHeight * 0.2;
+  const windowH = topWallHeight * 0.65;
+  const windowCount = 5;
+  const windowW = (CANVAS_WIDTH - sideWallWidth * 2) / (windowCount + 1);
 
   for (let i = 0; i < windowCount; i++) {
-    const wx = sideWallWidth + (i + 1) * windowW + (windowW * 0.1);
+    const wx = sideWallWidth + (i + 1) * windowW + (windowW * 0.05);
 
     // Window frame - black border
     ctx.fillStyle = '#0F0F14';
@@ -2304,9 +2393,12 @@ function render() {
   ctx.translate(offsetX, offsetY);
   ctx.scale(zoomLevel, zoomLevel);
 
-  // DRAW CLEAN BACKGROUND (no background image)
+  // DRAW OFFICE ENVIRONMENT
   // Modern laminate floor - full screen
   drawModernFloor();
+
+  // Brown-coffee wood walls with windows
+  drawRoomWalls();
 
   // Draw HUD (time, text) on top of background
   drawHUD();
@@ -2317,6 +2409,8 @@ function render() {
     // Draw professional desk for this agent
     const isCommander = a.id === 'commander';
     drawProfessionalDesk(g.x, g.y + 54, a, isCommander);
+    // Draw desk items (monitors, phones, keyboards)
+    drawDeskItems(g.x, g.y + 54, a, isCommander);
     // Draw agent on top of desk
     drawAgent(a);
   });
