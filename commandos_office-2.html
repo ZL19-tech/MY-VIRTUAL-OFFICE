@@ -294,19 +294,21 @@ function playAgentChatter() {
 }
 
 // ── Background Image Asset Loader ──────────────────────────────────
+// DISABLED: Old background images removed
 let bgImage = null;
 const bgImagePath = 'background.png';  // Relative path in project directory
 
-const imgLoader = new Image();
-imgLoader.onload = function() {
-  bgImage = imgLoader;
-  console.log('✓ Background image loaded successfully');
-};
-imgLoader.onerror = function() {
-  console.warn('⚠ Could not load background.png. Using fallback solid color.');
-  bgImage = null;
-};
-imgLoader.src = bgImagePath;
+// Commented out: Old background loading
+// const imgLoader = new Image();
+// imgLoader.onload = function() {
+//   bgImage = imgLoader;
+//   console.log('✓ Background image loaded successfully');
+// };
+// imgLoader.onerror = function() {
+//   console.warn('⚠ Could not load background.png. Using fallback solid color.');
+//   bgImage = null;
+// };
+// imgLoader.src = bgImagePath;
 
 // ── Language ────────────────────────────────────────────────────────
 let LANG = 'ro';
@@ -1811,6 +1813,81 @@ function drawSmallPlant(x, y, size, darkColor, lightColor) {
   ctx.fill();
 }
 
+// ── Modern Laminate Floor with Wood Pattern ──────────────────────────
+function drawModernFloor() {
+  const floorY = 240;
+  const floorHeight = 678;  // From 240 to 918
+  const floorX = 120;
+  const floorWidth = 960;  // From 120 to 1080
+
+  // Base color - light wood laminate
+  const baseColor = '#C4B5A0';
+  ctx.fillStyle = baseColor;
+  ctx.fillRect(sx(floorX), sy(floorY), S(floorWidth), S(floorHeight));
+
+  // Modern laminate pattern with wood grain
+  const plankWidth = 120;
+  const plankHeight = 35;
+
+  for (let y = floorY; y < floorY + floorHeight; y += plankHeight) {
+    for (let x = floorX; x < floorX + floorWidth; x += plankWidth) {
+      // Alternate plank colors (subtle variation)
+      const seed = Math.floor((x / plankWidth) + (y / plankHeight)) % 3;
+      let plankColor;
+
+      if (seed === 0) {
+        plankColor = '#B8A895';  // Slightly darker
+      } else if (seed === 1) {
+        plankColor = '#C4B5A0';  // Base color
+      } else {
+        plankColor = '#D0BFB0';  // Lighter variant
+      }
+
+      ctx.fillStyle = plankColor;
+      ctx.fillRect(sx(x), sy(y), S(plankWidth), S(plankHeight));
+
+      // Wood grain lines within each plank
+      ctx.strokeStyle = '#A59885';
+      ctx.lineWidth = 0.5;
+      ctx.globalAlpha = 0.3;
+
+      for (let i = 0; i < plankHeight; i += 4) {
+        const waveOffset = Math.sin((x + i) * 0.02) * 3;
+        ctx.beginPath();
+        ctx.moveTo(sx(x), sy(y + i + waveOffset));
+        ctx.lineTo(sx(x + plankWidth), sy(y + i + waveOffset));
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+
+      // Plank border highlight
+      ctx.strokeStyle = '#DDD8CE';
+      ctx.lineWidth = 0.5;
+      ctx.globalAlpha = 0.5;
+      ctx.strokeRect(sx(x), sy(y), S(plankWidth), S(plankHeight));
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // Glossy finish effect (subtle highlights)
+  ctx.fillStyle = '#FFFFFF';
+  ctx.globalAlpha = 0.04;
+  for (let i = 0; i < 15; i++) {
+    const rx = floorX + Math.random() * floorWidth;
+    const ry = floorY + Math.random() * floorHeight;
+    const size = 30 + Math.random() * 50;
+    ctx.beginPath();
+    ctx.ellipse(sx(rx), sy(ry), S(size), S(size / 3), 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // Shadow line near walls for depth
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+  ctx.fillRect(sx(floorX), sy(floorY), S(3), S(floorHeight));  // Left shadow
+  ctx.fillRect(sx(floorX + floorWidth - 3), sy(floorY), S(3), S(floorHeight));  // Right shadow
+}
+
 // ── Floor Texture Variation ──────────────────────────────────────────
 function addFloorVariation() {
   // Add subtle color variation to existing floor for depth
@@ -2283,38 +2360,18 @@ function render() {
   ctx.translate(offsetX, offsetY);
   ctx.scale(zoomLevel, zoomLevel);
 
-  // DRAW BACKGROUND IMAGE ON INTERNAL CANVAS (1200x950)
-  // Scale as CSS "cover" - fill entire canvas, crop if needed to maintain aspect ratio
-  if (bgImage && bgImage.complete && bgImage.naturalWidth > 0) {
-    // Calculate cover-mode scaling
-    const imgAspect = bgImage.width / bgImage.height;      // 1710 / 1478 ≈ 1.157
-    const canvasAspect = CANVAS_WIDTH / CANVAS_HEIGHT;     // 1200 / 950 ≈ 1.263
+  // DRAW CLEAN BACKGROUND (no background image)
+  // Walls
+  drawRoomWalls();
 
-    let drawWidth = CANVAS_WIDTH;
-    let drawHeight = CANVAS_HEIGHT;
-    let srcX = 0;
-    let srcY = 0;
-    let srcWidth = bgImage.width;
-    let srcHeight = bgImage.height;
+  // Modern laminate floor
+  drawModernFloor();
 
-    // Determine which dimension constrains (cover mode)
-    if (imgAspect > canvasAspect) {
-      // Image wider than canvas - constrain by height, crop sides
-      srcWidth = Math.ceil(bgImage.height * canvasAspect);
-      srcX = (bgImage.width - srcWidth) / 2;  // Center crop
-    } else {
-      // Image taller than canvas - constrain by width, crop top/bottom
-      srcHeight = Math.ceil(bgImage.width / canvasAspect);
-      srcY = (bgImage.height - srcHeight) / 2;  // Center crop
-    }
+  // Baseboards
+  drawBaseboards();
 
-    // Draw cropped image to fill entire canvas
-    ctx.drawImage(bgImage, srcX, srcY, srcWidth, srcHeight, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-  } else {
-    // Fallback: solid color
-    ctx.fillStyle = '#2A3245';
-    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-  }
+  // Wall shadows for depth
+  drawWallShadows();
 
   // Draw HUD (time, text) on top of background
   drawHUD();
