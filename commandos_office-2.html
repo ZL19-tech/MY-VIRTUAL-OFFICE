@@ -1622,6 +1622,9 @@ function drawRoomWalls() {
   // Side walls: proportional to canvas width (e.g., 2% or 40px minimum)
   const sideWallWidth = Math.max(canvas.width * 0.03, 40);
 
+  // Bottom wall: proportional to canvas height
+  const bottomWallHeight = Math.max(canvas.height * 0.06, 60);
+
   // ═══════════════════════════════════════════════════════════════
   // TOP WALL - Full width at the top, scales with height
   // ═══════════════════════════════════════════════════════════════
@@ -1639,6 +1642,12 @@ function drawRoomWalls() {
   // ═══════════════════════════════════════════════════════════════
   ctx.fillStyle = WALL_COLOR;
   ctx.fillRect(canvas.width - sideWallWidth, 0, sideWallWidth, canvas.height);
+
+  // ═══════════════════════════════════════════════════════════════
+  // BOTTOM WALL - Full width at the bottom
+  // ═══════════════════════════════════════════════════════════════
+  ctx.fillStyle = WALL_COLOR;
+  ctx.fillRect(0, canvas.height - bottomWallHeight, canvas.width, bottomWallHeight);
 
   // ═══════════════════════════════════════════════════════════════
   // WINDOWS - Only on TOP WALL, scale with canvas
@@ -1830,6 +1839,7 @@ function drawBG() {
   // Calculate responsive wall dimensions
   const topWallHeight = Math.max(canvas.height * 0.08, 80);
   const sideWallWidth = Math.max(canvas.width * 0.03, 40);
+  const bottomWallHeight = Math.max(canvas.height * 0.06, 60);
 
   // FILL ENTIRE BACKGROUND WITH WALL COLOR FIRST
   ctx.fillStyle = '#2A3245';
@@ -1839,7 +1849,7 @@ function drawBG() {
   const interiorLeft = sideWallWidth;
   const interiorTop = topWallHeight;
   const interiorRight = canvas.width - sideWallWidth;
-  const interiorBottom = canvas.height;
+  const interiorBottom = canvas.height - bottomWallHeight;
   const interiorWidth = interiorRight - interiorLeft;
   const interiorHeight = interiorBottom - interiorTop;
 
