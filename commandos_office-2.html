@@ -1853,8 +1853,9 @@ function drawBG() {
 
   // DRAW BACKGROUND IMAGE FIRST (or fallback solid color)
   if (bgImage && bgImage.complete && bgImage.naturalWidth > 0) {
-    // Background image loaded successfully - scale to fit canvas
-    ctx.drawImage(bgImage, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    // Background image loaded successfully - scale to FILL entire canvas
+    // Source: entire image | Destination: entire canvas (0,0 to CANVAS_WIDTH, CANVAS_HEIGHT)
+    ctx.drawImage(bgImage, 0, 0, bgImage.width, bgImage.height, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
   } else {
     // Fallback: solid color if image not loaded
     ctx.fillStyle = '#2A3245';
