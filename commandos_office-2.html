@@ -1644,10 +1644,10 @@ function drawRoomWalls() {
   ctx.fillRect(canvas.width - sideWallWidth, 0, sideWallWidth, canvas.height);
 
   // ═══════════════════════════════════════════════════════════════
-  // BOTTOM WALL - Full width at the bottom
+  // BOTTOM WALL - Thin trim at the very bottom edge (visual border only)
   // ═══════════════════════════════════════════════════════════════
   ctx.fillStyle = WALL_COLOR;
-  ctx.fillRect(0, canvas.height - bottomWallHeight, canvas.width, bottomWallHeight);
+  ctx.fillRect(0, canvas.height - 15, canvas.width, 15);
 
   // ═══════════════════════════════════════════════════════════════
   // WINDOWS - Only on TOP WALL, scale with canvas
@@ -1839,17 +1839,17 @@ function drawBG() {
   // Calculate responsive wall dimensions
   const topWallHeight = Math.max(canvas.height * 0.08, 80);
   const sideWallWidth = Math.max(canvas.width * 0.03, 40);
-  const bottomWallHeight = Math.max(canvas.height * 0.06, 60);
 
-  // FILL ENTIRE BACKGROUND WITH WALL COLOR FIRST
+  // FILL ENTIRE BACKGROUND WITH WALL COLOR FIRST (will be covered by walls and floor)
   ctx.fillStyle = '#2A3245';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // DEFINE INTERIOR OFFICE AREA (where floor and agents are)
+  // Interior extends to FULL canvas height - floor fills entire game area
   const interiorLeft = sideWallWidth;
   const interiorTop = topWallHeight;
   const interiorRight = canvas.width - sideWallWidth;
-  const interiorBottom = canvas.height - bottomWallHeight;
+  const interiorBottom = canvas.height;  // Full height - no bottom wall reduction
   const interiorWidth = interiorRight - interiorLeft;
   const interiorHeight = interiorBottom - interiorTop;
 
