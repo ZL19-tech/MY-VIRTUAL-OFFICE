@@ -1611,170 +1611,79 @@ function drawCompanyLogo(x, y) {
   ctx.fillText('CMD', sx(x), sy(y));
 }
 
-// ── ROOM WALLS - Real visible walls (pixel-art office style) ────────
+// ── CLEAN ROOM WALLS - Border Only ──────────────────────────────
 function drawRoomWalls() {
-  const WALL_TOP_H = 100;      // Top wall height
-  const WALL_SIDE_W = 40;       // Side wall width
-  const BASEBOARD_H = 12;       // Baseboard height
-  const WALL_COLOR = '#2A3245'; // Gray-blue wall color
-  const SHADOW_COLOR = '#1a2030'; // Darker for shadows
+  const TOP_WALL_HEIGHT = 100;    // Top wall: 100px high
+  const LEFT_WALL_WIDTH = 32;     // Left wall: 32px wide
+  const RIGHT_WALL_WIDTH = 32;    // Right wall: 32px wide
+  const WALL_COLOR = '#2A3245';   // Dark blue-gray
 
-  // ──── TOP WALL (full width) ────
+  // ═══════════════════════════════════════════════════════════════
+  // TOP WALL - Full width at the top
+  // ═══════════════════════════════════════════════════════════════
   ctx.fillStyle = WALL_COLOR;
-  ctx.fillRect(0, 0, canvas.width, sy(WALL_TOP_H));
+  ctx.fillRect(0, 0, canvas.width, sy(TOP_WALL_HEIGHT));
 
-  // Top wall shadow (adds depth)
-  ctx.fillStyle = SHADOW_COLOR;
-  ctx.fillRect(0, sy(WALL_TOP_H - 4), canvas.width, sy(4));
-
-  // ──── LEFT WALL (full height) ────
+  // ═══════════════════════════════════════════════════════════════
+  // LEFT WALL - Attached to top wall, full height on left side
+  // ═══════════════════════════════════════════════════════════════
   ctx.fillStyle = WALL_COLOR;
-  ctx.fillRect(0, 0, sx(WALL_SIDE_W), canvas.height);
+  ctx.fillRect(0, 0, S(LEFT_WALL_WIDTH), canvas.height);
 
-  // Left wall edge shadow
-  ctx.fillStyle = SHADOW_COLOR;
-  ctx.fillRect(sx(WALL_SIDE_W - 3), 0, sx(3), canvas.height);
-
-  // ──── RIGHT WALL (full height) ────
+  // ═══════════════════════════════════════════════════════════════
+  // RIGHT WALL - Attached to top wall, full height on right side
+  // ═══════════════════════════════════════════════════════════════
   ctx.fillStyle = WALL_COLOR;
-  ctx.fillRect(sx(CANVAS_WIDTH - WALL_SIDE_W), 0, sx(WALL_SIDE_W), canvas.height);
+  ctx.fillRect(sx(CANVAS_WIDTH - RIGHT_WALL_WIDTH), 0, S(RIGHT_WALL_WIDTH), canvas.height);
 
-  // Right wall edge shadow
-  ctx.fillStyle = SHADOW_COLOR;
-  ctx.fillRect(sx(CANVAS_WIDTH - WALL_SIDE_W), 0, sx(3), canvas.height);
-
-  // ──── BASEBOARDS (plinte) - where walls meet floor ────
-  ctx.fillStyle = '#1a1a24'; // Darker baseboard color
-
-  // Baseboard on bottom (full width)
-  ctx.fillRect(0, sy(CANVAS_HEIGHT - BASEBOARD_H), canvas.width, sy(BASEBOARD_H));
-
-  // Baseboard on left wall
-  ctx.fillRect(0, sy(WALL_TOP_H), sx(WALL_SIDE_W), canvas.height - sy(WALL_TOP_H));
-
-  // Baseboard on right wall
-  ctx.fillRect(sx(CANVAS_WIDTH - WALL_SIDE_W), sy(WALL_TOP_H), sx(WALL_SIDE_W), canvas.height - sy(WALL_TOP_H));
-
-  // ──── WALL CORNER DETAILS ────
-  ctx.fillStyle = '#0f1419'; // Very dark for corner shadows
-
-  // Top-left corner accent
-  ctx.fillRect(0, 0, sx(6), sy(WALL_TOP_H + 8));
-  ctx.fillRect(0, 0, sx(WALL_SIDE_W + 3), sy(6));
-
-  // Top-right corner accent
-  ctx.fillRect(sx(CANVAS_WIDTH - 6), 0, sx(6), sy(WALL_TOP_H + 8));
-  ctx.fillRect(sx(CANVAS_WIDTH - WALL_SIDE_W - 3), 0, sx(WALL_SIDE_W + 3), sy(6));
-
-  // Bottom-left corner
-  ctx.fillRect(0, sy(CANVAS_HEIGHT - BASEBOARD_H - 3), sx(WALL_SIDE_W + 3), sy(BASEBOARD_H + 3));
-
-  // Bottom-right corner
-  ctx.fillRect(sx(CANVAS_WIDTH - WALL_SIDE_W - 3), sy(CANVAS_HEIGHT - BASEBOARD_H - 3), sx(WALL_SIDE_W + 3), sy(BASEBOARD_H + 3));
-
-  // ──── WALL PANEL LINES (decorative detail) ────
-  ctx.strokeStyle = '#3d5566';
-  ctx.lineWidth = S(1);
-
-  // Vertical line on left wall
-  ctx.beginPath();
-  ctx.moveTo(sx(WALL_SIDE_W / 2), 0);
-  ctx.lineTo(sx(WALL_SIDE_W / 2), sy(WALL_TOP_H + 50));
-  ctx.stroke();
-
-  // Vertical line on right wall
-  ctx.beginPath();
-  ctx.moveTo(sx(CANVAS_WIDTH - WALL_SIDE_W / 2), 0);
-  ctx.lineTo(sx(CANVAS_WIDTH - WALL_SIDE_W / 2), sy(WALL_TOP_H + 50));
-  ctx.stroke();
-
-  // Horizontal divisions on top wall
-  ctx.beginPath();
-  ctx.moveTo(sx(CANVAS_WIDTH / 4), 0);
-  ctx.lineTo(sx(CANVAS_WIDTH / 4), sy(WALL_TOP_H));
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(sx(CANVAS_WIDTH / 2), 0);
-  ctx.lineTo(sx(CANVAS_WIDTH / 2), sy(WALL_TOP_H));
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(sx(3 * CANVAS_WIDTH / 4), 0);
-  ctx.lineTo(sx(3 * CANVAS_WIDTH / 4), sy(WALL_TOP_H));
-  ctx.stroke();
-
-  // ──── WINDOWS ON TOP WALL ────
-  const windowPositions = [150, 450, 750];
+  // ═══════════════════════════════════════════════════════════════
+  // WINDOWS - Only on TOP WALL
+  // ═══════════════════════════════════════════════════════════════
   const windowY = sy(20);
-  const windowW = 80;
-  const windowH = 60;
+  const windowH = S(80);
+  const windowPositions = [100, 350, 600, 850];  // Centered across top wall width
 
   windowPositions.forEach(wx => {
+    const windowW = S(90);
+
     // Window frame - black border
     ctx.fillStyle = '#0F0F14';
-    ctx.fillRect(sx(wx - 2), windowY - sy(2), S(windowW + 4), sy(windowH + 4));
+    ctx.fillRect(sx(wx), windowY, windowW, windowH);
 
     // Window glass - blue tint
     ctx.fillStyle = '#2D4A6A';
-    ctx.fillRect(sx(wx), windowY, S(windowW), sy(windowH));
+    ctx.fillRect(sx(wx + 3), windowY + S(3), windowW - S(6), windowH - S(6));
 
     // Window gradient (sunset effect)
-    const gradient = ctx.createLinearGradient(sx(wx), windowY, sx(wx), windowY + sy(windowH));
-    gradient.addColorStop(0, '#6B2C7A');
-    gradient.addColorStop(0.4, '#D4A574');
-    gradient.addColorStop(1, '#FF6B35');
+    const gradient = ctx.createLinearGradient(sx(wx), windowY, sx(wx), windowY + windowH);
+    gradient.addColorStop(0, '#6B2C7A');      // Purple top
+    gradient.addColorStop(0.4, '#D4A574');    // Orange middle
+    gradient.addColorStop(1, '#FF6B35');      // Red bottom
     ctx.fillStyle = gradient;
     ctx.globalAlpha = 0.3;
-    ctx.fillRect(sx(wx), windowY, S(windowW), sy(windowH));
+    ctx.fillRect(sx(wx + 3), windowY + S(3), windowW - S(6), windowH - S(6));
     ctx.globalAlpha = 1;
 
-    // Window panes (2x2 grid)
+    // Window panes - grid dividers
     ctx.strokeStyle = '#0F0F14';
-    ctx.lineWidth = S(1);
+    ctx.lineWidth = S(1.5);
+
+    // Vertical center divider
     ctx.beginPath();
-    ctx.moveTo(sx(wx + windowW/2), windowY);
-    ctx.lineTo(sx(wx + windowW/2), windowY + sy(windowH));
+    ctx.moveTo(sx(wx + windowW / 2), windowY + S(3));
+    ctx.lineTo(sx(wx + windowW / 2), windowY + windowH - S(3));
+    ctx.stroke();
+
+    // Horizontal dividers
+    ctx.beginPath();
+    ctx.moveTo(sx(wx + 3), windowY + windowH / 3);
+    ctx.lineTo(sx(wx) + windowW - S(3), windowY + windowH / 3);
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(sx(wx), windowY + sy(windowH/2));
-    ctx.lineTo(sx(wx + windowW), windowY + sy(windowH/2));
+    ctx.moveTo(sx(wx + 3), windowY + 2 * windowH / 3);
+    ctx.lineTo(sx(wx) + windowW - S(3), windowY + 2 * windowH / 3);
     ctx.stroke();
-  });
-
-  // ──── CEILING LAMPS (mounted on top wall) ────
-  const lampPositions = [200, 600, 1000];
-  const lampGlow = 0.6 + 0.3 * Math.sin(tick * 0.05);
-
-  lampPositions.forEach(lx => {
-    const lampY = sy(WALL_TOP_H - 12);
-
-    // Lamp mounting bracket
-    ctx.fillStyle = '#3D3D3D';
-    ctx.fillRect(sx(lx - 6), lampY - sy(4), S(12), sy(8));
-
-    // Lamp shade/cover
-    ctx.fillStyle = '#D4A574';
-    ctx.beginPath();
-    ctx.ellipse(sx(lx), lampY, S(10), sy(5), 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Lamp bulb glow
-    ctx.fillStyle = '#FFD700';
-    ctx.globalAlpha = 0.6 + 0.2 * lampGlow;
-    ctx.beginPath();
-    ctx.arc(sx(lx), lampY, S(8), 0, Math.PI * 2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-
-    // Bright glow effect
-    ctx.fillStyle = '#FF8C00';
-    ctx.globalAlpha = 0.2 * lampGlow;
-    ctx.beginPath();
-    ctx.arc(sx(lx), lampY, S(15), 0, Math.PI * 2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
   });
 }
 
