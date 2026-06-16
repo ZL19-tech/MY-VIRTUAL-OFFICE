@@ -421,13 +421,13 @@ const AGENTS = [
 ];
 
 // Grid layout for 6 agents: 3 in first row, 2 in second, Commander big at bottom center
-// ADJUSTED to fit within walls: left wall 120px, right wall varies, top wall 170px
+// Original positions - DO NOT CHANGE
 const GRID = [
-  { x: 170,  y: 150  },   // alexa     (row1 col1 - left)
+  { x: 100,  y: 150  },   // alexa     (row1 col1 - left)
   { x: 450, y: 150  },   // scout     (row1 col2 - center)
-  { x: 730, y: 150  },   // memo      (row1 col3 - right)
-  { x: 170, y: 420  },   // doc       (row2 col1 - left-center)
-  { x: 730, y: 420  },   // cal       (row2 col2 - right-center)
+  { x: 800, y: 150  },   // memo      (row1 col3 - right)
+  { x: 150, y: 420  },   // doc       (row2 col1 - left-center)
+  { x: 750, y: 420  },   // cal       (row2 col2 - right-center)
   { x: 450, y: 650  },   // commander (row3 - center)
 ];
 
@@ -1849,15 +1849,13 @@ function drawBG() {
   const interiorWidth = interiorRight - interiorLeft;
   const interiorHeight = interiorBottom - interiorTop;
 
-  // PREMIUM WOODEN PARQUET FLOOR - ONLY inside the office area
+  // PREMIUM WOODEN PARQUET FLOOR - Fill entire interior between walls
   // ════════════════════════════════════════════════════════════════
   const plankWidth = S(65);
   const plankHeight = S(16);
 
   for (let y = interiorTop; y < interiorBottom; y += plankHeight) {
-    for (let x = interiorLeft - plankWidth; x < interiorRight + plankWidth; x += plankWidth) {
-      // Skip if outside interior
-      if (x + plankWidth <= interiorLeft || x >= interiorRight || y >= interiorBottom) continue;
+    for (let x = interiorLeft; x < interiorRight; x += plankWidth) {
 
       // Alternating plank shades for wood effect
       const plankRow = Math.floor(y / plankHeight);
