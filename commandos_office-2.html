@@ -437,15 +437,23 @@ const AGENTS = [
   { id:'commander', name:'CommandOS', job:'CEO',             color:C.gold,   accent:'#B8860B', icon:'♛', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'classic' },
 ];
 
-// Grid layout for 6 agents: 3 in first row, 2 in second, Commander big at bottom center
-// OPTIMIZED to fit within office with thin walls (50px walls)
+// Grid layout for 6 agents with EQUAL SPACING
+// Canvas: 1200x950, Walls: 50px left/right, 220px top, 80px bottom
+// Usable space: X[50-1150], Y[220-870]
+// Equal spacing between agents
+
 const GRID = [
-  { x: 80,   y: 240  },   // alexa     (row1 col1 - left)
-  { x: 380,  y: 240  },   // scout     (row1 col2 - center)
-  { x: 700,  y: 240  },   // memo      (row1 col3 - right)
-  { x: 180,  y: 500  },   // doc       (row2 col1 - left-center)
-  { x: 600,  y: 500  },   // cal       (row2 col2 - right-center)
-  { x: 380,  y: 730  },   // commander (row3 - center)
+  // ROW 1: 3 agents equally spaced (horizontal) with 15-20px clearance each side
+  { x: 120,  y: 260  },   // alexa     (row1 col1 - left with spacing)
+  { x: 500,  y: 260  },   // scout     (row1 col2 - center with spacing)
+  { x: 880,  y: 260  },   // memo      (row1 col3 - right with spacing)
+
+  // ROW 2: 2 agents equally spaced, centered on canvas
+  { x: 280,  y: 520  },   // doc       (row2 col1 - left-center with spacing)
+  { x: 720,  y: 520  },   // cal       (row2 col2 - right-center with spacing)
+
+  // ROW 3: Commander in CENTER, isolated from others
+  { x: 500,  y: 780  },   // commander (row3 - center)
 ];
 
 // Agent home positions (in front of desk)
