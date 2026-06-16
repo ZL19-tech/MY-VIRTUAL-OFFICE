@@ -1643,56 +1643,38 @@ function drawCompanyLogo(x, y) {
   ctx.fillText('CMD', sx(x), sy(y));
 }
 
-// ── ENTRANCE DOORS - Opens when CommandOS enters ──────────────────
+// ── ENTRANCE DOORS - Bottom Left Corner ──────────────────
 let doorOpenTimer = 0;
-let doorOpenDuration = 200;  // 3+ seconds for animation
+let doorOpenDuration = 200;  // Animation duration
 
 function drawEntranceDoors() {
-  // Door positions on bottom wall
-  const doorWidth = 60;
-  const doorHeight = 70;
-  const doorY = CANVAS_HEIGHT - doorHeight - 15;  // Above bottom wall
+  // Door positions in BOTTOM LEFT CORNER
+  const doorWidth = 50;
+  const doorHeight = 65;
+  const doorX = 40;  // Left side, near wall
+  const doorY = CANVAS_HEIGHT - doorHeight - 8;  // Bottom area
 
-  // LEFT DOOR - Opens from left (slides left)
-  const leftDoorX = 200;
-  let leftDoorOpen = doorOpenTimer;  // 0 = closed, 200 = fully open
-  let leftDoorOffset = leftDoorOpen * (doorWidth / doorOpenDuration);
+  let doorOpen = doorOpenTimer;  // 0 = closed, 200 = fully open
+  let doorOffset = doorOpen * (doorWidth / doorOpenDuration);
 
-  // Draw left door frame
-  ctx.fillStyle = '#6B5345';
-  ctx.fillRect(leftDoorX - leftDoorOffset, doorY, doorWidth, doorHeight);
-
-  // Door frame decoration
-  ctx.strokeStyle = '#D4A574';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(leftDoorX - leftDoorOffset + 2, doorY + 2, doorWidth - 4, doorHeight - 4);
-
-  // Door handle
-  ctx.fillStyle = '#D4A574';
-  ctx.fillRect(leftDoorX - leftDoorOffset + doorWidth - 8, doorY + doorHeight/2 - 3, 5, 6);
-
-  // RIGHT DOOR - Opens from right (slides right)
-  const rightDoorX = 1000;
-  let rightDoorOffset = leftDoorOpen * (doorWidth / doorOpenDuration);
-
-  // Draw right door frame
-  ctx.fillStyle = '#6B5345';
-  ctx.fillRect(rightDoorX + rightDoorOffset, doorY, doorWidth, doorHeight);
+  // SINGLE DOOR - Opens from left (slides left to reveal entrance)
+  ctx.fillStyle = '#6B5345';  // Door frame color
+  ctx.fillRect(doorX - doorOffset, doorY, doorWidth, doorHeight);
 
   // Door frame decoration
   ctx.strokeStyle = '#D4A574';
   ctx.lineWidth = 2;
-  ctx.strokeRect(rightDoorX + rightDoorOffset + 2, doorY + 2, doorWidth - 4, doorHeight - 4);
+  ctx.strokeRect(doorX - doorOffset + 2, doorY + 2, doorWidth - 4, doorHeight - 4);
 
-  // Door handle
+  // Door handle (brass)
   ctx.fillStyle = '#D4A574';
-  ctx.fillRect(rightDoorX + rightDoorOffset + 3, doorY + doorHeight/2 - 3, 5, 6);
+  ctx.fillRect(doorX - doorOffset + doorWidth - 8, doorY + doorHeight/2 - 3, 5, 6);
 
   // Opening effect - light from outside
   if (doorOpenTimer > 0) {
     ctx.fillStyle = '#FFD700';
-    ctx.globalAlpha = 0.15 * (doorOpenTimer / doorOpenDuration);
-    ctx.fillRect(0, doorY - 50, CANVAS_WIDTH, 50);
+    ctx.globalAlpha = 0.2 * (doorOpenTimer / doorOpenDuration);
+    ctx.fillRect(0, doorY - 30, 100, 30);
     ctx.globalAlpha = 1;
   }
 }
@@ -2576,16 +2558,16 @@ setLang('ro');
 // Place agents at their desk positions
 AGENTS.forEach((a, i) => {
   if (a.id === 'commander') {
-    // CommandOS starts OUTSIDE at bottom, will enter through doors
-    a.x = 600;  // Center X
-    a.y = 950;  // OUTSIDE - below canvas
+    // CommandOS starts OUTSIDE at bottom-left door, will enter through it
+    a.x = 20;   // LEFT side (outside)
+    a.y = 880;  // Bottom area (near door)
     a.state = 'walk';
     // Schedule door opening and walking to desk
     setTimeout(() => {
       doorOpenTimer = 1;  // Start opening animation
     }, 500);
     setTimeout(() => {
-      // Walk from outside to desk position
+      // Walk from door entrance to desk position
       const targetX = GRID[i].x + 100;
       const targetY = GRID[i].y + 170;
       walkTo('commander', targetX, targetY);
