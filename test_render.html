@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Render</title>
+</head>
+<body style="margin:0; padding:0; background:#0D1117;">
+    <canvas id="c" style="display:block; width:100%; height:100%;"></canvas>
+    <script>
+        const canvas = document.getElementById('c');
+        const ctx = canvas.getContext('2d');
+        const CANVAS_WIDTH = 1200;
+        const CANVAS_HEIGHT = 950;
+        
+        canvas.width = 800;
+        canvas.height = 600;
+        
+        const zoomLevel = Math.min(canvas.width / CANVAS_WIDTH, canvas.height / CANVAS_HEIGHT);
+        const offsetX = (canvas.width - CANVAS_WIDTH * zoomLevel) / 2;
+        const offsetY = (canvas.height - CANVAS_HEIGHT * zoomLevel) / 2;
+        
+        ctx.save();
+        ctx.fillStyle = '#0D1117';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.translate(offsetX, offsetY);
+        ctx.scale(zoomLevel, zoomLevel);
+        
+        // Draw walls (dark)
+        ctx.fillStyle = '#2A3245';
+        ctx.fillRect(0, 0, 170, CANVAS_HEIGHT);      // Top
+        ctx.fillRect(0, 0, CANVAS_WIDTH, 170);       // Left
+        ctx.fillRect(CANVAS_WIDTH - 120, 0, 120, CANVAS_HEIGHT);  // Right
+        ctx.fillRect(0, CANVAS_HEIGHT - 80, CANVAS_WIDTH, 80);    // Bottom
+        
+        // Draw modern laminate floor
+        const floorY = 240;
+        const floorHeight = 678;
+        const floorX = 120;
+        const floorWidth = 960;
+        
+        // Base color
+        ctx.fillStyle = '#C4B5A0';
+        ctx.fillRect(floorX, floorY, floorWidth, floorHeight);
+        
+        // Plank pattern
+        const plankWidth = 120;
+        const plankHeight = 35;
+        
+        for (let y = floorY; y < floorY + floorHeight; y += plankHeight) {
+            for (let x = floorX; x < floorX + floorWidth; x += plankWidth) {
+                const seed = Math.floor((x / plankWidth) + (y / plankHeight)) % 3;
+                let plankColor = seed === 0 ? '#B8A895' : seed === 1 ? '#C4B5A0' : '#D0BFB0';
+                
+                ctx.fillStyle = plankColor;
+                ctx.fillRect(x, y, plankWidth, plankHeight);
+                
+                // Wood grain
+                ctx.strokeStyle = '#A59885';
+                ctx.lineWidth = 0.5;
+                ctx.globalAlpha = 0.3;
+                
+                for (let i = 0; i < plankHeight; i += 4) {
+                    const waveOffset = Math.sin((x + i) * 0.02) * 3;
+                    ctx.beginPath();
+                    ctx.moveTo(x, y + i + waveOffset);
+                    ctx.lineTo(x + plankWidth, y + i + waveOffset);
+                    ctx.stroke();
+                }
+                ctx.globalAlpha = 1;
+                
+                // Border
+                ctx.strokeStyle = '#DDD8CE';
+                ctx.lineWidth = 0.5;
+                ctx.globalAlpha = 0.5;
+                ctx.strokeRect(x, y, plankWidth, plankHeight);
+                ctx.globalAlpha = 1;
+            }
+        }
+        
+        // Add text
+        ctx.font = 'bold 24px Arial';
+        ctx.fillStyle = '#00FF88';
+        ctx.fillText('✓ Modern Laminate Floor', 250, 350);
+        ctx.fillStyle = '#888';
+        ctx.font = '14px Arial';
+        ctx.fillText('Wood grain pattern with depth effect', 200, 400);
+        
+        ctx.restore();
+    </script>
+</body>
+</html>

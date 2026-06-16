@@ -138,6 +138,63 @@ canvas{display:block;width:100%;height:100%;}
 .toast.gold{border-color:var(--gold);color:var(--gold);background:rgba(255,215,0,0.08);}
 @keyframes toastIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 @keyframes toastOut{to{opacity:0;}}
+
+/* FaceID Modal */
+#faceIdModal{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,0.85);z-index:10000;
+  display:none;align-items:center;justify-content:center;
+}
+#faceIdModal.active{display:flex;}
+#faceIdBox{
+  background:#0A0F1A;border:3px solid var(--green);border-radius:2px;
+  padding:30px;text-align:center;width:400px;max-width:90vw;
+  box-shadow:0 0 50px rgba(0,255,136,0.3);
+}
+#faceIdBox h2{
+  color:var(--green);font-family:'Press Start 2P',monospace;font-size:16px;
+  margin-bottom:20px;letter-spacing:2px;
+}
+#faceIdCamera{
+  width:100%;height:300px;background:#000;border:2px solid var(--blue);
+  margin:20px 0;position:relative;overflow:hidden;border-radius:2px;
+  display:flex;align-items:center;justify-content:center;
+}
+#faceIdCamera video,#faceIdCamera canvas{
+  width:100%;height:100%;object-fit:cover;
+}
+#faceIdCamera.scanning::before{
+  content:'🔍 SCANNING...';position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);color:var(--blue);font-size:20px;
+  font-family:'Press Start 2P',monospace;z-index:5;
+}
+#faceIdCamera.scanning::after{
+  content:'';position:absolute;top:0;left:0;width:100%;height:100%;
+  background:linear-gradient(180deg,transparent,rgba(0,191,255,0.3));
+  animation:scanLine 1s infinite;z-index:4;
+}
+@keyframes scanLine{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(200px);}
+}
+#faceScanResult{
+  margin:15px 0;min-height:40px;display:flex;align-items:center;
+  justify-content:center;color:var(--green);font-family:'Share Tech Mono',monospace;
+  font-size:12px;
+}
+#faceScanResult.success{color:var(--green);}
+#faceScanResult.error{color:var(--orange);}
+#faceIdButtons{
+  display:flex;gap:10px;margin-top:20px;justify-content:center;
+}
+.faceId-btn{
+  background:transparent;border:2px solid var(--green);color:var(--green);
+  padding:10px 20px;cursor:pointer;font-family:'Press Start 2P',monospace;
+  font-size:11px;transition:all .2s;flex:1;
+}
+.faceId-btn:hover{background:rgba(0,255,136,0.2);}
+.faceId-btn.cancel{border-color:var(--orange);color:var(--orange);}
+.faceId-btn.cancel:hover{background:rgba(255,107,53,0.2);}
 </style>
 </head>
 <body>
@@ -195,6 +252,25 @@ canvas{display:block;width:100%;height:100%;}
 </div>
 
 <div id="toast-wrap"></div>
+
+<!-- FaceID Authentication Modal -->
+<div id="faceIdModal">
+  <div id="faceIdBox">
+    <h2>🔐 FACE ID</h2>
+    <p style="color:var(--text);font-family:'Share Tech Mono',monospace;font-size:11px;margin-bottom:15px;">
+      SCAN YOUR FACE TO OPEN DOOR
+    </p>
+    <div id="faceIdCamera" class="scanning">
+      <video id="faceVideo" style="display:none;"></video>
+      <canvas id="faceCanvas"></canvas>
+    </div>
+    <div id="faceScanResult"></div>
+    <div id="faceIdButtons">
+      <button class="faceId-btn" id="approveFaceBtn">✓ APPROVE</button>
+      <button class="faceId-btn cancel" id="cancelFaceBtn">✗ CANCEL</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ═══════════════════════════════════════════════════════════════════
@@ -1643,6 +1719,171 @@ function drawCompanyLogo(x, y) {
   ctx.fillText('CMD', sx(x), sy(y));
 }
 
+// ── FACEID SYSTEM ───────────────────────────────────────────────
+let faceIdPending = false;
+let faceIdApproved = false;
+let faceIdScanProgress = 0;
+let faceIdScanTimer = null;
+
+function openFaceIdModal() {
+  faceIdApproved = false;
+  faceIdPending = true;
+  faceIdScanProgress = 0;
+  const modal = document.getElementById('faceIdModal');
+  modal.classList.add('active');
+
+  // Start scanning animation
+  const camera = document.getElementById('faceIdCamera');
+  camera.classList.add('scanning');
+
+  // Draw animated face scanning visualization
+  const canvas = document.getElementById('faceCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = camera.clientWidth;
+  canvas.height = camera.clientHeight;
+
+  // Start scan simulation
+  let scanFrame = 0;
+  faceIdScanTimer = setInterval(() => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Background
+    ctx.fillStyle = '#1A2A3A';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Scanning circles (facial recognition animation)
+    ctx.strokeStyle = '#00BFFF';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 3; i++) {
+      const radius = 50 + i * 30 + Math.sin(scanFrame * 0.1 + i) * 10;
+      const opacity = 1 - (i / 3);
+      ctx.globalAlpha = opacity * 0.6;
+      ctx.beginPath();
+      ctx.arc(canvas.width / 2, canvas.height / 2, radius, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    // Face outline rectangle
+    ctx.strokeStyle = '#00FF88';
+    ctx.lineWidth = 3;
+    const faceW = canvas.width * 0.5;
+    const faceH = canvas.height * 0.7;
+    const faceX = (canvas.width - faceW) / 2;
+    const faceY = (canvas.height - faceH) / 2;
+    ctx.strokeRect(faceX, faceY, faceW, faceH);
+
+    // Scanning line
+    const lineY = faceY + (faceH * (scanFrame % 100) / 100);
+    ctx.strokeStyle = '#00FF88';
+    ctx.lineWidth = 2;
+    ctx.globalAlpha = 0.7;
+    ctx.beginPath();
+    ctx.moveTo(faceX, lineY);
+    ctx.lineTo(faceX + faceW, lineY);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // Corner brackets
+    const bracketSize = 30;
+    ctx.strokeStyle = '#FFD700';
+    ctx.lineWidth = 2;
+
+    // Top-left
+    ctx.beginPath();
+    ctx.moveTo(faceX, faceY);
+    ctx.lineTo(faceX + bracketSize, faceY);
+    ctx.moveTo(faceX, faceY);
+    ctx.lineTo(faceX, faceY + bracketSize);
+    ctx.stroke();
+
+    // Top-right
+    ctx.beginPath();
+    ctx.moveTo(faceX + faceW, faceY);
+    ctx.lineTo(faceX + faceW - bracketSize, faceY);
+    ctx.moveTo(faceX + faceW, faceY);
+    ctx.lineTo(faceX + faceW, faceY + bracketSize);
+    ctx.stroke();
+
+    // Bottom-left
+    ctx.beginPath();
+    ctx.moveTo(faceX, faceY + faceH);
+    ctx.lineTo(faceX + bracketSize, faceY + faceH);
+    ctx.moveTo(faceX, faceY + faceH);
+    ctx.lineTo(faceX, faceY + faceH - bracketSize);
+    ctx.stroke();
+
+    // Bottom-right
+    ctx.beginPath();
+    ctx.moveTo(faceX + faceW, faceY + faceH);
+    ctx.lineTo(faceX + faceW - bracketSize, faceY + faceH);
+    ctx.moveTo(faceX + faceW, faceY + faceH);
+    ctx.lineTo(faceX + faceW, faceY + faceH - bracketSize);
+    ctx.stroke();
+
+    // Progress percentage
+    const progress = Math.min(100, scanFrame * 2);
+    faceIdScanProgress = progress;
+    ctx.fillStyle = '#00FF88';
+    ctx.font = '16px "Press Start 2P", monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(`${progress}%`, canvas.width / 2, canvas.height - 10);
+
+    scanFrame++;
+
+    // Auto-complete after 50 frames
+    if (scanFrame > 50) {
+      clearInterval(faceIdScanTimer);
+      showFaceScanResult('✓ FACE RECOGNIZED - READY TO APPROVE', 'success');
+    }
+  }, 50);
+
+  showFaceScanResult('⏳ SCANNING FACE...', 'normal');
+}
+
+function showFaceScanResult(text, status) {
+  const resultDiv = document.getElementById('faceScanResult');
+  resultDiv.textContent = text;
+  resultDiv.className = status;
+}
+
+function closeFaceIdModal() {
+  faceIdPending = false;
+  faceIdApproved = false;
+  if (faceIdScanTimer) clearInterval(faceIdScanTimer);
+  document.getElementById('faceIdModal').classList.remove('active');
+}
+
+function approveFaceId() {
+  if (faceIdScanProgress >= 90) {
+    faceIdApproved = true;
+    showFaceScanResult('✓✓✓ FACE VERIFIED - DOOR OPENING ✓✓✓', 'success');
+
+    // Close modal and open door
+    setTimeout(() => {
+      closeFaceIdModal();
+      doorIsOpen = true;
+      showToast('🔐 FACE ID APPROVED - Welcome!', 'green');
+
+      // Trigger CommandOS entry
+      setTimeout(() => {
+        commanderShouldEnter = true;
+        const commander = AGENTS.find(a => a.id === 'commander');
+        if (commander) {
+          commander.state = 'walk';
+          const i = AGENTS.indexOf(commander);
+          const targetX = GRID[i].x + 100;
+          const targetY = GRID[i].y + 170;
+          walkTo('commander', targetX, targetY);
+        }
+      }, 500);
+    }, 800);
+  } else {
+    showFaceScanResult('⚠ FACE NOT FULLY SCANNED - TRY AGAIN', 'error');
+  }
+}
+
 // ── ENTRANCE DOOR & CONTROL - Top Left Corner ──────────────────
 let doorIsOpen = false;  // Door state: true = open, false = closed
 let commanderShouldEnter = false;
@@ -1701,28 +1942,58 @@ function drawEntranceDoor() {
   }
 }
 
-// Draw control button next to door
+// Draw control button next to door (Face ID)
 function drawDoorButton() {
-  const buttonWidth = 40;
-  const buttonHeight = 40;
-  const buttonX = 130;  // Right of door
-  const buttonY = 95;   // Same level as door
+  const buttonWidth = 50;
+  const buttonHeight = 50;
+  const buttonX = 125;  // Right of door
+  const buttonY = 85;   // Same level as door
 
-  // Button background
-  ctx.fillStyle = doorIsOpen ? '#00FF88' : '#FF3355';  // Green=OPEN, Red=CLOSED
+  // Button background - gradient for tech look
+  const gradient = ctx.createLinearGradient(buttonX, buttonY, buttonX, buttonY + buttonHeight);
+  gradient.addColorStop(0, '#1A4D6D');
+  gradient.addColorStop(1, '#0F2A3D');
+
+  ctx.fillStyle = gradient;
   ctx.fillRect(buttonX, buttonY, buttonWidth, buttonHeight);
 
-  // Button border
-  ctx.strokeStyle = '#FFFFFF';
+  // Button border - glowing effect
+  ctx.strokeStyle = doorIsOpen ? '#00FF88' : '#00BFFF';  // Green=OPEN, Blue=LOCKED
   ctx.lineWidth = 2;
+  if (!doorIsOpen) {
+    ctx.shadowColor = '#00BFFF';
+    ctx.shadowBlur = 10;
+  } else {
+    ctx.shadowColor = '#00FF88';
+    ctx.shadowBlur = 15;
+  }
   ctx.strokeRect(buttonX, buttonY, buttonWidth, buttonHeight);
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
 
-  // Button text
-  ctx.font = `${S(8)}px "Press Start 2P", monospace`;
-  ctx.fillStyle = '#FFFFFF';
+  // FaceID icon
+  ctx.font = `${S(24)}px serif`;
+  ctx.fillStyle = doorIsOpen ? '#00FF88' : '#00BFFF';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(doorIsOpen ? 'OPEN' : 'CLOSED', buttonX + buttonWidth/2, buttonY + buttonHeight/2);
+  ctx.fillText('🔐', buttonX + buttonWidth/2, buttonY + buttonHeight/2 - 2);
+
+  // Status text below
+  ctx.font = `${S(5)}px "Press Start 2P", monospace`;
+  ctx.fillStyle = doorIsOpen ? '#00FF88' : '#00BFFF';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  const statusText = doorIsOpen ? 'OPEN' : 'SCAN';
+  ctx.fillText(statusText, buttonX + buttonWidth/2, buttonY + buttonHeight + 8);
+
+  // Pulse animation when locked
+  if (!doorIsOpen && (Math.sin(tick * 0.08) > 0)) {
+    ctx.globalAlpha = 0.3;
+    ctx.strokeStyle = '#00BFFF';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(buttonX - 3, buttonY - 3, buttonWidth + 6, buttonHeight + 6);
+    ctx.globalAlpha = 1;
+  }
 
   // Store button position for click detection
   window.doorButtonRect = { x: buttonX, y: buttonY, w: buttonWidth, h: buttonHeight };
@@ -2552,24 +2823,17 @@ canvas.addEventListener('click', (e) => {
 });
 
 function handleDoorButtonClick() {
-  doorIsOpen = !doorIsOpen;  // Toggle door state
-
   if (doorIsOpen) {
-    showToast('🚪 DOOR OPENED - CommandOS entering...', 'green');
-    // Schedule CommandOS to enter after short delay
-    setTimeout(() => {
-      commanderShouldEnter = true;
-      const commander = AGENTS.find(a => a.id === 'commander');
-      if (commander) {
-        commander.state = 'walk';
-        const i = AGENTS.indexOf(commander);
-        const targetX = GRID[i].x + 100;
-        const targetY = GRID[i].y + 170;
-        walkTo('commander', targetX, targetY);
-      }
-    }, 500);
-  } else {
+    // Close door
+    doorIsOpen = false;
+    faceIdApproved = false;
     showToast('🚪 DOOR CLOSED', 'orange');
+  } else {
+    // Open Face ID scanner
+    if (!faceIdPending) {
+      showToast('🔐 FACE ID SCANNING...', 'gold');
+      openFaceIdModal();
+    }
   }
 }
 
@@ -2625,6 +2889,16 @@ function handleCommandButton(action) {
     }
   }
 }
+
+// ── Face ID Button Handlers ──────────────────────────────────────
+document.getElementById('approveFaceBtn').addEventListener('click', () => {
+  approveFaceId();
+});
+
+document.getElementById('cancelFaceBtn').addEventListener('click', () => {
+  closeFaceIdModal();
+  showToast('🔐 Face ID cancelled', 'orange');
+});
 
 // ── Init ─────────────────────────────────────────────────────────────
 buildAgentButtons();
