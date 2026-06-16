@@ -2284,10 +2284,32 @@ function render() {
   ctx.scale(zoomLevel, zoomLevel);
 
   // DRAW BACKGROUND IMAGE ON INTERNAL CANVAS (1200x950)
-  // After transformations - fills the game area perfectly
+  // Scale as CSS "cover" - fill entire canvas, crop if needed to maintain aspect ratio
   if (bgImage && bgImage.complete && bgImage.naturalWidth > 0) {
-    // Draw image scaled to fill entire internal canvas
-    ctx.drawImage(bgImage, 0, 0, bgImage.width, bgImage.height, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    // Calculate cover-mode scaling
+    const imgAspect = bgImage.width / bgImage.height;      // 1710 / 1478 ≈ 1.157
+    const canvasAspect = CANVAS_WIDTH / CANVAS_HEIGHT;     // 1200 / 950 ≈ 1.263
+
+    let drawWidth = CANVAS_WIDTH;
+    let drawHeight = CANVAS_HEIGHT;
+    let srcX = 0;
+    let srcY = 0;
+    let srcWidth = bgImage.width;
+    let srcHeight = bgImage.height;
+
+    // Determine which dimension constrains (cover mode)
+    if (imgAspect > canvasAspect) {
+      // Image wider than canvas - constrain by height, crop sides
+      srcWidth = Math.ceil(bgImage.height * canvasAspect);
+      srcX = (bgImage.width - srcWidth) / 2;  // Center crop
+    } else {
+      // Image taller than canvas - constrain by width, crop top/bottom
+      srcHeight = Math.ceil(bgImage.width / canvasAspect);
+      srcY = (bgImage.height - srcHeight) / 2;  // Center crop
+    }
+
+    // Draw cropped image to fill entire canvas
+    ctx.drawImage(bgImage, srcX, srcY, srcWidth, srcHeight, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
   } else {
     // Fallback: solid color
     ctx.fillStyle = '#2A3245';
