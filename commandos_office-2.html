@@ -1643,6 +1643,60 @@ function drawCompanyLogo(x, y) {
   ctx.fillText('CMD', sx(x), sy(y));
 }
 
+// ── ENTRANCE DOORS - Opens when CommandOS enters ──────────────────
+let doorOpenTimer = 0;
+let doorOpenDuration = 200;  // 3+ seconds for animation
+
+function drawEntranceDoors() {
+  // Door positions on bottom wall
+  const doorWidth = 60;
+  const doorHeight = 70;
+  const doorY = CANVAS_HEIGHT - doorHeight - 15;  // Above bottom wall
+
+  // LEFT DOOR - Opens from left (slides left)
+  const leftDoorX = 200;
+  let leftDoorOpen = doorOpenTimer;  // 0 = closed, 200 = fully open
+  let leftDoorOffset = leftDoorOpen * (doorWidth / doorOpenDuration);
+
+  // Draw left door frame
+  ctx.fillStyle = '#6B5345';
+  ctx.fillRect(leftDoorX - leftDoorOffset, doorY, doorWidth, doorHeight);
+
+  // Door frame decoration
+  ctx.strokeStyle = '#D4A574';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(leftDoorX - leftDoorOffset + 2, doorY + 2, doorWidth - 4, doorHeight - 4);
+
+  // Door handle
+  ctx.fillStyle = '#D4A574';
+  ctx.fillRect(leftDoorX - leftDoorOffset + doorWidth - 8, doorY + doorHeight/2 - 3, 5, 6);
+
+  // RIGHT DOOR - Opens from right (slides right)
+  const rightDoorX = 1000;
+  let rightDoorOffset = leftDoorOpen * (doorWidth / doorOpenDuration);
+
+  // Draw right door frame
+  ctx.fillStyle = '#6B5345';
+  ctx.fillRect(rightDoorX + rightDoorOffset, doorY, doorWidth, doorHeight);
+
+  // Door frame decoration
+  ctx.strokeStyle = '#D4A574';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(rightDoorX + rightDoorOffset + 2, doorY + 2, doorWidth - 4, doorHeight - 4);
+
+  // Door handle
+  ctx.fillStyle = '#D4A574';
+  ctx.fillRect(rightDoorX + rightDoorOffset + 3, doorY + doorHeight/2 - 3, 5, 6);
+
+  // Opening effect - light from outside
+  if (doorOpenTimer > 0) {
+    ctx.fillStyle = '#FFD700';
+    ctx.globalAlpha = 0.15 * (doorOpenTimer / doorOpenDuration);
+    ctx.fillRect(0, doorY - 50, CANVAS_WIDTH, 50);
+    ctx.globalAlpha = 1;
+  }
+}
+
 // ── RESPONSIVE ROOM WALLS - Ultra-Thin Professional Style ──────────────────
 function drawRoomWalls() {
   const WALL_COLOR = '#8B7355';   // Coffee-brown wood color
@@ -2048,6 +2102,13 @@ function drawCharts() {
 
 // ── Scene auto-animation ─────────────────────────────────────────────
 function runAutoScene() {
+  // Handle door opening animation
+  if (doorOpenTimer > 0 && doorOpenTimer < doorOpenDuration) {
+    doorOpenTimer++;
+  } else if (doorOpenTimer >= doorOpenDuration) {
+    doorOpenTimer = doorOpenDuration;  // Keep fully open
+  }
+
   // Handle system states
   if (systemState === 'paused') {
     pauseTimer--;
@@ -2408,6 +2469,9 @@ function render() {
   // Brown-coffee wood walls with windows
   drawRoomWalls();
 
+  // Entrance doors (opens when CommandOS arrives)
+  drawEntranceDoors();
+
   // Draw HUD (time, text) on top of background
   drawHUD();
 
@@ -2508,12 +2572,24 @@ function handleCommandButton(action) {
 // ── Init ─────────────────────────────────────────────────────────────
 buildAgentButtons();
 setLang('ro');
+
 // Place agents at their desk positions
 AGENTS.forEach((a, i) => {
   if (a.id === 'commander') {
-    a.x = GRID[i].x + 100;
-    a.y = GRID[i].y + 170;
-    a.state = 'idle';
+    // CommandOS starts OUTSIDE at bottom, will enter through doors
+    a.x = 600;  // Center X
+    a.y = 950;  // OUTSIDE - below canvas
+    a.state = 'walk';
+    // Schedule door opening and walking to desk
+    setTimeout(() => {
+      doorOpenTimer = 1;  // Start opening animation
+    }, 500);
+    setTimeout(() => {
+      // Walk from outside to desk position
+      const targetX = GRID[i].x + 100;
+      const targetY = GRID[i].y + 170;
+      walkTo('commander', targetX, targetY);
+    }, 1500);
   } else {
     a.x = GRID[i].x + 80;
     a.y = GRID[i].y + 90;
@@ -2522,6 +2598,7 @@ AGENTS.forEach((a, i) => {
   a.homeX = a.x;
   a.homeY = a.y;
 });
+
 render();
 </script>
 </body>
