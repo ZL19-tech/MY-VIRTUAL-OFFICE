@@ -2272,21 +2272,27 @@ function runAutoScene() {
 function render() {
   resizeCanvas();
 
-  // DRAW BACKGROUND IMAGE ON FULL CANVAS BEFORE ANY TRANSFORMATIONS
-  // This fills entire viewport with background, no dark borders
-  if (bgImage && bgImage.complete && bgImage.naturalWidth > 0) {
-    // Scale background to fill entire physical canvas (responsive size)
-    ctx.drawImage(bgImage, 0, 0, bgImage.width, bgImage.height, 0, 0, canvas.width, canvas.height);
-  } else {
-    // Fallback: solid color
-    ctx.fillStyle = '#0D1117';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
-
   // Apply zoom transformation for responsive scaling
   ctx.save();
+
+  // Fill entire physical canvas with dark background first
+  ctx.fillStyle = '#0D1117';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Apply transformations for game rendering
   ctx.translate(offsetX, offsetY);
   ctx.scale(zoomLevel, zoomLevel);
+
+  // DRAW BACKGROUND IMAGE ON INTERNAL CANVAS (1200x950)
+  // After transformations - fills the game area perfectly
+  if (bgImage && bgImage.complete && bgImage.naturalWidth > 0) {
+    // Draw image scaled to fill entire internal canvas
+    ctx.drawImage(bgImage, 0, 0, bgImage.width, bgImage.height, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+  } else {
+    // Fallback: solid color
+    ctx.fillStyle = '#2A3245';
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+  }
 
   // Draw HUD (time, text) on top of background
   drawHUD();
