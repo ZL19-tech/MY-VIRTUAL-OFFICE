@@ -194,17 +194,6 @@ canvas{display:block;width:100%;height:100%;}
 }
 #faceScanResult.success{color:var(--green);}
 #faceScanResult.error{color:var(--orange);}
-#faceIdButtons{
-  display:flex;gap:10px;margin-top:20px;justify-content:center;
-}
-.faceId-btn{
-  background:transparent;border:2px solid var(--green);color:var(--green);
-  padding:10px 20px;cursor:pointer;font-family:'Press Start 2P',monospace;
-  font-size:11px;transition:all .2s;flex:1;
-}
-.faceId-btn:hover{background:rgba(0,255,136,0.2);}
-.faceId-btn.cancel{border-color:var(--orange);color:var(--orange);}
-.faceId-btn.cancel:hover{background:rgba(255,107,53,0.2);}
 </style>
 </head>
 <body>
@@ -276,10 +265,6 @@ canvas{display:block;width:100%;height:100%;}
       <div id="faceLoadingStatus" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00FF88; font-family: 'Press Start 2P', monospace; font-size: 12px; text-align: center; z-index: 10;">⏳ LOADING CAMERA...</div>
     </div>
     <div id="faceScanResult"></div>
-    <div id="faceIdButtons">
-      <button class="faceId-btn" id="approveFaceBtn">✓ APPROVE</button>
-      <button class="faceId-btn cancel" id="cancelFaceBtn">✗ CANCEL</button>
-    </div>
   </div>
 </div>
 
@@ -1733,23 +1718,15 @@ function drawCompanyLogo(x, y) {
 // ── FACEID SYSTEM - REAL CAMERA DETECTION ───────────────────────
 let faceIdPending = false;
 let faceIdApproved = false;
-let faceIdScanProgress = 0;
-let faceIdScanTimer = null;
 let faceVideoStream = null;
 let faceDetected = false;
-let faceInPosition = false;
-let detectionConfidence = 0;
 let cameraPermission = 'pending'; // 'pending' | 'granted' | 'denied'
-let detectionModel = null;
 let modelLoading = false;
 
 async function openFaceIdModal() {
   faceIdApproved = false;
   faceIdPending = true;
-  faceIdScanProgress = 0;
   faceDetected = false;
-  faceInPosition = false;
-  detectionConfidence = 0;
   cameraPermission = 'pending';
 
   const modal = document.getElementById('faceIdModal');
@@ -1808,9 +1785,7 @@ async function openFaceIdModal() {
     loadingStatus.style.display = 'none';
     showFaceScanResult('🔍 SCANNING FACE...', 'normal');
 
-    // Step 3: Detection loop
-    let stableDetectionCount = 0;
-
+    // Step 3: Detection loop - AUTO-APPROVE ANY FACE INSTANTLY
     const detectFace = async () => {
       if (!faceIdPending) return;
 
@@ -1823,33 +1798,15 @@ async function openFaceIdModal() {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        if (detections.length === 1) {
+        if (detections.length >= 1) {
+          // ANY FACE DETECTED = INSTANT AUTO-APPROVE
           const detection = detections[0];
           const box = detection.detection.box;
 
-          // Calculate confidence (0-100)
-          const score = Math.round(detection.detection.score * 100);
-          detectionConfidence = score;
-
-          // Check if face is centered and well-positioned
-          const centerX = canvas.width / 2;
-          const centerY = canvas.height / 2;
-          const faceCenter = {
-            x: box.x + box.width / 2,
-            y: box.y + box.height / 2
-          };
-
-          const distFromCenter = Math.sqrt(
-            Math.pow(faceCenter.x - centerX, 2) +
-            Math.pow(faceCenter.y - centerY, 2)
-          );
-          const maxDist = Math.min(canvas.width, canvas.height) * 0.15;
-
           faceDetected = true;
-          faceInPosition = distFromCenter < maxDist && score >= 80;
 
-          // Draw bounding box
-          ctx.strokeStyle = faceInPosition ? '#00FF88' : '#FF6B35';
+          // Draw bounding box (always GREEN for instant approval)
+          ctx.strokeStyle = '#00FF88';
           ctx.lineWidth = 3;
           ctx.strokeRect(box.x, box.y, box.width, box.height);
 
@@ -1862,56 +1819,36 @@ async function openFaceIdModal() {
             ctx.fill();
           });
 
-          // Draw confidence
-          ctx.fillStyle = faceInPosition ? '#00FF88' : '#FF6B35';
-          ctx.font = '14px "Press Start 2P", monospace';
-          ctx.textAlign = 'center';
-          ctx.fillText(`${score}%`, canvas.width / 2, 30);
+          // INSTANT AUTO-APPROVE - NO CONDITIONS
+          showFaceScanResult('✓ FACE APPROVED', 'success');
+          faceIdPending = false;
 
-          // Auto-approve if good position
-          if (faceInPosition) {
-            stableDetectionCount++;
-            faceIdScanProgress = Math.min(100, stableDetectionCount * 10);
+          setTimeout(() => {
+            closeFaceIdModal();
+            doorIsOpen = true;
+            showToast('🔐 FACE ID APPROVED - Welcome!', 'green');
 
-            if (stableDetectionCount >= 5) {
-              // Auto-approve!
-              clearTimeout(faceIdScanTimer);
-              showFaceScanResult('✓✓✓ FACE VERIFIED ✓✓✓', 'success');
-              setTimeout(() => {
-                closeFaceIdModal();
-                doorIsOpen = true;
-                showToast('🔐 FACE ID APPROVED - Welcome!', 'green');
-
-                // Trigger CommandOS entry
-                setTimeout(() => {
-                  commanderShouldEnter = true;
-                  const commander = AGENTS.find(a => a.id === 'commander');
-                  if (commander) {
-                    commander.state = 'walk';
-                    const i = AGENTS.indexOf(commander);
-                    const targetX = GRID[i].x + 100;
-                    const targetY = GRID[i].y + 170;
-                    walkTo('commander', targetX, targetY);
-                  }
-                }, 500);
-              }, 500);
-              return;
-            }
-          } else {
-            stableDetectionCount = Math.max(0, stableDetectionCount - 1);
-            faceIdScanProgress = Math.max(0, stableDetectionCount * 15);
-            showFaceScanResult('📍 CENTER YOUR FACE...', 'normal');
-          }
+            // Trigger CommandOS entry
+            setTimeout(() => {
+              commanderShouldEnter = true;
+              const commander = AGENTS.find(a => a.id === 'commander');
+              if (commander) {
+                commander.state = 'walk';
+                const i = AGENTS.indexOf(commander);
+                const targetX = GRID[i].x + 100;
+                const targetY = GRID[i].y + 170;
+                walkTo('commander', targetX, targetY);
+              }
+            }, 500);
+          }, 300);
+          return;
         } else {
           faceDetected = false;
-          faceInPosition = false;
-          stableDetectionCount = 0;
-          faceIdScanProgress = Math.max(0, faceIdScanProgress - 5);
           ctx.fillStyle = '#FF6B35';
           ctx.font = '14px "Press Start 2P", monospace';
           ctx.textAlign = 'center';
-          ctx.fillText(detections.length === 0 ? 'NO FACE DETECTED' : 'MULTIPLE FACES', canvas.width / 2, 30);
-          showFaceScanResult(detections.length === 0 ? '❌ NO FACE DETECTED' : '❌ MULTIPLE FACES', 'error');
+          ctx.fillText('NO FACE DETECTED', canvas.width / 2, 30);
+          showFaceScanResult('❌ NO FACE DETECTED', 'error');
         }
       } catch (err) {
         console.error('Detection error:', err);
@@ -1933,10 +1870,6 @@ async function openFaceIdModal() {
     loadingStatus.style.color = '#FF6B35';
     showFaceScanResult('🔐 Camera required for Face ID', 'error');
     showToast('❌ Camera access denied or not available', 'warn');
-
-    // Disable approve button
-    document.getElementById('approveFaceBtn').disabled = true;
-    document.getElementById('approveFaceBtn').style.opacity = '0.5';
   }
 }
 
@@ -1956,12 +1889,6 @@ function closeFaceIdModal() {
     faceVideoStream = null;
   }
 
-  // Stop detection loop
-  if (faceIdScanTimer) {
-    clearTimeout(faceIdScanTimer);
-    faceIdScanTimer = null;
-  }
-
   // Clear canvas
   const canvas = document.getElementById('faceDetectionCanvas');
   if (canvas) {
@@ -1971,8 +1898,6 @@ function closeFaceIdModal() {
 
   // Reset states
   faceDetected = false;
-  faceInPosition = false;
-  detectionConfidence = 0;
 
   // Hide modal
   document.getElementById('faceIdModal').classList.remove('active');
@@ -1986,39 +1911,8 @@ function closeFaceIdModal() {
 }
 
 function approveFaceId() {
-  // Manual approval (only for fallback or user override)
-  if (cameraPermission === 'denied') {
-    showFaceScanResult('❌ CAMERA REQUIRED', 'error');
-    showToast('❌ Camera access is required', 'warn');
-    return;
-  }
-
-  if (faceDetected && faceInPosition) {
-    faceIdApproved = true;
-    showFaceScanResult('✓✓✓ FACE VERIFIED ✓✓✓', 'success');
-
-    // Close modal and open door
-    setTimeout(() => {
-      closeFaceIdModal();
-      doorIsOpen = true;
-      showToast('🔐 FACE ID APPROVED - Welcome!', 'green');
-
-      // Trigger CommandOS entry
-      setTimeout(() => {
-        commanderShouldEnter = true;
-        const commander = AGENTS.find(a => a.id === 'commander');
-        if (commander) {
-          commander.state = 'walk';
-          const i = AGENTS.indexOf(commander);
-          const targetX = GRID[i].x + 100;
-          const targetY = GRID[i].y + 170;
-          walkTo('commander', targetX, targetY);
-        }
-      }, 500);
-    }, 500);
-  } else {
-    showFaceScanResult('⚠ POSITION YOUR FACE AND WAIT...', 'error');
-  }
+  // NO LONGER USED - Auto-approve happens instantly in openFaceIdModal()
+  // This function is kept for backwards compatibility but not called
 }
 
 // ── ENTRANCE DOOR & CONTROL - Top Left Corner ──────────────────
@@ -3026,16 +2920,6 @@ function handleCommandButton(action) {
     }
   }
 }
-
-// ── Face ID Button Handlers ──────────────────────────────────────
-document.getElementById('approveFaceBtn').addEventListener('click', () => {
-  approveFaceId();
-});
-
-document.getElementById('cancelFaceBtn').addEventListener('click', () => {
-  closeFaceIdModal();
-  showToast('🔐 Face ID cancelled', 'orange');
-});
 
 // ── Init ─────────────────────────────────────────────────────────────
 buildAgentButtons();
