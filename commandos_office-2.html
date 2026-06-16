@@ -1827,13 +1827,32 @@ function enhanceWindowFrames() {
 
 // ── CommandOS Brand Background ──────────────────────────────────────
 function drawBG() {
-  // FULL PREMIUM WOODEN PARQUET FLOOR (entire background)
-  // ════════════════════════════════════════════════════════════════
-  const plankWidth = S(65);   // Wide planks for realistic look
-  const plankHeight = S(16);  // Proportional height
+  // Calculate responsive wall dimensions
+  const topWallHeight = Math.max(canvas.height * 0.08, 80);
+  const sideWallWidth = Math.max(canvas.width * 0.03, 40);
 
-  for (let y = 0; y < canvas.height; y += plankHeight) {
-    for (let x = -plankWidth; x < canvas.width; x += plankWidth) {
+  // FILL ENTIRE BACKGROUND WITH WALL COLOR FIRST
+  ctx.fillStyle = '#2A3245';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // DEFINE INTERIOR OFFICE AREA (where floor and agents are)
+  const interiorLeft = sideWallWidth;
+  const interiorTop = topWallHeight;
+  const interiorRight = canvas.width - sideWallWidth;
+  const interiorBottom = canvas.height;
+  const interiorWidth = interiorRight - interiorLeft;
+  const interiorHeight = interiorBottom - interiorTop;
+
+  // PREMIUM WOODEN PARQUET FLOOR - ONLY inside the office area
+  // ════════════════════════════════════════════════════════════════
+  const plankWidth = S(65);
+  const plankHeight = S(16);
+
+  for (let y = interiorTop; y < interiorBottom; y += plankHeight) {
+    for (let x = interiorLeft - plankWidth; x < interiorRight + plankWidth; x += plankWidth) {
+      // Skip if outside interior
+      if (x + plankWidth <= interiorLeft || x >= interiorRight || y >= interiorBottom) continue;
+
       // Alternating plank shades for wood effect
       const plankRow = Math.floor(y / plankHeight);
       const plankCol = Math.floor(x / plankWidth);
