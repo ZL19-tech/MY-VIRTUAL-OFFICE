@@ -2066,11 +2066,10 @@ async function openFaceIdModal() {
                   showToast('🚪 DOOR OPENED - CommandOS entering...', 'green');
 
                   // CEO walks to desk avoiding collision zones - no stops, just movement
-                  // Path: DOWN immediately (below Scout y:170-290) → DREAPTA → to desk
+                  // Path: DOWN to bottom → then to desk (avoids all desk collisions)
                   const waypoints = [
                     { x: 50, y: 150 },    // Start at door (entrance - top left)
-                    { x: 50, y: 350 },    // Go DOWN FAST (below Scout collision y:170-290)
-                    { x: 800, y: 350 },   // Go RIGHT (at safe height)
+                    { x: 50, y: 850 },    // Go DOWN to BOTTOM (below all desks completely)
                     { x: 500, y: 800 },   // FINAL: Commander's home position (in front of his LARGE desk at bottom, sitting)
                   ];
 
