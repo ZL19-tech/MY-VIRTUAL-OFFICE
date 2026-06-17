@@ -1041,8 +1041,23 @@ function drawDeskItems(gx, gy, agent, isCommander = false) {
     }
   }
 
-  // Phone
+  // Laptop (MacBook) - Silver color
   itemX += 32;
+  ctx.fillStyle = '#C0C0C0';  // Silver aluminum
+  ctx.fillRect(itemX, itemY + 8, 24, 16);  // Laptop base
+  ctx.fillStyle = '#404040';  // Screen bezels
+  ctx.fillRect(itemX + 2, itemY + 2, 20, 12);  // Screen
+  ctx.fillStyle = '#1A1A1A';  // Screen
+  ctx.fillRect(itemX + 3, itemY + 3, 18, 10);
+  ctx.fillStyle = agent.color;
+  ctx.globalAlpha = 0.2;
+  ctx.fillRect(itemX + 3, itemY + 3, 18, 10);  // Screen glow
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#808080';  // Keyboard area
+  ctx.fillRect(itemX + 3, itemY + 13, 18, 2);
+
+  // Phone (Laprop)
+  itemX += 28;
   ctx.fillStyle = '#333333';
   ctx.fillRect(itemX, itemY + 10, 12, 20);
   ctx.fillStyle = '#1A2A3D';
@@ -1051,6 +1066,22 @@ function drawDeskItems(gx, gy, agent, isCommander = false) {
   ctx.globalAlpha = 0.3;
   ctx.fillRect(itemX + 1, itemY + 12, 10, 12);
   ctx.globalAlpha = 1;
+
+  // Books stacked on desk
+  itemX += 16;
+  ctx.fillStyle = '#8B4513';  // Brown book
+  ctx.fillRect(itemX, itemY + 12, 10, 14);
+  ctx.fillStyle = '#DC143C';  // Red book
+  ctx.fillRect(itemX + 2, itemY + 10, 10, 14);
+  ctx.fillStyle = '#1E90FF';  // Blue book
+  ctx.fillRect(itemX + 4, itemY + 8, 10, 14);
+
+  // Book spines detail
+  ctx.strokeStyle = '#000000';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i < 3; i++) {
+    ctx.strokeRect(itemX + i*2, itemY + 8 + i*2, 10, 14);
+  }
 
   if (isCommander) {
     // Add extra items for Commander's larger desk
@@ -1061,7 +1092,7 @@ function drawDeskItems(gx, gy, agent, isCommander = false) {
     ctx.fillStyle = '#654321';
     ctx.fillRect(itemX + 1, itemY + 19, 6, 4);
 
-    // Notepad
+    // Notepad with more details
     itemX += 10;
     ctx.fillStyle = '#F5F5DC';
     ctx.fillRect(itemX, itemY + 8, 16, 14);
@@ -1073,6 +1104,44 @@ function drawDeskItems(gx, gy, agent, isCommander = false) {
       ctx.fillRect(itemX + 2, itemY + 11 + i * 3, 12, 1);
     }
   }
+}
+
+// ── Draw decorative plants around office ──────────────────────────
+function drawOfficePlant(x, y, size = 1) {
+  // Plant pot
+  ctx.fillStyle = '#8B6914';  // Terracotta
+  ctx.beginPath();
+  ctx.moveTo(x - 8*size, y + 8*size);
+  ctx.lineTo(x - 5*size, y - 8*size);
+  ctx.lineTo(x + 5*size, y - 8*size);
+  ctx.lineTo(x + 8*size, y + 8*size);
+  ctx.fill();
+
+  // Pot rim
+  ctx.strokeStyle = '#6B5914';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(x - 5*size, y - 9*size, 10*size, 2*size);
+
+  // Plant leaves (green foliage)
+  ctx.fillStyle = '#228B22';  // Forest green
+  ctx.globalAlpha = 0.8;
+
+  // Left leaf
+  ctx.beginPath();
+  ctx.ellipse(x - 4*size, y - 12*size, 4*size, 8*size, -0.3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Center leaf
+  ctx.beginPath();
+  ctx.ellipse(x, y - 16*size, 3*size, 10*size, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Right leaf
+  ctx.beginPath();
+  ctx.ellipse(x + 4*size, y - 12*size, 4*size, 8*size, 0.3, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.globalAlpha = 1;
 }
 
 // ── Professional Office Desks - Modern Minimalist Style ─────────────
@@ -2878,6 +2947,23 @@ function render() {
 
   // Draw HUD (time, text) on top of background
   drawHUD();
+
+  // Draw decorative plants around office
+  // Top-left corner plants (near door)
+  drawOfficePlant(100, 200, 0.8);
+
+  // Top-right corner plants
+  drawOfficePlant(1050, 200, 0.8);
+
+  // Bottom-left plants (near main desk)
+  drawOfficePlant(150, 750, 1);
+
+  // Bottom-right plants (near main desk)
+  drawOfficePlant(950, 750, 1);
+
+  // Middle area plants
+  drawOfficePlant(400, 150, 0.7);
+  drawOfficePlant(800, 150, 0.7);
 
   // Draw all professional desks and agents
   AGENTS.forEach((a, i) => {
