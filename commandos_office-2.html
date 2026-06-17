@@ -365,6 +365,72 @@ function playAgentChatter() {
   }
 }
 
+// ── Door Opening Sound - Industrial/Deposit Door ──────────────────
+function playDoorOpenSound() {
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+    // Deep rumbling bass - door opening
+    const bassOsc = audioContext.createOscillator();
+    const bassGain = audioContext.createGain();
+    bassOsc.connect(bassGain);
+    bassGain.connect(audioContext.destination);
+
+    bassOsc.type = 'sine';
+    bassOsc.frequency.setValueAtTime(100, audioContext.currentTime);
+    bassOsc.frequency.exponentialRampToValueAtTime(80, audioContext.currentTime + 0.3);
+
+    bassGain.gain.setValueAtTime(0.4, audioContext.currentTime);
+    bassGain.gain.exponentialRampToValueAtTime(0.05, audioContext.currentTime + 0.8);
+
+    bassOsc.start(audioContext.currentTime);
+    bassOsc.stop(audioContext.currentTime + 0.8);
+
+    // Mid-range tone - mechanical sliding
+    setTimeout(() => {
+      const midOsc = audioContext.createOscillator();
+      const midGain = audioContext.createGain();
+      const midFilter = audioContext.createBiquadFilter();
+
+      midOsc.connect(midFilter);
+      midFilter.connect(midGain);
+      midGain.connect(audioContext.destination);
+
+      midOsc.type = 'square';
+      midOsc.frequency.setValueAtTime(200, audioContext.currentTime);
+      midOsc.frequency.linearRampToValueAtTime(250, audioContext.currentTime + 0.5);
+
+      midGain.gain.setValueAtTime(0.2, audioContext.currentTime);
+      midGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.6);
+
+      midOsc.start(audioContext.currentTime);
+      midOsc.stop(audioContext.currentTime + 0.6);
+    }, 100);
+
+    // High click - door latch/lock engagement
+    setTimeout(() => {
+      const clickOsc = audioContext.createOscillator();
+      const clickGain = audioContext.createGain();
+      const clickFilter = audioContext.createBiquadFilter();
+
+      clickOsc.connect(clickFilter);
+      clickFilter.connect(clickGain);
+      clickGain.connect(audioContext.destination);
+
+      clickOsc.type = 'square';
+      clickOsc.frequency.value = 800;
+
+      clickGain.gain.setValueAtTime(0.3, audioContext.currentTime);
+      clickGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+      clickOsc.start(audioContext.currentTime);
+      clickOsc.stop(audioContext.currentTime + 0.15);
+    }, 400);
+  } catch (err) {
+    console.log('Audio context not available');
+  }
+}
+
 // ── Background Image Asset Loader ──────────────────────────────────
 // DISABLED: Old background images removed
 let bgImage = null;
@@ -1981,6 +2047,9 @@ async function openFaceIdModal() {
             setTimeout(() => {
               closeFaceIdModal();
               showToast('🔐 FACE ID APPROVED - Welcome!', 'green');
+
+              // Play door opening sound when door starts to open
+              playDoorOpenSound();
 
               // START DOOR OPENING ANIMATION
               doorAnimating = true;
