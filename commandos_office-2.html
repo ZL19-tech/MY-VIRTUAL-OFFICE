@@ -2065,13 +2065,15 @@ async function openFaceIdModal() {
                   commander.state = 'walk';
                   showToast('🚪 DOOR OPENED - CommandOS entering...', 'green');
 
-                  // CEO walks DIRECT to his desk - entrance to desk, no stops
+                  // CEO walks to desk avoiding collision zones - no stops, just movement
+                  // Path: Down left side (below Alexa) → then to desk
                   const waypoints = [
                     { x: 50, y: 150 },    // Start at door (entrance - top left)
+                    { x: 50, y: 350 },    // Go DOWN left side (avoids Alexa desk collision y:170-290)
                     { x: 500, y: 680 },   // FINAL: Direct to CEO's desk (sit down)
                   ];
 
-                  // NO stops or pauses - direct path only
+                  // NO stops or pauses - just continuous walking
                   const STOP_DURATION = 0;  // No delays between waypoints
 
                   // Use pathfinding to follow waypoints with stops at each desk
