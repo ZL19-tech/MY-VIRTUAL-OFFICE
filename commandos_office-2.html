@@ -2065,16 +2065,12 @@ async function openFaceIdModal() {
                   commander.state = 'walk';
                   showToast('🚪 DOOR OPENED - CommandOS entering...', 'green');
 
-                  // CEO walks through entire office visiting all 5 team desks, then sits at his own desk
-                  // Visits desks in order: Alexa → Scout → Memo → Doc → Cal → CEO desk
+                  // CEO walks the red path: DOWN left side, then DIAGONAL to his desk
+                  // Following exact path shown in office layout
                   const waypoints = [
                     { x: 50, y: 150 },    // Start at door (entrance)
-                    { x: 90, y: 210 },    // STOP at Alexa desk (row1 col1 - left)
-                    { x: 500, y: 210 },   // STOP at Scout desk (row1 col2 - center top)
-                    { x: 910, y: 210 },   // STOP at Memo desk (row1 col3 - right)
-                    { x: 250, y: 450 },   // STOP at Doc desk (row2 col1 - left-center)
-                    { x: 750, y: 450 },   // STOP at Cal desk (row2 col2 - right-center)
-                    { x: 500, y: 680 },   // FINAL: CEO's own desk (center-bottom, sit down)
+                    { x: 50, y: 450 },    // Go DOWN the left side
+                    { x: 500, y: 680 },   // FINAL: Diagonal to CEO's desk (sit down)
                   ];
 
                   // Delay at each desk so CEO greets the team
