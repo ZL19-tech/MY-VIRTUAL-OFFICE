@@ -365,6 +365,72 @@ function playAgentChatter() {
   }
 }
 
+// ── Door Opening Sound - Industrial/Deposit Door ──────────────────
+function playDoorOpenSound() {
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+    // Deep rumbling bass - door opening
+    const bassOsc = audioContext.createOscillator();
+    const bassGain = audioContext.createGain();
+    bassOsc.connect(bassGain);
+    bassGain.connect(audioContext.destination);
+
+    bassOsc.type = 'sine';
+    bassOsc.frequency.setValueAtTime(100, audioContext.currentTime);
+    bassOsc.frequency.exponentialRampToValueAtTime(80, audioContext.currentTime + 0.3);
+
+    bassGain.gain.setValueAtTime(0.4, audioContext.currentTime);
+    bassGain.gain.exponentialRampToValueAtTime(0.05, audioContext.currentTime + 0.8);
+
+    bassOsc.start(audioContext.currentTime);
+    bassOsc.stop(audioContext.currentTime + 0.8);
+
+    // Mid-range tone - mechanical sliding
+    setTimeout(() => {
+      const midOsc = audioContext.createOscillator();
+      const midGain = audioContext.createGain();
+      const midFilter = audioContext.createBiquadFilter();
+
+      midOsc.connect(midFilter);
+      midFilter.connect(midGain);
+      midGain.connect(audioContext.destination);
+
+      midOsc.type = 'square';
+      midOsc.frequency.setValueAtTime(200, audioContext.currentTime);
+      midOsc.frequency.linearRampToValueAtTime(250, audioContext.currentTime + 0.5);
+
+      midGain.gain.setValueAtTime(0.2, audioContext.currentTime);
+      midGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.6);
+
+      midOsc.start(audioContext.currentTime);
+      midOsc.stop(audioContext.currentTime + 0.6);
+    }, 100);
+
+    // High click - door latch/lock engagement
+    setTimeout(() => {
+      const clickOsc = audioContext.createOscillator();
+      const clickGain = audioContext.createGain();
+      const clickFilter = audioContext.createBiquadFilter();
+
+      clickOsc.connect(clickFilter);
+      clickFilter.connect(clickGain);
+      clickGain.connect(audioContext.destination);
+
+      clickOsc.type = 'square';
+      clickOsc.frequency.value = 800;
+
+      clickGain.gain.setValueAtTime(0.3, audioContext.currentTime);
+      clickGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+      clickOsc.start(audioContext.currentTime);
+      clickOsc.stop(audioContext.currentTime + 0.15);
+    }, 400);
+  } catch (err) {
+    console.log('Audio context not available or permission denied');
+  }
+}
+
 // ── Background Image Asset Loader ──────────────────────────────────
 // DISABLED: Old background images removed
 let bgImage = null;
@@ -1982,8 +2048,14 @@ async function openFaceIdModal() {
               closeFaceIdModal();
               showToast('🔐 FACE ID APPROVED - Welcome!', 'green');
 
-              // START DOOR OPENING ANIMATION
-              doorAnimating = true;
+              // TRIGGER OFFICE EFFECTS - Lights on, laptops on, door opens
+              lightsAnimating = true;  // Fade from night to day
+              laptopsAnimating = true;  // Laptops screen glow turns on
+              doorAnimating = true;   // START DOOR OPENING ANIMATION
+
+              // Play door opening sound (industrial/deposit door sound)
+              playDoorOpenSound();
+
               commanderEntering = false;  // Start entering sequence after door opens
 
               // After door animation completes (~1 second), CommandOS enters
@@ -2140,6 +2212,12 @@ let doorAnimating = false;  // Is door currently animating?
 let doorAnimationSpeed = 0.05;  // How fast door opens (0-1 per frame, ~0.05 = smooth)
 let commanderShouldEnter = false;
 let commanderEntering = false;  // Is CommandOS currently entering?
+
+// Lighting and office effects
+let lightsProgress = 0;  // 0 (dark) to 1 (fully lit)
+let lightsAnimating = false;  // Are lights turning on?
+let laptopsAnimating = false;  // Are laptops turning on?
+let laptopsProgress = 0;  // 0 (off) to 1 (on)
 
 function drawEntranceDoor() {
   // Door positions in TOP LEFT CORNER (above top wall)
@@ -2652,6 +2730,24 @@ function runAutoScene() {
     }
   }
 
+  // Handle lights turning on - fade from night to day
+  if (lightsAnimating) {
+    lightsProgress += 0.02;  // Smooth fade over ~50 frames
+    if (lightsProgress >= 1.0) {
+      lightsProgress = 1.0;
+      lightsAnimating = false;
+    }
+  }
+
+  // Handle laptops turning on - screen glow increases
+  if (laptopsAnimating) {
+    laptopsProgress += 0.03;  // Slightly faster than lights
+    if (laptopsProgress >= 1.0) {
+      laptopsProgress = 1.0;
+      laptopsAnimating = false;
+    }
+  }
+
   // Handle system states
   if (systemState === 'paused') {
     pauseTimer--;
@@ -3030,6 +3126,34 @@ function render() {
     // Draw agent on top of desk
     drawAgent(a);
   });
+
+  // Draw lighting overlay - creates day/night effect
+  if (lightsProgress < 1) {
+    // Dark overlay at beginning (night time)
+    ctx.globalAlpha = 1 - lightsProgress;  // Fades as lights turn on
+    ctx.fillStyle = '#0a0a1a';  // Very dark blue-black
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    ctx.globalAlpha = 1;
+  }
+
+  // Draw laptop screen glows when turning on
+  if (laptopsProgress > 0) {
+    AGENTS.forEach((agent, i) => {
+      const g = GRID[i];
+      // Laptop location (center of desk)
+      const laptopX = g.x + (agent.id === 'commander' ? 140 : 100);
+      const laptopY = g.y + 10;
+      const glowSize = agent.id === 'commander' ? 50 : 40;
+
+      // Glow effect from laptop screen
+      ctx.globalAlpha = laptopsProgress * 0.3;
+      ctx.fillStyle = agent.color;
+      ctx.beginPath();
+      ctx.arc(laptopX, laptopY, glowSize, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+  }
 
   ctx.restore();
 
