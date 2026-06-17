@@ -1016,77 +1016,66 @@ function drawDeskItems(gx, gy, agent, isCommander = false) {
   const itemY = gy + 5;  // Items on top of desk
   let itemX = gx + 15;
 
-  // Monitor
-  ctx.fillStyle = '#1A1A1A';  // Monitor frame
-  ctx.fillRect(itemX, itemY, 35, 28);
-  ctx.fillStyle = '#1A3A5E';  // Monitor screen
-  ctx.fillRect(itemX + 2, itemY + 2, 31, 20);
+  // MAIN FOCUS: Open MacBook Laptop - Large and prominent
+  ctx.fillStyle = '#E8E8E8';  // Silver aluminum unibody
+  const laptopWidth = isCommander ? 60 : 50;
+  const laptopHeight = isCommander ? 38 : 32;
+
+  // Laptop base (bottom part)
+  ctx.fillRect(itemX, itemY + 8, laptopWidth, laptopHeight - 16);
+
+  // Laptop screen (open at angle)
+  ctx.fillStyle = '#D0D0D0';  // Lighter silver for screen back
+  ctx.beginPath();
+  ctx.moveTo(itemX, itemY + 8);
+  ctx.lineTo(itemX + laptopWidth, itemY + 8);
+  ctx.lineTo(itemX + laptopWidth - 4, itemY - 12);
+  ctx.lineTo(itemX + 4, itemY - 12);
+  ctx.fill();
+
+  // Screen glass with agent color glow
+  ctx.fillStyle = '#1A1A1A';  // Dark screen
+  ctx.fillRect(itemX + 3, itemY - 8, laptopWidth - 6, 14);
   ctx.fillStyle = agent.color;
-  ctx.globalAlpha = 0.2;
-  ctx.fillRect(itemX + 2, itemY + 2, 31, 20);
+  ctx.globalAlpha = 0.25;
+  ctx.fillRect(itemX + 3, itemY - 8, laptopWidth - 6, 14);  // Color glow
   ctx.globalAlpha = 1;
 
-  // Monitor stand
-  ctx.fillStyle = '#454545';
-  ctx.fillRect(itemX + 14, itemY + 22, 7, 5);
+  // Keyboard area (bottom of open laptop)
+  ctx.fillStyle = '#505050';  // Dark keyboard
+  ctx.fillRect(itemX + 2, itemY + 8, laptopWidth - 4, 18);
 
-  // Keyboard
-  itemX += 45;
-  ctx.fillStyle = '#2A2A2A';
-  ctx.fillRect(itemX, itemY + 15, 28, 10);
-  for (let kx = itemX + 2; kx < itemX + 27; kx += 4) {
-    for (let ky = itemY + 17; ky < itemY + 23; ky += 3) {
-      ctx.fillStyle = '#454545';
-      ctx.fillRect(kx, ky, 3, 2);
+  // Keyboard keys detail
+  for (let kx = itemX + 4; kx < itemX + laptopWidth - 2; kx += 4) {
+    for (let ky = itemY + 10; ky < itemY + 24; ky += 3) {
+      ctx.fillStyle = '#303030';
+      ctx.fillRect(kx, ky, 2, 2);
     }
   }
 
-  // Laptop (MacBook) - Silver color
-  itemX += 32;
-  ctx.fillStyle = '#C0C0C0';  // Silver aluminum
-  ctx.fillRect(itemX, itemY + 8, 24, 16);  // Laptop base
-  ctx.fillStyle = '#404040';  // Screen bezels
-  ctx.fillRect(itemX + 2, itemY + 2, 20, 12);  // Screen
-  ctx.fillStyle = '#1A1A1A';  // Screen
-  ctx.fillRect(itemX + 3, itemY + 3, 18, 10);
+  // Apple logo on keyboard area
   ctx.fillStyle = agent.color;
-  ctx.globalAlpha = 0.2;
-  ctx.fillRect(itemX + 3, itemY + 3, 18, 10);  // Screen glow
+  ctx.globalAlpha = 0.6;
+  ctx.beginPath();
+  ctx.arc(itemX + laptopWidth/2, itemY + 16, 3, 0, Math.PI * 2);
+  ctx.fill();
   ctx.globalAlpha = 1;
-  ctx.fillStyle = '#808080';  // Keyboard area
-  ctx.fillRect(itemX + 3, itemY + 13, 18, 2);
 
-  // Phone (Laprop)
-  itemX += 28;
-  ctx.fillStyle = '#333333';
-  ctx.fillRect(itemX, itemY + 10, 12, 20);
-  ctx.fillStyle = '#1A2A3D';
-  ctx.fillRect(itemX + 1, itemY + 12, 10, 12);
+  // Small phone (Laprop) on side
+  itemX += laptopWidth + 12;
+  ctx.fillStyle = '#2A2A2A';
+  ctx.fillRect(itemX, itemY + 10, 10, 18);
+  ctx.fillStyle = '#0A1A2A';
+  ctx.fillRect(itemX + 1, itemY + 12, 8, 12);
   ctx.fillStyle = agent.color;
   ctx.globalAlpha = 0.3;
-  ctx.fillRect(itemX + 1, itemY + 12, 10, 12);
+  ctx.fillRect(itemX + 1, itemY + 12, 8, 12);
   ctx.globalAlpha = 1;
-
-  // Books stacked on desk
-  itemX += 16;
-  ctx.fillStyle = '#8B4513';  // Brown book
-  ctx.fillRect(itemX, itemY + 12, 10, 14);
-  ctx.fillStyle = '#DC143C';  // Red book
-  ctx.fillRect(itemX + 2, itemY + 10, 10, 14);
-  ctx.fillStyle = '#1E90FF';  // Blue book
-  ctx.fillRect(itemX + 4, itemY + 8, 10, 14);
-
-  // Book spines detail
-  ctx.strokeStyle = '#000000';
-  ctx.lineWidth = 0.5;
-  for (let i = 0; i < 3; i++) {
-    ctx.strokeRect(itemX + i*2, itemY + 8 + i*2, 10, 14);
-  }
 
   if (isCommander) {
     // Add extra items for Commander's larger desk
     // Coffee cup
-    itemX += 16;
+    itemX += 14;
     ctx.fillStyle = '#8B7355';
     ctx.fillRect(itemX, itemY + 18, 8, 8);
     ctx.fillStyle = '#654321';
@@ -3029,10 +3018,6 @@ function render() {
 
   // Draw HUD (time, text) on top of background
   drawHUD();
-
-  // Draw large realistic corner plants - positioned at bottom corners on floor
-  drawLargeCornerPlant(70, 880);      // Bottom-left corner (on floor)
-  drawLargeCornerPlant(1130, 880);    // Bottom-right corner (on floor)
 
   // Draw all professional desks and agents
   AGENTS.forEach((a, i) => {
