@@ -1846,23 +1846,55 @@ async function openFaceIdModal() {
 
             setTimeout(() => {
               closeFaceIdModal();
-              doorIsOpen = true;
               showToast('🔐 FACE ID APPROVED - Welcome!', 'green');
 
-              // Trigger CommandOS entry - MAKE HIM VISIBLE AND WALK
+              // START DOOR OPENING ANIMATION
+              doorAnimating = true;
+              commanderEntering = false;  // Start entering sequence after door opens
+
+              // After door animation completes (~1 second), CommandOS enters
               setTimeout(() => {
+                commanderEntering = true;
                 commanderShouldEnter = true;
                 const commander = AGENTS.find(a => a.id === 'commander');
                 if (commander) {
                   // Make CommandOS visible by changing from 'hidden' to 'walk'
                   commander.state = 'walk';
-                  const i = AGENTS.indexOf(commander);
-                  const targetX = GRID[i].x + 100;
-                  const targetY = GRID[i].y + 170;
-                  walkTo('commander', targetX, targetY);
                   showToast('🚪 DOOR OPENED - CommandOS entering...', 'green');
+
+                  // CommandOS walks the red path: Door → Alexa desk → Scout desk → Doc desk → Cal desk → Main desk
+                  // Waypoints based on the red path you drew in the image
+                  const waypoints = [
+                    { x: 50, y: 150 },    // Just inside door
+                    { x: 120, y: 220 },   // Toward Alexa desk (left)
+                    { x: 380, y: 320 },   // Across to Scout desk (center)
+                    { x: 280, y: 420 },   // Down to Doc desk (center-left)
+                    { x: 560, y: 520 },   // To Cal desk (right)
+                    { x: 500, y: 650 },   // Final destination (main desk)
+                  ];
+
+                  // Use pathfinding to follow waypoints with callbacks
+                  let pathIndex = 0;
+
+                  function followNextWaypoint() {
+                    if (pathIndex >= waypoints.length) {
+                      // Reached destination - sit at desk
+                      commander.state = 'sit_work';
+                      showToast('✅ CommandOS at desk', 'green');
+                      return;
+                    }
+
+                    const target = waypoints[pathIndex];
+                    pathIndex++;
+
+                    // Walk to next waypoint, then callback to move to the one after
+                    walkTo('commander', target.x, target.y, followNextWaypoint);
+                  }
+
+                  // Start following the path
+                  followNextWaypoint();
                 }
-              }, 500);
+              }, 1000);  // Wait for door to fully open
             }, 300);
             return;
           }
@@ -1943,7 +1975,11 @@ function approveFaceId() {
 
 // ── ENTRANCE DOOR & CONTROL - Top Left Corner ──────────────────
 let doorIsOpen = false;  // Door state: true = open, false = closed
+let doorOpenProgress = 0;  // Animation progress: 0 (closed) to 1 (open)
+let doorAnimating = false;  // Is door currently animating?
+let doorAnimationSpeed = 0.05;  // How fast door opens (0-1 per frame, ~0.05 = smooth)
 let commanderShouldEnter = false;
+let commanderEntering = false;  // Is CommandOS currently entering?
 
 function drawEntranceDoor() {
   // Door positions in TOP LEFT CORNER (above top wall)
@@ -1956,45 +1992,37 @@ function drawEntranceDoor() {
   ctx.fillStyle = '#5A4A3A';  // Dark wood frame
   ctx.fillRect(doorX - 5, doorY - 5, doorWidth + 10, doorHeight + 10);  // Frame border
 
-  // DOOR BODY (slides based on state)
+  // DOOR BODY (slides based on animation progress)
   ctx.fillStyle = '#6B5345';  // Door color
 
-  if (doorIsOpen) {
-    // Door slides left when open (fully hidden)
-    ctx.fillRect(doorX - doorWidth, doorY, doorWidth, doorHeight);
-  } else {
-    // Door stays in place when closed
-    ctx.fillRect(doorX, doorY, doorWidth, doorHeight);
-  }
+  // Calculate door position based on animation progress
+  // doorOpenProgress: 0 = closed, 1 = fully open
+  const slideDistance = doorWidth * doorOpenProgress;
+  const doorBodyX = doorX - slideDistance;  // Slides left as it opens
+
+  ctx.fillRect(doorBodyX, doorY, doorWidth, doorHeight);
 
   // Door frame decoration (window/glass)
   ctx.strokeStyle = '#D4A574';
   ctx.lineWidth = 2;
 
-  if (doorIsOpen) {
-    ctx.strokeRect(doorX - doorWidth + 2, doorY + 2, doorWidth - 4, doorHeight - 4);
-    // Glass reflection when open
-    ctx.fillStyle = '#FFD700';
-    ctx.globalAlpha = 0.15;
-    ctx.fillRect(doorX - doorWidth + 2, doorY + 2, doorWidth - 4, doorHeight - 4);
-    ctx.globalAlpha = 1;
-  } else {
-    ctx.strokeRect(doorX + 2, doorY + 2, doorWidth - 4, doorHeight - 4);
-  }
+  ctx.strokeRect(doorBodyX + 2, doorY + 2, doorWidth - 4, doorHeight - 4);
 
-  // Door handle (brass)
+  // Glass reflection gets brighter as door opens
+  ctx.fillStyle = '#FFD700';
+  ctx.globalAlpha = 0.05 + (doorOpenProgress * 0.15);  // Brightens as door opens
+  ctx.fillRect(doorBodyX + 2, doorY + 2, doorWidth - 4, doorHeight - 4);
+  ctx.globalAlpha = 1;
+
+  // Door handle (brass) - moves with door
   ctx.fillStyle = '#D4A574';
-  if (doorIsOpen) {
-    ctx.fillRect(doorX - doorWidth + doorWidth - 8, doorY + doorHeight/2 - 3, 5, 6);
-  } else {
-    ctx.fillRect(doorX + doorWidth - 8, doorY + doorHeight/2 - 3, 5, 6);
-  }
+  ctx.fillRect(doorBodyX + doorWidth - 8, doorY + doorHeight/2 - 3, 5, 6);
 
-  // Light from outside when door is open
-  if (doorIsOpen) {
+  // Light from outside when door is opening
+  if (doorOpenProgress > 0) {
     ctx.fillStyle = '#FFD700';
-    ctx.globalAlpha = 0.15;
-    ctx.fillRect(0, doorY - 30, 150, 30);
+    ctx.globalAlpha = doorOpenProgress * 0.15;  // Light intensity matches door progress
+    ctx.fillRect(0, doorY - 30, 150 * doorOpenProgress, 30);
     ctx.globalAlpha = 1;
   }
 }
@@ -2454,11 +2482,14 @@ function drawCharts() {
 
 // ── Scene auto-animation ─────────────────────────────────────────────
 function runAutoScene() {
-  // Handle door opening animation
-  if (doorOpenTimer > 0 && doorOpenTimer < doorOpenDuration) {
-    doorOpenTimer++;
-  } else if (doorOpenTimer >= doorOpenDuration) {
-    doorOpenTimer = doorOpenDuration;  // Keep fully open
+  // Handle door opening animation - smooth sliding
+  if (doorAnimating) {
+    doorOpenProgress += doorAnimationSpeed;
+    if (doorOpenProgress >= 1.0) {
+      doorOpenProgress = 1.0;
+      doorAnimating = false;
+      doorIsOpen = true;
+    }
   }
 
   // Handle system states
