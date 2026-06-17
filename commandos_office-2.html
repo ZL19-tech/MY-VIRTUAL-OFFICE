@@ -1106,42 +1106,124 @@ function drawDeskItems(gx, gy, agent, isCommander = false) {
   }
 }
 
-// ── Draw decorative plants around office ──────────────────────────
-function drawOfficePlant(x, y, size = 1) {
-  // Plant pot
-  ctx.fillStyle = '#8B6914';  // Terracotta
+// ── Draw large realistic corner plants ─────────────────────────────
+function drawLargeCornerPlant(x, y) {
+  // Large terracotta pot
+  const potWidth = 60;
+  const potHeight = 50;
+
+  // Pot body (trapezoid shape - wider at top)
+  ctx.fillStyle = '#A0522D';  // Sienna brown
   ctx.beginPath();
-  ctx.moveTo(x - 8*size, y + 8*size);
-  ctx.lineTo(x - 5*size, y - 8*size);
-  ctx.lineTo(x + 5*size, y - 8*size);
-  ctx.lineTo(x + 8*size, y + 8*size);
+  ctx.moveTo(x - potWidth/2, y + potHeight);  // Bottom-left
+  ctx.lineTo(x - potWidth/2 - 8, y);           // Top-left (wider)
+  ctx.lineTo(x + potWidth/2 + 8, y);           // Top-right (wider)
+  ctx.lineTo(x + potWidth/2, y + potHeight);  // Bottom-right
   ctx.fill();
 
-  // Pot rim
-  ctx.strokeStyle = '#6B5914';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(x - 5*size, y - 9*size, 10*size, 2*size);
+  // Pot shading (darker right side for depth)
+  ctx.fillStyle = '#8B4513';
+  ctx.beginPath();
+  ctx.moveTo(x + potWidth/2, y + potHeight);
+  ctx.lineTo(x + potWidth/2 + 8, y);
+  ctx.lineTo(x + potWidth/2 + 4, y + 20);
+  ctx.lineTo(x + potWidth/2 - 4, y + potHeight - 10);
+  ctx.fill();
 
-  // Plant leaves (green foliage)
+  // Pot rim (lip at top)
+  ctx.fillStyle = '#CD853F';  // Peru
+  ctx.fillRect(x - potWidth/2 - 10, y - 5, potWidth + 20, 8);
+
+  // Pot rim detail
+  ctx.strokeStyle = '#8B4513';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.ellipse(x, y - 1, potWidth/2 + 8, 4, 0, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Soil inside pot
+  ctx.fillStyle = '#654321';
+  ctx.beginPath();
+  ctx.ellipse(x, y + 2, potWidth/2, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Large plant foliage - realistic fern/bushy plant
+  const foliageX = x;
+  const foliageY = y - 60;
+
+  // Multiple layered leaves for full effect
   ctx.fillStyle = '#228B22';  // Forest green
-  ctx.globalAlpha = 0.8;
+  ctx.globalAlpha = 0.9;
 
-  // Left leaf
-  ctx.beginPath();
-  ctx.ellipse(x - 4*size, y - 12*size, 4*size, 8*size, -0.3, 0, Math.PI * 2);
-  ctx.fill();
+  // Back layer (behind)
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const leafX = foliageX + Math.cos(angle) * 25;
+    const leafY = foliageY + Math.sin(angle) * 35;
+    drawLeaf(leafX, leafY, angle + Math.PI/2, 18, 35);
+  }
 
-  // Center leaf
-  ctx.beginPath();
-  ctx.ellipse(x, y - 16*size, 3*size, 10*size, 0, 0, Math.PI * 2);
-  ctx.fill();
+  // Middle layer
+  ctx.fillStyle = '#2E8B57';  // Sea green
+  ctx.globalAlpha = 0.85;
+  for (let i = 0; i < 10; i++) {
+    const angle = (i / 10) * Math.PI * 2 + 0.3;
+    const leafX = foliageX + Math.cos(angle) * 35;
+    const leafY = foliageY + Math.sin(angle) * 40;
+    drawLeaf(leafX, leafY, angle + Math.PI/2, 16, 32);
+  }
 
-  // Right leaf
-  ctx.beginPath();
-  ctx.ellipse(x + 4*size, y - 12*size, 4*size, 8*size, 0.3, 0, Math.PI * 2);
-  ctx.fill();
+  // Front layer (top - brightest green)
+  ctx.fillStyle = '#3CB371';  // Medium sea green
+  ctx.globalAlpha = 0.95;
+  for (let i = 0; i < 12; i++) {
+    const angle = (i / 12) * Math.PI * 2;
+    const leafX = foliageX + Math.cos(angle) * 28;
+    const leafY = foliageY + Math.sin(angle) * 32;
+    drawLeaf(leafX, leafY, angle + Math.PI/2, 14, 28);
+  }
+
+  // Center highlights (lighter green tips)
+  ctx.fillStyle = '#90EE90';  // Light green
+  ctx.globalAlpha = 0.6;
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2;
+    const leafX = foliageX + Math.cos(angle) * 20;
+    const leafY = foliageY + Math.sin(angle) * 25;
+    drawLeaf(leafX, leafY, angle + Math.PI/2, 10, 20);
+  }
 
   ctx.globalAlpha = 1;
+
+  // Stem visible between leaves
+  ctx.strokeStyle = '#654321';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(x, y + 5);
+  ctx.lineTo(x, foliageY + 20);
+  ctx.stroke();
+}
+
+// ── Draw individual leaf ───────────────────────────────────────────
+function drawLeaf(x, y, angle, width, height) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+
+  // Leaf shape (pointed oval)
+  ctx.beginPath();
+  ctx.ellipse(0, 0, width, height, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Leaf vein detail
+  ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(0, -height);
+  ctx.lineTo(0, height);
+  ctx.stroke();
+
+  ctx.restore();
 }
 
 // ── Professional Office Desks - Modern Minimalist Style ─────────────
@@ -2948,22 +3030,11 @@ function render() {
   // Draw HUD (time, text) on top of background
   drawHUD();
 
-  // Draw decorative plants around office
-  // Top-left corner plants (near door)
-  drawOfficePlant(100, 200, 0.8);
-
-  // Top-right corner plants
-  drawOfficePlant(1050, 200, 0.8);
-
-  // Bottom-left plants (near main desk)
-  drawOfficePlant(150, 750, 1);
-
-  // Bottom-right plants (near main desk)
-  drawOfficePlant(950, 750, 1);
-
-  // Middle area plants
-  drawOfficePlant(400, 150, 0.7);
-  drawOfficePlant(800, 150, 0.7);
+  // Draw large realistic corner plants - one in each corner
+  drawLargeCornerPlant(40, 120);      // Top-left corner
+  drawLargeCornerPlant(1160, 120);    // Top-right corner
+  drawLargeCornerPlant(40, 850);      // Bottom-left corner
+  drawLargeCornerPlant(1160, 850);    // Bottom-right corner
 
   // Draw all professional desks and agents
   AGENTS.forEach((a, i) => {
