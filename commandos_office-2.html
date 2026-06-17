@@ -1013,84 +1013,78 @@ function drawDesk(gx, gy, agent) {
 
 // ── Office Items - Monitors, Phones, Keyboards ──────────────────
 function drawDeskItems(gx, gy, agent, isCommander = false) {
-  const itemY = gy + 5;  // Items on top of desk
-  let itemX = gx + 15;
+  // Center the laptop on the desk
+  const deskCenter = gx + (isCommander ? 140 : 100);  // Center of desk
 
-  // MAIN FOCUS: Open MacBook Laptop - Large and prominent
+  // MAIN FOCUS: Large Open MacBook Laptop - Centered on desk
   ctx.fillStyle = '#E8E8E8';  // Silver aluminum unibody
-  const laptopWidth = isCommander ? 60 : 50;
-  const laptopHeight = isCommander ? 38 : 32;
+  const laptopWidth = isCommander ? 100 : 80;  // Much larger!
+  const laptopHeight = isCommander ? 60 : 50;  // Much taller!
+  const laptopX = deskCenter - laptopWidth / 2;  // Center it
+  const laptopY = gy + 8;
 
   // Laptop base (bottom part)
-  ctx.fillRect(itemX, itemY + 8, laptopWidth, laptopHeight - 16);
+  ctx.fillRect(laptopX, laptopY + 16, laptopWidth, laptopHeight - 32);
 
-  // Laptop screen (open at angle)
+  // Laptop screen (open at angle - more open)
   ctx.fillStyle = '#D0D0D0';  // Lighter silver for screen back
   ctx.beginPath();
-  ctx.moveTo(itemX, itemY + 8);
-  ctx.lineTo(itemX + laptopWidth, itemY + 8);
-  ctx.lineTo(itemX + laptopWidth - 4, itemY - 12);
-  ctx.lineTo(itemX + 4, itemY - 12);
+  ctx.moveTo(laptopX, laptopY + 16);
+  ctx.lineTo(laptopX + laptopWidth, laptopY + 16);
+  ctx.lineTo(laptopX + laptopWidth - 8, laptopY - 20);
+  ctx.lineTo(laptopX + 8, laptopY - 20);
   ctx.fill();
 
-  // Screen glass with agent color glow
-  ctx.fillStyle = '#1A1A1A';  // Dark screen
-  ctx.fillRect(itemX + 3, itemY - 8, laptopWidth - 6, 14);
+  // Screen glass with agent color glow (larger screen)
+  ctx.fillStyle = '#0A0A0A';  // Dark screen
+  ctx.fillRect(laptopX + 5, laptopY - 16, laptopWidth - 10, 28);
   ctx.fillStyle = agent.color;
-  ctx.globalAlpha = 0.25;
-  ctx.fillRect(itemX + 3, itemY - 8, laptopWidth - 6, 14);  // Color glow
+  ctx.globalAlpha = 0.3;
+  ctx.fillRect(laptopX + 5, laptopY - 16, laptopWidth - 10, 28);  // Color glow
   ctx.globalAlpha = 1;
 
-  // Keyboard area (bottom of open laptop)
-  ctx.fillStyle = '#505050';  // Dark keyboard
-  ctx.fillRect(itemX + 2, itemY + 8, laptopWidth - 4, 18);
+  // Screen border/bezel
+  ctx.strokeStyle = '#505050';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(laptopX + 5, laptopY - 16, laptopWidth - 10, 28);
 
-  // Keyboard keys detail
-  for (let kx = itemX + 4; kx < itemX + laptopWidth - 2; kx += 4) {
-    for (let ky = itemY + 10; ky < itemY + 24; ky += 3) {
-      ctx.fillStyle = '#303030';
-      ctx.fillRect(kx, ky, 2, 2);
+  // Keyboard area (bottom of open laptop - much larger)
+  ctx.fillStyle = '#404040';  // Dark keyboard
+  ctx.fillRect(laptopX + 4, laptopY + 16, laptopWidth - 8, 30);
+
+  // Keyboard keys detail (more visible)
+  for (let kx = laptopX + 8; kx < laptopX + laptopWidth - 4; kx += 6) {
+    for (let ky = laptopY + 20; ky < laptopY + 42; ky += 4) {
+      ctx.fillStyle = '#202020';
+      ctx.fillRect(kx, ky, 3, 3);
     }
   }
 
-  // Apple logo on keyboard area
+  // Apple logo on keyboard area (larger and more visible)
   ctx.fillStyle = agent.color;
-  ctx.globalAlpha = 0.6;
+  ctx.globalAlpha = 0.7;
   ctx.beginPath();
-  ctx.arc(itemX + laptopWidth/2, itemY + 16, 3, 0, Math.PI * 2);
+  ctx.arc(laptopX + laptopWidth/2, laptopY + 28, 5, 0, Math.PI * 2);
   ctx.fill();
-  ctx.globalAlpha = 1;
-
-  // Small phone (Laprop) on side
-  itemX += laptopWidth + 12;
-  ctx.fillStyle = '#2A2A2A';
-  ctx.fillRect(itemX, itemY + 10, 10, 18);
-  ctx.fillStyle = '#0A1A2A';
-  ctx.fillRect(itemX + 1, itemY + 12, 8, 12);
-  ctx.fillStyle = agent.color;
-  ctx.globalAlpha = 0.3;
-  ctx.fillRect(itemX + 1, itemY + 12, 8, 12);
   ctx.globalAlpha = 1;
 
   if (isCommander) {
     // Add extra items for Commander's larger desk
-    // Coffee cup
-    itemX += 14;
+    // Coffee cup on side
     ctx.fillStyle = '#8B7355';
-    ctx.fillRect(itemX, itemY + 18, 8, 8);
+    ctx.fillRect(laptopX - 20, laptopY + 20, 12, 12);
     ctx.fillStyle = '#654321';
-    ctx.fillRect(itemX + 1, itemY + 19, 6, 4);
+    ctx.fillRect(laptopX - 18, laptopY + 22, 8, 6);
 
-    // Notepad with more details
-    itemX += 10;
+    // Notepad on other side
     ctx.fillStyle = '#F5F5DC';
-    ctx.fillRect(itemX, itemY + 8, 16, 14);
+    ctx.fillRect(laptopX + laptopWidth + 8, laptopY + 8, 20, 18);
     ctx.strokeStyle = '#A0826D';
-    ctx.lineWidth = 0.5;
-    ctx.strokeRect(itemX, itemY + 8, 16, 14);
+    ctx.lineWidth = 1;
+    ctx.strokeRect(laptopX + laptopWidth + 8, laptopY + 8, 20, 18);
     ctx.fillStyle = '#CCCCCC';
-    for (let i = 0; i < 3; i++) {
-      ctx.fillRect(itemX + 2, itemY + 11 + i * 3, 12, 1);
+    for (let i = 0; i < 4; i++) {
+      ctx.fillRect(laptopX + laptopWidth + 12, laptopY + 12 + i * 3, 12, 1);
     }
   }
 }
@@ -2033,15 +2027,20 @@ async function openFaceIdModal() {
 
                     // Walk to waypoint
                     walkTo('commander', target.x, target.y, () => {
+                      // Check if this was the last waypoint
+                      const wasLastWaypoint = (pathIndex >= waypoints.length);
+
                       // Arrived at waypoint - stop and greet for a moment (except at final desk)
-                      if (!isLastWaypoint) {
+                      if (!wasLastWaypoint) {
                         commander.state = 'idle';  // Stop and greet
                         showToast(`🤝 CEO visiting team...`, 'blue');
 
                         // After stopping, continue to next waypoint
                         setTimeout(() => {
-                          commander.state = 'walk';
-                          followNextWaypoint();
+                          if (commander.state === 'idle') {  // Only continue if still idle
+                            commander.state = 'walk';
+                            followNextWaypoint();
+                          }
                         }, STOP_DURATION);
                       } else {
                         // At main desk - sit down
