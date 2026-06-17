@@ -2065,11 +2065,13 @@ async function openFaceIdModal() {
                   commander.state = 'walk';
                   showToast('🚪 DOOR OPENED - CommandOS entering...', 'green');
 
-                  // CEO walks directly from entrance to his desk - no stops
-                  // Direct path without any pauses or greetings
+                  // CEO walks the red path: entrance → down left side → center → desk
+                  // Avoiding all desk collision zones
                   const waypoints = [
                     { x: 50, y: 150 },    // Start at door (entrance - top left)
-                    { x: 500, y: 680 },   // FINAL: Direct to CEO's desk (sit down, no stops)
+                    { x: 50, y: 350 },    // Go DOWN left side (below Alexa desk collision y:290)
+                    { x: 500, y: 560 },   // STOP at CENTER (below Doc/Cal desks) - greet/pause
+                    { x: 500, y: 680 },   // FINAL: Down to CEO's desk (sit down)
                   ];
 
                   // Delay at each desk so CEO greets the team
@@ -2090,18 +2092,27 @@ async function openFaceIdModal() {
                     const isLastWaypoint = (pathIndex === waypoints.length - 1);
                     pathIndex++;
 
-                    // Walk to waypoint - no stops or pauses, just continue
+                    // Walk to waypoint
                     walkTo('commander', target.x, target.y, () => {
                       // Check if this was the last waypoint
                       const wasLastWaypoint = (pathIndex >= waypoints.length);
 
-                      if (wasLastWaypoint) {
+                      // Arrived at waypoint - stop and greet for a moment (except at final desk)
+                      if (!wasLastWaypoint) {
+                        commander.state = 'idle';  // Stop and greet
+                        showToast(`🤝 CEO visiting team...`, 'blue');
+
+                        // After stopping, continue to next waypoint
+                        setTimeout(() => {
+                          if (commander.state === 'idle') {  // Only continue if still idle
+                            commander.state = 'walk';
+                            followNextWaypoint();
+                          }
+                        }, STOP_DURATION);
+                      } else {
                         // At main desk - sit down
                         commander.state = 'sit_work';
                         showToast('✅ CEO at his desk', 'green');
-                      } else {
-                        // Continue to next waypoint immediately (no stop/pause)
-                        followNextWaypoint();
                       }
                     });
                   }
