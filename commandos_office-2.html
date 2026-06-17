@@ -1996,19 +1996,20 @@ async function openFaceIdModal() {
                   commander.state = 'walk';
                   showToast('🚪 DOOR OPENED - CommandOS entering...', 'green');
 
-                  // CEO walks the red path visiting desks: Door → RIGHT → DOWN → Main desk
-                  // Waypoints based on the exact red path you drew
+                  // CEO walks through entire office visiting all 5 team desks, then sits at his own desk
+                  // Visits desks in order: Alexa → Scout → Memo → Doc → Cal → CEO desk
                   const waypoints = [
-                    { x: 50, y: 150 },    // Start at door
-                    { x: 120, y: 220 },   // STOP at Alexa desk (left)
-                    { x: 380, y: 280 },   // STOP at Scout desk area (going right)
-                    { x: 650, y: 280 },   // Going further right across top
-                    { x: 650, y: 500 },   // STOP at Cal desk area (right side)
-                    { x: 520, y: 650 },   // Down to main desk (final destination)
+                    { x: 50, y: 150 },    // Start at door (entrance)
+                    { x: 90, y: 210 },    // STOP at Alexa desk (row1 col1 - left)
+                    { x: 500, y: 210 },   // STOP at Scout desk (row1 col2 - center top)
+                    { x: 910, y: 210 },   // STOP at Memo desk (row1 col3 - right)
+                    { x: 250, y: 450 },   // STOP at Doc desk (row2 col1 - left-center)
+                    { x: 750, y: 450 },   // STOP at Cal desk (row2 col2 - right-center)
+                    { x: 500, y: 650 },   // FINAL: CEO's own desk (row3 - center, sit down)
                   ];
 
-                  // Small delay at each desk so CEO greets them
-                  const STOP_DURATION = 1500;  // 1.5 seconds at each desk
+                  // Delay at each desk so CEO greets the team
+                  const STOP_DURATION = 2000;  // 2 seconds at each desk to greet
 
                   // Use pathfinding to follow waypoints with stops at each desk
                   let pathIndex = 0;
