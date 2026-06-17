@@ -1862,33 +1862,53 @@ async function openFaceIdModal() {
                   commander.state = 'walk';
                   showToast('🚪 DOOR OPENED - CommandOS entering...', 'green');
 
-                  // CommandOS walks the red path: Door → Alexa desk → Scout desk → Doc desk → Cal desk → Main desk
+                  // CEO walks the red path visiting desks: Door → Alexa desk → Scout desk → Doc desk → Cal desk → Main desk
                   // Waypoints based on the red path you drew in the image
                   const waypoints = [
                     { x: 50, y: 150 },    // Just inside door
-                    { x: 120, y: 220 },   // Toward Alexa desk (left)
-                    { x: 380, y: 320 },   // Across to Scout desk (center)
-                    { x: 280, y: 420 },   // Down to Doc desk (center-left)
-                    { x: 560, y: 520 },   // To Cal desk (right)
-                    { x: 500, y: 650 },   // Final destination (main desk)
+                    { x: 120, y: 220 },   // STOP at Alexa desk (left)
+                    { x: 380, y: 320 },   // STOP at Scout desk (center)
+                    { x: 280, y: 420 },   // STOP at Doc desk (center-left)
+                    { x: 560, y: 520 },   // STOP at Cal desk (right)
+                    { x: 500, y: 650 },   // STOP at his main desk
                   ];
 
-                  // Use pathfinding to follow waypoints with callbacks
+                  // Small delay at each desk so CEO greets them
+                  const STOP_DURATION = 1500;  // 1.5 seconds at each desk
+
+                  // Use pathfinding to follow waypoints with stops at each desk
                   let pathIndex = 0;
 
                   function followNextWaypoint() {
                     if (pathIndex >= waypoints.length) {
-                      // Reached destination - sit at desk
+                      // Reached final destination - sit at desk
                       commander.state = 'sit_work';
-                      showToast('✅ CommandOS at desk', 'green');
+                      showToast('✅ CEO at his desk', 'green');
                       return;
                     }
 
                     const target = waypoints[pathIndex];
+                    const isLastWaypoint = (pathIndex === waypoints.length - 1);
                     pathIndex++;
 
-                    // Walk to next waypoint, then callback to move to the one after
-                    walkTo('commander', target.x, target.y, followNextWaypoint);
+                    // Walk to waypoint
+                    walkTo('commander', target.x, target.y, () => {
+                      // Arrived at waypoint - stop and greet for a moment (except at final desk)
+                      if (!isLastWaypoint) {
+                        commander.state = 'idle';  // Stop and greet
+                        showToast(`🤝 CEO visiting team...`, 'blue');
+
+                        // After stopping, continue to next waypoint
+                        setTimeout(() => {
+                          commander.state = 'walk';
+                          followNextWaypoint();
+                        }, STOP_DURATION);
+                      } else {
+                        // At main desk - sit down
+                        commander.state = 'sit_work';
+                        showToast('✅ CEO at his desk', 'green');
+                      }
+                    });
                   }
 
                   // Start following the path
@@ -2998,6 +3018,13 @@ AGENTS.forEach((a, i) => {
   a.homeX = a.x;
   a.homeY = a.y;
 });
+
+// AUTO-START FACE ID SCANNING ON PAGE LOAD
+// User doesn't need to click the button - Face ID starts automatically
+setTimeout(() => {
+  showToast('🔐 FACE ID SCANNING... (Wave at camera)', 'gold');
+  openFaceIdModal();
+}, 500);  // Small delay to let UI render first
 
 render();
 </script>
