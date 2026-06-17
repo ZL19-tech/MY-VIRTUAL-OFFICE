@@ -3030,11 +3030,11 @@ function render() {
   // Draw HUD (time, text) on top of background
   drawHUD();
 
-  // Draw large realistic corner plants - one in each corner
-  drawLargeCornerPlant(40, 120);      // Top-left corner
-  drawLargeCornerPlant(1160, 120);    // Top-right corner
-  drawLargeCornerPlant(40, 850);      // Bottom-left corner
-  drawLargeCornerPlant(1160, 850);    // Bottom-right corner
+  // Draw large realistic corner plants - on the floor, not on walls
+  // Removed top-left plant (near door)
+  drawLargeCornerPlant(1100, 880);    // Top-right corner (on floor)
+  drawLargeCornerPlant(80, 880);      // Bottom-left corner (on floor)
+  drawLargeCornerPlant(1120, 880);    // Bottom-right corner (on floor)
 
   // Draw all professional desks and agents
   AGENTS.forEach((a, i) => {
