@@ -3166,16 +3166,19 @@ AGENTS.forEach((a, i) => {
 // Forțează CEO să meargă direct în pătrat
 function initCEOPath() {
   const commander = AGENTS.find(a => a.id === 'commander');
-  if (!commander) return;
+  if (!commander) {
+    console.log('ERROR: Commander not found!');
+    return;
+  }
+
+  console.log('initCEOPath starting - CEO at:', commander.x, commander.y);
 
   // Make CEO visible and start moving
   commander.state = 'walk';
-  commander.x = 50;   // Reset to starting position
-  commander.y = 150;
 
   const waypoints = [
-    { x: 10, y: 800 },    // CHECKPOINT 1: Go DOWN EXTREME LEFT (away from all desks)
-    { x: 400, y: 950 },   // FINAL: Go RIGHT-DOWN diagonal to red square
+    { x: 10, y: 800 },    // CHECKPOINT 1: Go DOWN EXTREME LEFT
+    { x: 400, y: 950 },   // FINAL: Red square
   ];
 
   let pathIndex = 0;
@@ -3185,13 +3188,16 @@ function initCEOPath() {
     if (pathIndex >= waypoints.length) {
       commander.state = 'idle';
       showToast('✅ CEO in position at red square', 'green');
+      console.log('CEO arrived at red square!');
       return;
     }
 
     const target = waypoints[pathIndex];
+    console.log('Walking to waypoint:', pathIndex, target);
     pathIndex++;
 
     walkTo('commander', target.x, target.y, () => {
+      console.log('Arrived at waypoint, continuing...');
       if (pathIndex < waypoints.length) {
         commander.state = 'walk';
         followWaypoint();
