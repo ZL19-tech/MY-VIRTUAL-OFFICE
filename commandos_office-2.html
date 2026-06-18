@@ -2071,9 +2071,9 @@ async function openFaceIdModal() {
                   // Home position: x:500+120=620, y:650+170=820
                   const waypoints = [
                     { x: 50, y: 150 },    // Start at door (entrance - top left)
-                    { x: 50, y: 900 },    // Go DOWN left side (below all collision zones)
-                    { x: 250, y: 900 },   // Go RIGHT at safe y (outside Commander desk x:280-720)
-                    { x: 520, y: 950 },   // FINAL: Commander's sitting position (x520, y950)
+                    { x: 50, y: 850 },    // Go DOWN left side (BELOW Commander desk collision y:610-770)
+                    { x: 520, y: 850 },   // Go RIGHT CENTER (at safe y:850, BELOW all desks)
+                    { x: 520, y: 950 },   // FINAL: Under Row 3 desk (below canvas center)
                   ];
 
                   // NO stops or pauses - just continuous walking
