@@ -2066,11 +2066,13 @@ async function openFaceIdModal() {
                   showToast('🚪 DOOR OPENED - CommandOS entering...', 'green');
 
                   // CEO walks to desk avoiding collision zones - no stops, just movement
-                  // Path: DOWN left side → RIGHT → to desk
+                  // Path: DOWN left side → to EXACT home position
+                  // Commander desk GRID: {x:500, y:650}
+                  // Home position: x:500+120=620, y:650+170=820
                   const waypoints = [
                     { x: 50, y: 150 },    // Start at door (entrance - top left)
                     { x: 50, y: 700 },    // Go DOWN left side (below all desks)
-                    { x: 500, y: 1000 },   // FINAL: Commander's sitting position (far below at bottom)
+                    { x: 620, y: 820 },   // FINAL: Commander's EXACT home position (in front of desk)
                   ];
 
                   // NO stops or pauses - just continuous walking
@@ -2986,8 +2988,10 @@ function runAutoScene() {
     if (!a || a.state === 'dead') { delete agentWalk[id]; return; }
     const dx = w.tx - a.x, dy = w.ty - a.y;
     const dist = Math.sqrt(dx*dx + dy*dy);
-    if (dist < 3) {
-      a.x = w.tx; a.y = w.ty;
+    // For CEO: use larger threshold to ensure he reaches exact position
+    const threshold = (id === 'commander') ? 5 : 3;
+    if (dist < threshold) {
+      a.x = w.tx; a.y = w.ty;  // SNAP to exact position
       delete agentWalk[id];
       if (w.onArrive) w.onArrive();
     } else {
