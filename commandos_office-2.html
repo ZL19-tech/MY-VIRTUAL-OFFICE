@@ -3149,10 +3149,10 @@ setLang('ro');
 // Place agents at their desk positions
 AGENTS.forEach((a, i) => {
   if (a.id === 'commander') {
-    // CommandOS starts HIDDEN outside - will move after Face ID approval
+    // CommandOS starts VISIBLE at door - waits for Face ID approval
     a.x = 50;   // Starting position (left side)
     a.y = 150;  // TOP area (near door)
-    a.state = 'hidden';  // HIDDEN until Face ID approves
+    a.state = 'idle';  // VISIBLE and IDLE at door
   } else {
     a.x = GRID[i].x + 80;
     a.y = GRID[i].y + 90;
