@@ -2065,62 +2065,8 @@ async function openFaceIdModal() {
                   commander.state = 'walk';
                   showToast('🚪 DOOR OPENED - CommandOS entering...', 'green');
 
-                  // CEO walks to desk avoiding collision zones - no stops, just movement
-                  // Path: DOWN left side → RIGHT at bottom → UP to desk
-                  // Commander desk GRID: {x:500, y:650}
-                  // Home position: x:500+120=620, y:650+170=820
-                  const waypoints = [
-                    { x: 50, y: 150 },    // Start at door (entrance - top left)
-                    { x: 50, y: 850 },    // Go DOWN left side (BELOW Commander desk collision y:610-770)
-                    { x: 520, y: 850 },   // Go RIGHT CENTER (at safe y:850, BELOW all desks)
-                    { x: 540, y: 950 },   // FINAL: Slightly EAST (inside red square zone)
-                  ];
-
-                  // NO stops or pauses - just continuous walking
-                  const STOP_DURATION = 0;  // No delays between waypoints
-
-                  // Use pathfinding to follow waypoints with stops at each desk
-                  let pathIndex = 0;
-
-                  function followNextWaypoint() {
-                    if (pathIndex >= waypoints.length) {
-                      // Reached final destination - sit at desk
-                      commander.state = 'sit_work';
-                      showToast('✅ CEO at his desk', 'green');
-                      return;
-                    }
-
-                    const target = waypoints[pathIndex];
-                    const isLastWaypoint = (pathIndex === waypoints.length - 1);
-                    pathIndex++;
-
-                    // Walk to waypoint
-                    walkTo('commander', target.x, target.y, () => {
-                      // Check if this was the last waypoint
-                      const wasLastWaypoint = (pathIndex >= waypoints.length);
-
-                      // Arrived at waypoint - stop and greet for a moment (except at final desk)
-                      if (!wasLastWaypoint) {
-                        commander.state = 'idle';  // Stop and greet
-                        showToast(`🤝 CEO visiting team...`, 'blue');
-
-                        // After stopping, continue to next waypoint
-                        setTimeout(() => {
-                          if (commander.state === 'idle') {  // Only continue if still idle
-                            commander.state = 'walk';
-                            followNextWaypoint();
-                          }
-                        }, STOP_DURATION);
-                      } else {
-                        // Reached final destination in red square - stay standing
-                        commander.state = 'idle';
-                        showToast('✅ CEO in position at red square', 'green');
-                      }
-                    });
-                  }
-
-                  // Start following the path
-                  followNextWaypoint();
+                  // Call initCEOPath to move CEO to red square
+                  initCEOPath();
                 }
               }, 1000);  // Wait for door to fully open
             }, 300);
@@ -2710,8 +2656,6 @@ function drawCharts() {
 
 // ── Scene auto-animation ─────────────────────────────────────────────
 function runAutoScene() {
-  // DISABLED: Auto scene is disabled so CEO can move freely to red square
-  return;
 
   // Handle door opening animation - smooth sliding
   if (doorAnimating) {
@@ -3257,10 +3201,8 @@ function initCEOPath() {
   followWaypoint();
 }
 
-// Inițiază CEO path imediat
-setTimeout(() => {
-  initCEOPath();
-}, 1000);
+// CEO path is triggered by Face ID approval, not automatically
+// (removed automatic trigger - Face ID will call initCEOPath when approved)
 
 render();
 </script>
