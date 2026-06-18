@@ -2038,8 +2038,8 @@ async function openFaceIdModal() {
           // Update status with progress
           showFaceScanResult(`SCANNING FACE... ${scanPercent}%`, 'normal');
 
-          // AUTO-APPROVE AFTER 10 SECONDS
-          if (scanDuration >= 10000) {
+          // AUTO-APPROVE AFTER 5 SECONDS
+          if (scanDuration >= 5000) {
             showFaceScanResult('✓ FACE APPROVED', 'success');
             faceIdPending = false;
             faceDetectStartTime = null;
