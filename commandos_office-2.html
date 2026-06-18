@@ -182,6 +182,69 @@ canvas{display:block;width:100%;height:100%;}
 @keyframes toastIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 @keyframes toastOut{to{opacity:0;}}
 
+/* Chat Grid */
+#chat-grid{
+  position:fixed;bottom:20px;right:20px;background:rgba(13,17,23,0.95);
+  border:2px solid #00BFFF;border-radius:8px;padding:15px;
+  z-index:500;font-family:'Press Start 2P',monospace;
+  max-width:400px;max-height:300px;overflow-y:auto;
+  box-shadow:0 0 20px rgba(0,191,255,0.3);display:none;
+}
+#chat-grid.active{display:block;}
+#chat-grid h3{color:#00BFFF;font-size:8px;margin:0 0 10px 0;}
+.chat-item{
+  background:rgba(0,191,255,0.1);border-left:3px solid;padding:8px;
+  margin-bottom:5px;font-size:7px;color:#E6EDF3;cursor:pointer;
+  transition:all 0.2s;
+}
+.chat-item:hover{background:rgba(0,191,255,0.2);transform:translateX(5px);}
+.chat-item .agent-name{color:#00BFFF;margin-bottom:3px;}
+.chat-item .msg-preview{color:#8B949E;font-size:6px;}
+
+/* Chat Modal */
+#chat-modal{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:#0A0F1A;border:3px solid #00BFFF;border-radius:8px;
+  padding:20px;width:500px;max-width:90vw;z-index:1000;
+  display:none;flex-direction:column;box-shadow:0 0 30px rgba(0,191,255,0.4);
+}
+#chat-modal.active{display:flex;}
+#chat-modal-header{
+  color:#00BFFF;font-family:'Press Start 2P',monospace;
+  font-size:12px;margin-bottom:15px;display:flex;justify-content:space-between;
+  align-items:center;
+}
+#chat-modal-close{
+  background:transparent;border:1px solid #00BFFF;color:#00BFFF;
+  cursor:pointer;width:30px;height:30px;font-size:16px;
+}
+#chat-messages{
+  background:#080D16;border:1px solid #263348;border-radius:4px;
+  padding:10px;height:250px;overflow-y:auto;margin-bottom:10px;
+  font-family:'Share Tech Mono',monospace;font-size:10px;
+}
+.chat-msg{
+  margin-bottom:8px;padding:5px;border-radius:3px;
+}
+.chat-msg.user{
+  background:rgba(0,191,255,0.2);color:#00BFFF;text-align:right;
+}
+.chat-msg.agent{
+  background:rgba(0,255,136,0.1);color:#00FF88;text-align:left;
+}
+#chat-input{
+  width:100%;padding:8px;background:#0D1520;border:1px solid #263348;
+  color:#E6EDF3;font-family:'Share Tech Mono',monospace;font-size:10px;
+  margin-bottom:10px;outline:none;border-radius:3px;
+}
+#chat-input:focus{border-color:#00BFFF;}
+#chat-send{
+  width:100%;padding:8px;background:transparent;border:1px solid #00BFFF;
+  color:#00BFFF;cursor:pointer;font-family:'Press Start 2P',monospace;
+  font-size:8px;transition:all 0.2s;
+}
+#chat-send:hover{background:rgba(0,191,255,0.2);}
+
 /* FaceID Modal */
 #faceIdModal{
   position:fixed;top:0;left:0;width:100%;height:100%;
@@ -292,6 +355,23 @@ canvas{display:block;width:100%;height:100%;}
 </div>
 
 <div id="toast-wrap"></div>
+
+<!-- Chat Modal -->
+<div id="chat-modal">
+  <div id="chat-modal-header">
+    <span id="chat-agent-name">Agent Chat</span>
+    <button id="chat-modal-close" onclick="closeChat()">✕</button>
+  </div>
+  <div id="chat-messages"></div>
+  <input id="chat-input" type="text" placeholder="Type message..." maxlength="100">
+  <button id="chat-send" onclick="sendChatMessage()">SEND</button>
+</div>
+
+<!-- Chat Grid -->
+<div id="chat-grid">
+  <h3>💬 CHATS</h3>
+  <div id="chat-grid-items"></div>
+</div>
 
 <!-- Game Controller -->
 <div id="game-controller">
@@ -3207,6 +3287,106 @@ function handleCommandButton(action) {
   }
 }
 
+// ── Chat System ──────────────────────────────────────────────────────
+let chatHistory = {};  // { agentId: [messages] }
+let currentChatAgent = null;
+const CHAT_PROXIMITY = 100;  // Distance to trigger chat button
+
+function initChats() {
+  AGENTS.forEach(a => {
+    if (a.id !== 'commander') {
+      chatHistory[a.id] = [];
+    }
+  });
+}
+
+function openChat(agentId) {
+  const agent = AGENTS.find(a => a.id === agentId);
+  if (!agent) return;
+
+  currentChatAgent = agentId;
+  document.getElementById('chat-agent-name').textContent = `💬 ${agent.name}`;
+  document.getElementById('chat-modal').classList.add('active');
+  renderChatMessages();
+  document.getElementById('chat-input').focus();
+}
+
+function closeChat() {
+  currentChatAgent = null;
+  document.getElementById('chat-modal').classList.remove('active');
+  document.getElementById('chat-input').value = '';
+  updateChatGrid();
+}
+
+function sendChatMessage() {
+  if (!currentChatAgent) return;
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  // Add user message
+  chatHistory[currentChatAgent].push({ user: 'YOU', text, time: new Date().toLocaleTimeString() });
+
+  // Add auto-reply after delay
+  setTimeout(() => {
+    if (currentChatAgent && chatHistory[currentChatAgent]) {
+      const agent = AGENTS.find(a => a.id === currentChatAgent);
+      const replies = [
+        `Yes, I can help with that!`,
+        `Thanks for the update!`,
+        `Got it, will do!`,
+        `👍 Understood!`,
+        `Let me check and get back to you.`
+      ];
+      const reply = replies[Math.floor(Math.random() * replies.length)];
+      chatHistory[currentChatAgent].push({ user: agent.name, text: reply, time: new Date().toLocaleTimeString() });
+      renderChatMessages();
+      updateChatGrid();
+    }
+  }, 800);
+
+  input.value = '';
+  renderChatMessages();
+  updateChatGrid();
+}
+
+function renderChatMessages() {
+  const container = document.getElementById('chat-messages');
+  if (!currentChatAgent || !chatHistory[currentChatAgent]) return;
+
+  container.innerHTML = '';
+  chatHistory[currentChatAgent].forEach(msg => {
+    const div = document.createElement('div');
+    div.className = `chat-msg ${msg.user === 'YOU' ? 'user' : 'agent'}`;
+    div.innerHTML = `<strong>${msg.user}</strong><br>${msg.text}<br><small>${msg.time}</small>`;
+    container.appendChild(div);
+  });
+  container.scrollTop = container.scrollHeight;
+}
+
+function updateChatGrid() {
+  const grid = document.getElementById('chat-grid-items');
+  grid.innerHTML = '';
+
+  AGENTS.forEach(a => {
+    if (a.id === 'commander' || !chatHistory[a.id] || chatHistory[a.id].length === 0) return;
+
+    const item = document.createElement('div');
+    item.className = 'chat-item';
+    item.style.borderLeftColor = a.color;
+    const lastMsg = chatHistory[a.id][chatHistory[a.id].length - 1];
+    item.innerHTML = `
+      <div class="agent-name">${a.name}</div>
+      <div class="msg-preview">${lastMsg.text.slice(0, 40)}...</div>
+    `;
+    item.onclick = () => openChat(a.id);
+    grid.appendChild(item);
+  });
+
+  // Show grid if there are chats
+  document.getElementById('chat-grid').classList.toggle('active', grid.children.length > 0);
+}
+
 // ── Game Controller ──────────────────────────────────────────────────
 let selectedCharForControl = null;
 
@@ -3252,6 +3432,7 @@ function moveSelected(dx, dy) {
 // ── Init ─────────────────────────────────────────────────────────────
 buildAgentButtons();
 buildCharSelector();
+initChats();
 setLang('ro');
 
 // Place agents at their desk positions
