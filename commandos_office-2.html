@@ -3149,10 +3149,10 @@ setLang('ro');
 // Place agents at their desk positions
 AGENTS.forEach((a, i) => {
   if (a.id === 'commander') {
-    // CommandOS starts at door and moves immediately to red square
+    // CommandOS starts HIDDEN outside - will move after Face ID approval
     a.x = 50;   // Starting position (left side)
     a.y = 150;  // TOP area (near door)
-    a.state = 'walk';  // Start walking immediately
+    a.state = 'hidden';  // HIDDEN until Face ID approves
   } else {
     a.x = GRID[i].x + 80;
     a.y = GRID[i].y + 90;
@@ -3167,6 +3167,11 @@ function initCEOPath() {
   const commander = AGENTS.find(a => a.id === 'commander');
   if (!commander) return;
 
+  // Make CEO visible and start moving
+  commander.state = 'walk';
+  commander.x = 50;   // Reset to starting position
+  commander.y = 150;
+
   const waypoints = [
     { x: 50, y: 850 },    // Go DOWN left side
     { x: 520, y: 850 },   // Go RIGHT CENTER
@@ -3174,7 +3179,6 @@ function initCEOPath() {
   ];
 
   let pathIndex = 0;
-  commander.state = 'walk';
   showToast('🚶 CEO starts moving to red square...', 'gold');
 
   function followWaypoint() {
@@ -3203,6 +3207,12 @@ function initCEOPath() {
 
 // CEO path is triggered by Face ID approval, not automatically
 // (removed automatic trigger - Face ID will call initCEOPath when approved)
+
+// AUTO-START FACE ID SCANNING ON PAGE LOAD
+setTimeout(() => {
+  showToast('🔐 FACE ID SCANNING... (Wave at camera)', 'gold');
+  openFaceIdModal();
+}, 500);
 
 render();
 </script>
