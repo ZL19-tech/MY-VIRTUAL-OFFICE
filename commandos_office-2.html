@@ -3215,11 +3215,10 @@ setLang('ro');
 // Place agents at their desk positions
 AGENTS.forEach((a, i) => {
   if (a.id === 'commander') {
-    // CommandOS starts OUTSIDE at top-left door, waits for user to open door
-    a.x = 20;   // LEFT side (outside)
-    a.y = 100;  // TOP area (near door)
-    a.state = 'idle';  // Wait for user to open door
-    // No automatic entry - user must click button!
+    // CommandOS starts at door and moves immediately to red square
+    a.x = 50;   // Starting position (left side)
+    a.y = 150;  // TOP area (near door)
+    a.state = 'walk';  // Start walking immediately
   } else {
     a.x = GRID[i].x + 80;
     a.y = GRID[i].y + 90;
@@ -3229,12 +3228,50 @@ AGENTS.forEach((a, i) => {
   a.homeY = a.y;
 });
 
-// AUTO-START FACE ID SCANNING ON PAGE LOAD
-// User doesn't need to click the button - Face ID starts automatically
+// Forțează CEO să meargă direct în pătrat
+function initCEOPath() {
+  const commander = AGENTS.find(a => a.id === 'commander');
+  if (!commander) return;
+
+  const waypoints = [
+    { x: 50, y: 150 },    // Start at door
+    { x: 50, y: 850 },    // Go DOWN left side
+    { x: 520, y: 850 },   // Go RIGHT CENTER
+    { x: 540, y: 950 },   // FINAL: Red square zone
+  ];
+
+  let pathIndex = 0;
+  commander.state = 'walk';
+  showToast('🚶 CEO starts moving to red square...', 'gold');
+
+  function followWaypoint() {
+    if (pathIndex >= waypoints.length) {
+      commander.state = 'idle';
+      showToast('✅ CEO in position at red square', 'green');
+      return;
+    }
+
+    const target = waypoints[pathIndex];
+    pathIndex++;
+
+    walkTo('commander', target.x, target.y, () => {
+      if (pathIndex < waypoints.length) {
+        commander.state = 'walk';
+        followWaypoint();
+      } else {
+        commander.state = 'idle';
+        showToast('✅ CEO in position at red square', 'green');
+      }
+    });
+  }
+
+  followWaypoint();
+}
+
+// Inițiază CEO path imediat
 setTimeout(() => {
-  showToast('🔐 FACE ID SCANNING... (Wave at camera)', 'gold');
-  openFaceIdModal();
-}, 500);  // Small delay to let UI render first
+  initCEOPath();
+}, 1000);
 
 render();
 </script>
