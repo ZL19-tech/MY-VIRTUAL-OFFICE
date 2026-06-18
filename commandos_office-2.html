@@ -2071,7 +2071,8 @@ async function openFaceIdModal() {
                   // Home position: x:500+120=620, y:650+170=820
                   const waypoints = [
                     { x: 50, y: 150 },    // Start at door (entrance - top left)
-                    { x: 50, y: 950 },    // Go DOWN left side (BELOW all desks)
+                    { x: 50, y: 900 },    // Go DOWN left side (below all collision zones)
+                    { x: 250, y: 900 },   // Go RIGHT at safe y (outside Commander desk x:280-720)
                     { x: 520, y: 950 },   // FINAL: Commander's sitting position (x520, y950)
                   ];
 
