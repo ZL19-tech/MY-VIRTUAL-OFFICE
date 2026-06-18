@@ -2072,7 +2072,7 @@ async function openFaceIdModal() {
                   const waypoints = [
                     { x: 50, y: 150 },    // Start at door (entrance - top left)
                     { x: 50, y: 950 },    // Go DOWN left side (BELOW all desks)
-                    { x: 500, y: 910 },   // FINAL: Commander's sitting position (centered in red square below desk)
+                    { x: 520, y: 950 },   // FINAL: Commander's sitting position (x520, y950)
                   ];
 
                   // NO stops or pauses - just continuous walking
@@ -3099,11 +3099,6 @@ function render() {
     // Draw agent on top of desk
     drawAgent(a);
   });
-
-  // Draw CEO final position indicator (red square below desk)
-  ctx.strokeStyle = '#FF0000';
-  ctx.lineWidth = S(3);
-  ctx.strokeRect(sx(350), sy(880), S(300), S(80));  // Red square at CEO final position
 
   ctx.restore();
 
