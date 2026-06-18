@@ -2948,11 +2948,22 @@ function runAutoScene() {
       let newX = a.x + dx/dist * speed;
       let newY = a.y + dy/dist * speed;
 
-      // Commander can move freely ANYWHERE (no collision checks for CEO)
+      // Commander avoids desks but can move freely everywhere else
       if (a.id === 'commander') {
-        // CEO moves freely with no collision checks - goes directly to red square
-        a.x = newX;
-        a.y = newY;
+        // Desk collision zones to AVOID
+        const onAlexaDesk = newX >= 70 && newX <= 310 && newY >= 170 && newY <= 290;
+        const onScoutDesk = newX >= 480 && newX <= 720 && newY >= 170 && newY <= 290;
+        const onMemoDesk = newX >= 890 && newX <= 1130 && newY >= 170 && newY <= 290;
+        const onDocDesk = newX >= 230 && newX <= 470 && newY >= 410 && newY <= 530;
+        const onCalDesk = newX >= 730 && newX <= 970 && newY >= 410 && newY <= 530;
+        const onCommanderDesk = newX >= 280 && newX <= 720 && newY >= 610 && newY <= 770;
+
+        // If NOT on any desk and within bounds, allow movement
+        if (!onAlexaDesk && !onScoutDesk && !onMemoDesk && !onDocDesk && !onCalDesk && !onCommanderDesk &&
+            newX >= 0 && newX <= CANVAS_WIDTH && newY >= 0 && newY <= CANVAS_HEIGHT) {
+          a.x = newX;
+          a.y = newY;
+        }
       } else {
         a.x = newX;
         a.y = newY;
