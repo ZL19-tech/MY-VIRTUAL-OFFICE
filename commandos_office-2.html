@@ -2656,6 +2656,8 @@ function drawCharts() {
 
 // ── Scene auto-animation ─────────────────────────────────────────────
 function runAutoScene() {
+  // DISABLED - CEO moves only via initCEOPath waypoints, no auto-scene interference
+  return;
 
   // Handle door opening animation - smooth sliding
   if (doorAnimating) {
