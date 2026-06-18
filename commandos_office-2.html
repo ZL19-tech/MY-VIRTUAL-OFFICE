@@ -2710,6 +2710,9 @@ function drawCharts() {
 
 // ── Scene auto-animation ─────────────────────────────────────────────
 function runAutoScene() {
+  // DISABLED: Auto scene is disabled so CEO can move freely to red square
+  return;
+
   // Handle door opening animation - smooth sliding
   if (doorAnimating) {
     doorOpenProgress += doorAnimationSpeed;
@@ -2976,8 +2979,9 @@ function runAutoScene() {
 
   // Commander patrol disabled - uses walkTo() only
 
-  // Walk home occasionally
+  // Walk home occasionally (but NOT for commander - he moves via initCEOPath)
   AGENTS.forEach(a => {
+    if (a.id === 'commander') return;  // Skip commander - he follows waypoints
     if (a.state === 'walk' && !agentWalk[a.id]) {
       a.state = 'sit_work';
     }
