@@ -3141,9 +3141,62 @@ function runAutoScene() {
   if (sceneTimer > 750) sceneTimer = 0;
 }
 
+// ── Proximity Chat ──────────────────────────────────────────────────
+let nearbyAgentForChat = null;
+
+function checkProximityChat() {
+  const commander = AGENTS.find(a => a.id === 'commander');
+  if (!commander) return;
+
+  nearbyAgentForChat = null;
+
+  AGENTS.forEach(a => {
+    if (a.id === 'commander' || !a) return;
+    const dx = a.x - commander.x;
+    const dy = a.y - commander.y;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+
+    if (dist < CHAT_PROXIMITY) {
+      nearbyAgentForChat = a;
+    }
+  });
+}
+
+function drawChatButton() {
+  if (!nearbyAgentForChat) return;
+
+  const a = nearbyAgentForChat;
+  const buttonX = sx(a.x + 60);
+  const buttonY = sy(a.y - 80);
+  const buttonW = 50;
+  const buttonH = 25;
+
+  // Button background
+  ctx.fillStyle = a.color;
+  ctx.globalAlpha = 0.8;
+  ctx.fillRect(buttonX, buttonY, buttonW, buttonH);
+  ctx.globalAlpha = 1;
+
+  // Button border
+  ctx.strokeStyle = a.color;
+  ctx.lineWidth = 2;
+  ctx.strokeRect(buttonX, buttonY, buttonW, buttonH);
+
+  // Button text
+  ctx.font = `${S(8)}px "Press Start 2P", monospace`;
+  ctx.fillStyle = '#0D1117';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('💬', buttonX + buttonW/2, buttonY + buttonH/2);
+
+  // Store button rect for clicking
+  window.chatButtonRect = { x: buttonX/zoomLevel - offsetX/zoomLevel, y: buttonY/zoomLevel - offsetY/zoomLevel, w: buttonW/zoomLevel, h: buttonH/zoomLevel, agentId: a.id };
+}
+
 // ── Main render ──────────────────────────────────────────────────────
 function render() {
   resizeCanvas();
+  checkProximityChat();
 
   // Apply zoom transformation for responsive scaling
   ctx.save();
@@ -3182,6 +3235,9 @@ function render() {
     drawAgent(a);
   });
 
+  // Draw proximity chat button
+  drawChatButton();
+
   ctx.restore();
 
   drawCharts();
@@ -3199,6 +3255,16 @@ canvas.addEventListener('click', (e) => {
   // Convert screen coordinates to game coordinates (1200x950), accounting for zoom and offset
   const clickX = (clickXScreen - offsetX) / zoomLevel;
   const clickY = (clickYScreen - offsetY) / zoomLevel;
+
+  // Check chat button click
+  if (window.chatButtonRect) {
+    const btn = window.chatButtonRect;
+    if (clickX >= btn.x && clickX <= btn.x + btn.w &&
+        clickY >= btn.y && clickY <= btn.y + btn.h) {
+      openChat(btn.agentId);
+      return;
+    }
+  }
 
   // Check door button click
   if (window.doorButtonRect) {
