@@ -3184,7 +3184,9 @@ function initCEOPath() {
   commander.y = 150;
 
   const waypoints = [
-    { x: 400, y: 950 },   // DIRECT: Go straight down under CEO desk to red square
+    { x: 50, y: 480 },    // CHECKPOINT 1: Go DOWN left side (below Alexa desk)
+    { x: 300, y: 480 },   // CHECKPOINT 2: Go RIGHT on bottom (left of Doc desk)
+    { x: 400, y: 950 },   // FINAL: Go DOWN-RIGHT diagonal to red square
   ];
 
   let pathIndex = 0;
