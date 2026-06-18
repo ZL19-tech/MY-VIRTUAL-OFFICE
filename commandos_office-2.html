@@ -2112,9 +2112,9 @@ async function openFaceIdModal() {
                           }
                         }, STOP_DURATION);
                       } else {
-                        // At main desk - sit down
-                        commander.state = 'sit_work';
-                        showToast('✅ CEO at his desk', 'green');
+                        // Reached final destination in red square - stay standing
+                        commander.state = 'idle';
+                        showToast('✅ CEO in position at red square', 'green');
                       }
                     });
                   }
