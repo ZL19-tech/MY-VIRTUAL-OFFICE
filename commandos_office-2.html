@@ -2989,7 +2989,7 @@ function runAutoScene() {
     const dx = w.tx - a.x, dy = w.ty - a.y;
     const dist = Math.sqrt(dx*dx + dy*dy);
     // For CEO: use larger threshold to ensure he reaches exact position
-    const threshold = (id === 'commander') ? 5 : 3;
+    const threshold = (id === 'commander') ? 15 : 3;
     if (dist < threshold) {
       a.x = w.tx; a.y = w.ty;  // SNAP to exact position
       delete agentWalk[id];
