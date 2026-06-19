@@ -1755,17 +1755,17 @@ function drawAgent(agent) {
   ctx.fillStyle='rgba(0,0,0,0.35)';
   ctx.fillRect(ax-S(8), ay+ph-S(5), pw+S(14), S(10));
 
-  // Legs
+  // Legs - picioarele NU plutesc cand se misca corpul (bob)
   const legL = sitting ? S(28) : S(8) + walkLeg * S(12);
   const legR = sitting ? S(28) : S(8) - walkLeg * S(12);
   ctx.fillStyle = '#1A1A2E';  // Dark pants
-  ctx.fillRect(ax+S(12), ay+S(52)+bob, S(16), legL);
-  ctx.fillRect(ax+S(34), ay+S(52)+bob, S(16), legR);
+  ctx.fillRect(ax+S(12), ay+S(52), S(16), legL);
+  ctx.fillRect(ax+S(34), ay+S(52), S(16), legR);
 
-  // Shoes
+  // Shoes - pantofii se muta cu picioarele, nu plutesc
   ctx.fillStyle = '#0F0F1A';
-  ctx.fillRect(ax+S(10), ay+S(52)+bob+legL, S(20), S(8));
-  ctx.fillRect(ax+S(32), ay+S(52)+bob+legR, S(20), S(8));
+  ctx.fillRect(ax+S(10), ay+S(52)+legL, S(20), S(8));
+  ctx.fillRect(ax+S(32), ay+S(52)+legR, S(20), S(8));
 
   // Body/T-shirt (white for most, with styling)
   if (a.clothing === 'classic') {
@@ -3206,8 +3206,8 @@ function drawChatButton() {
   ctx.textBaseline = 'middle';
   ctx.fillText('💬', buttonX + buttonW/2, buttonY + buttonH/2);
 
-  // Store button rect for clicking
-  window.chatButtonRect = { x: buttonX/zoomLevel - offsetX/zoomLevel, y: buttonY/zoomLevel - offsetY/zoomLevel, w: buttonW/zoomLevel, h: buttonH/zoomLevel, agentId: a.id };
+  // Store button rect for clicking - coordonate in spatiul jocului (game world)
+  window.chatButtonRect = { x: (buttonX - offsetX) / zoomLevel, y: (buttonY - offsetY) / zoomLevel, w: buttonW / zoomLevel, h: buttonH / zoomLevel, agentId: a.id };
 }
 
 // ── Main render ──────────────────────────────────────────────────────
