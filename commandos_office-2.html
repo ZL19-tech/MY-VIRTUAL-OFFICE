@@ -3520,7 +3520,10 @@ function moveSelected(dx, dy) {
     return;
   }
   const agent = AGENTS.find(a => a.id === selectedCharForControl);
-  if (!agent) return;
+  if (!agent) {
+    console.log('ERROR: Agent not found!', selectedCharForControl);
+    return;
+  }
 
   // Calculate new position
   const newX = agent.x + dx;
@@ -3540,11 +3543,16 @@ function moveSelected(dx, dy) {
     newY >= topWallHeight &&
     newY + charHeight <= CANVAS_HEIGHT - bottomWallHeight;
 
+  console.log(`moveSelected(${dx}, ${dy}): agent=${agent.name}, pos=(${agent.x},${agent.y}) -> (${newX},${newY}), canMove=${isWithinBounds}, bounds=L:${sideWallWidth} R:${CANVAS_WIDTH-sideWallWidth} T:${topWallHeight} B:${CANVAS_HEIGHT-bottomWallHeight}`);
+
   if (isWithinBounds) {
     agent.x = newX;
     agent.y = newY;
     delete agentWalk[selectedCharForControl];
     agent.state = 'idle';
+    console.log('MOVED to:', newX, newY);
+  } else {
+    console.log('BLOCKED - out of bounds');
   }
 }
 
