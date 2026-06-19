@@ -1744,8 +1744,8 @@ function drawAgent(agent) {
 
   // Sitting: agent offset
   const sitting = a.state === 'sit_work';
-  const isAdmin = a.id === 'admin';
-  const scale = isAdmin ? 1.4 : 1;  // Admin is 40% bigger
+  const isAdmin = a.id === 'admin' || a.id === 'commander';  // Commander e ca admin
+  const scale = isAdmin ? 1.4 : 1;  // Admin/Commander is 40% bigger
   const ax = sx(a.x), ay = sy(a.y) + (sitting ? S(35) : 0);
   const pw = S(62 * scale), ph = S(95 * scale);
   const bob = sitting ? 0 : Math.floor(Math.sin(tick * 0.1) * S(3));
@@ -1756,16 +1756,20 @@ function drawAgent(agent) {
   ctx.fillRect(ax-S(8), ay+ph-S(5), pw+S(14), S(10));
 
   // Legs - picioarele NU plutesc cand se misca corpul (bob)
-  const legL = sitting ? S(28) : S(8) + walkLeg * S(12);
-  const legR = sitting ? S(28) : S(8) - walkLeg * S(12);
+  // Cand merge: picioarele se misca alternativ (stanga jos, dreapta sus, invers)
+  const legL = sitting ? S(28) : S(8) + walkLeg * S(12);  // walkLeg: -1 la +1
+  const legR = sitting ? S(28) : S(8) - walkLeg * S(12);  // legR e opus lui legL
+  // Sigur că nu sunt negative
+  const legLHeight = Math.max(S(4), legL);
+  const legRHeight = Math.max(S(4), legR);
   ctx.fillStyle = '#1A1A2E';  // Dark pants
-  ctx.fillRect(ax+S(12), ay+S(52), S(16), legL);
-  ctx.fillRect(ax+S(34), ay+S(52), S(16), legR);
+  ctx.fillRect(ax+S(12), ay+S(52), S(16), legLHeight);
+  ctx.fillRect(ax+S(34), ay+S(52), S(16), legRHeight);
 
   // Shoes - pantofii se muta cu picioarele, nu plutesc
   ctx.fillStyle = '#0F0F1A';
-  ctx.fillRect(ax+S(10), ay+S(52)+legL, S(20), S(8));
-  ctx.fillRect(ax+S(32), ay+S(52)+legR, S(20), S(8));
+  ctx.fillRect(ax+S(10), ay+S(52)+legLHeight, S(20), S(8));
+  ctx.fillRect(ax+S(32), ay+S(52)+legRHeight, S(20), S(8));
 
   // Body/T-shirt (white for most, with styling)
   if (a.clothing === 'classic') {
@@ -3183,10 +3187,15 @@ function drawChatButton() {
   if (!nearbyAgentForChat) return;
 
   const a = nearbyAgentForChat;
-  const buttonX = sx(a.x + 60);
-  const buttonY = sy(a.y - 80);
+  // Coordonate in game world
+  const gameX = a.x + 60;
+  const gameY = a.y - 80;
   const buttonW = 50;
   const buttonH = 25;
+
+  // Transform to screen space
+  const buttonX = sx(gameX);
+  const buttonY = sy(gameY);
 
   // Button background
   ctx.fillStyle = a.color;
@@ -3206,8 +3215,8 @@ function drawChatButton() {
   ctx.textBaseline = 'middle';
   ctx.fillText('💬', buttonX + buttonW/2, buttonY + buttonH/2);
 
-  // Store button rect for clicking - coordonate in spatiul jocului (game world)
-  window.chatButtonRect = { x: (buttonX - offsetX) / zoomLevel, y: (buttonY - offsetY) / zoomLevel, w: buttonW / zoomLevel, h: buttonH / zoomLevel, agentId: a.id };
+  // Store button rect for clicking - in game world coordinates
+  window.chatButtonRect = { x: gameX, y: gameY, w: buttonW / zoomLevel, h: buttonH / zoomLevel, agentId: a.id };
 }
 
 // ── Main render ──────────────────────────────────────────────────────
