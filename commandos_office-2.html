@@ -1744,8 +1744,8 @@ function drawAgent(agent) {
 
   // Sitting: agent offset
   const sitting = a.state === 'sit_work';
-  const isAdmin = a.id === 'admin' || a.id === 'commander';  // Commander e ca admin
-  const scale = isAdmin ? 1.4 : 1;  // Admin/Commander is 40% bigger
+  const isAdmin = a.id === 'admin';
+  const scale = isAdmin ? 1.4 : 1;  // Admin is 40% bigger
   const ax = sx(a.x), ay = sy(a.y) + (sitting ? S(35) : 0);
   const pw = S(62 * scale), ph = S(95 * scale);
   const bob = sitting ? 0 : Math.floor(Math.sin(tick * 0.1) * S(3));
