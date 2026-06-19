@@ -3561,11 +3561,10 @@ function moveSelected(dx, dy) {
   if (canMove) {
     agent.x = newX;
     agent.y = newY;
+    // Cancel any walk command
+    delete agentWalk[selectedCharForControl];
+    agent.state = 'idle';
   }
-
-  // Cancel any walk command
-  delete agentWalk[selectedCharForControl];
-  agent.state = 'idle';
 }
 
 // Keyboard controls
