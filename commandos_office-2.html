@@ -3119,19 +3119,8 @@ function runAutoScene() {
         if (adist < 40) onAgent = true;
       });
 
-      // Wall collision - don't walk through walls
-      const topWallHeight = 180;
-      const sideWallWidth = 30;
-      const bottomWallHeight = 70;
-      const charWidth = 60;
-      const charHeight = 95;
-      let inWall = false;
-      if (newY < topWallHeight) inWall = true;
-      if (newX + charWidth > CANVAS_WIDTH - sideWallWidth) inWall = true;
-      if (newY + charHeight > CANVAS_HEIGHT - bottomWallHeight) inWall = true;
-
-      // If NOT on any desk/agent/wall and within bounds, allow movement
-      if (!onAlexaDesk && !onScoutDesk && !onMemoDesk && !onDocDesk && !onCalDesk && !onCommanderDesk && !onAgent && !inWall &&
+      // If NOT on any desk/agent and within bounds, allow movement
+      if (!onAlexaDesk && !onScoutDesk && !onMemoDesk && !onDocDesk && !onCalDesk && !onCommanderDesk && !onAgent &&
           newX >= 0 && newX <= CANVAS_WIDTH && newY >= 0 && newY <= CANVAS_HEIGHT) {
         a.x = newX;
         a.y = newY;
