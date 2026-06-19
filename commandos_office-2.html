@@ -728,16 +728,16 @@ const AGENTS = [
 
 const GRID = [
   // ROW 1: 3 agents equally spaced (horizontal) - NEAR WINDOWS (top area)
-  { x: 90,   y: 210  },   // alexa     (row1 col1 - left near windows)
-  { x: 500,  y: 210  },   // scout     (row1 col2 - center near windows)
-  { x: 910,  y: 210  },   // memo      (row1 col3 - right near windows)
+  { x: 90,   y: 290  },   // alexa     (row1 col1 - left near windows)
+  { x: 500,  y: 290  },   // scout     (row1 col2 - center near windows)
+  { x: 910,  y: 290  },   // memo      (row1 col3 - right near windows)
 
   // ROW 2: 2 agents equally spaced, centered on canvas - MIDDLE AREA
-  { x: 250,  y: 450  },   // doc       (row2 col1 - left-center)
-  { x: 750,  y: 450  },   // cal       (row2 col2 - right-center)
+  { x: 250,  y: 530  },   // doc       (row2 col1 - left-center)
+  { x: 750,  y: 530  },   // cal       (row2 col2 - right-center)
 
   // ROW 3: Commander in CENTER - FAR FROM BOTTOM WALL
-  { x: 500,  y: 650  },   // commander (row3 - center far from walls)
+  { x: 500,  y: 730  },   // commander (row3 - center far from walls)
 ];
 
 // Agent home positions (in front of desk)
@@ -3108,13 +3108,13 @@ function runAutoScene() {
       let newY = a.y + dy/dist * speed;
 
       // All agents respect collision zones
-      // Desk collision zones
-      const onAlexaDesk = newX >= 70 && newX <= 310 && newY >= 170 && newY <= 290;
-      const onScoutDesk = newX >= 480 && newX <= 720 && newY >= 170 && newY <= 290;
-      const onMemoDesk = newX >= 890 && newX <= 1130 && newY >= 170 && newY <= 290;
-      const onDocDesk = newX >= 230 && newX <= 470 && newY >= 410 && newY <= 530;
-      const onCalDesk = newX >= 730 && newX <= 970 && newY >= 410 && newY <= 530;
-      const onCommanderDesk = newX >= 280 && newX <= 720 && newY >= 610 && newY <= 770;
+      // Desk collision zones (updated Y coordinates after desk movement)
+      const onAlexaDesk = newX >= 70 && newX <= 310 && newY >= 250 && newY <= 370;
+      const onScoutDesk = newX >= 480 && newX <= 720 && newY >= 250 && newY <= 370;
+      const onMemoDesk = newX >= 890 && newX <= 1130 && newY >= 250 && newY <= 370;
+      const onDocDesk = newX >= 230 && newX <= 470 && newY >= 490 && newY <= 610;
+      const onCalDesk = newX >= 730 && newX <= 970 && newY >= 490 && newY <= 610;
+      const onCommanderDesk = newX >= 280 && newX <= 720 && newY >= 690 && newY <= 850;
 
       // Agent collision - don't walk into other agents
       let onAgent = false;
@@ -3549,7 +3549,10 @@ function moveSelected(dx, dy) {
     canMove = false;
   }
 
-  // Left side is open (no left wall)
+  // Left wall collision
+  if (newX < sideWallWidth) {
+    canMove = false;
+  }
 
   if (canMove) {
     agent.x = newX;
