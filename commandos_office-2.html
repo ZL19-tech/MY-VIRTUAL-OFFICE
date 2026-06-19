@@ -3536,15 +3536,29 @@ function moveSelected(dx, dy) {
   const charWidth = 60;
   const charHeight = 95;
 
-  // TEMPORARY: Remove collision check to test if function is called
-  console.log(`moveSelected(${dx}, ${dy}): agent=${agent.name}, pos=(${agent.x},${agent.y}) -> (${newX},${newY})`);
+  // Wall dimensions
+  const topWallHeight = 180;
+  const sideWallWidth = 30;
+  const bottomWallHeight = 70;
+  const charWidth = 60;
+  const charHeight = 95;
 
-  // Just move without any collision check
-  agent.x = newX;
-  agent.y = newY;
-  delete agentWalk[selectedCharForControl];
-  agent.state = 'idle';
-  console.log('MOVED to:', newX, newY);
+  // Check if position is SAFE (not colliding with walls)
+  const canMove =
+    newX >= sideWallWidth &&  // Left wall
+    newX + charWidth <= CANVAS_WIDTH - sideWallWidth &&  // Right wall
+    newY >= topWallHeight &&  // Top wall
+    newY + charHeight <= CANVAS_HEIGHT - bottomWallHeight;  // Bottom wall
+
+  console.log(`moveSelected(${dx}, ${dy}): agent=${agent.name}, pos=(${agent.x},${agent.y}) -> (${newX},${newY}), canMove=${canMove}`);
+
+  if (canMove) {
+    agent.x = newX;
+    agent.y = newY;
+    delete agentWalk[selectedCharForControl];
+    agent.state = 'idle';
+    console.log('MOVED to:', newX, newY);
+  }
 }
 
 // Keyboard controls
