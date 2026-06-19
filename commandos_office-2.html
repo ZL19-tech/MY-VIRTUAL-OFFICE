@@ -3524,6 +3524,14 @@ function moveSelected(dx, dy) {
 }
 
 // Keyboard controls
+// Chat input - Enter to send
+document.getElementById('chat-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    sendChatMessage();
+  }
+});
+
 document.addEventListener('keydown', (e) => {
   if (e.target === document.getElementById('chat-input')) return;  // Don't move while typing chat
 
