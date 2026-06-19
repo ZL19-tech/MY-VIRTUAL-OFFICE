@@ -3538,14 +3538,19 @@ function moveSelected(dx, dy) {
 
   console.log(`moveSelected(${dx}, ${dy}): agent=${agent.name}, pos=(${agent.x},${agent.y}) -> (${newX},${newY})`);
 
-  // Check walls only - don't pass through pereti
-  const isOutsideWalls =
-    newX < sideWallWidth ||
-    newX + charWidth > CANVAS_WIDTH - sideWallWidth ||
-    newY < topWallHeight ||
-    newY + charHeight > CANVAS_HEIGHT - bottomWallHeight;
+  // Simple boundary check - conservative margins for safety
+  const LEFT_BOUND = 40;
+  const RIGHT_BOUND = 1160;
+  const TOP_BOUND = 190;
+  const BOTTOM_BOUND = 870;
 
-  if (!isOutsideWalls) {
+  const canMove =
+    newX >= LEFT_BOUND &&
+    newX <= RIGHT_BOUND &&
+    newY >= TOP_BOUND &&
+    newY <= BOTTOM_BOUND;
+
+  if (canMove) {
     agent.x = newX;
     agent.y = newY;
     delete agentWalk[selectedCharForControl];
