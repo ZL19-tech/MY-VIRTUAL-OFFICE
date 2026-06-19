@@ -3119,8 +3119,19 @@ function runAutoScene() {
         if (adist < 40) onAgent = true;
       });
 
-      // If NOT on any desk/agent and within bounds, allow movement
-      if (!onAlexaDesk && !onScoutDesk && !onMemoDesk && !onDocDesk && !onCalDesk && !onCommanderDesk && !onAgent &&
+      // Wall collision - don't walk through walls
+      const topWallHeight = 180;
+      const sideWallWidth = 30;
+      const bottomWallHeight = 70;
+      const charWidth = 60;
+      const charHeight = 95;
+      let inWall = false;
+      if (newY < topWallHeight) inWall = true;
+      if (newX + charWidth > CANVAS_WIDTH - sideWallWidth) inWall = true;
+      if (newY + charHeight > CANVAS_HEIGHT - bottomWallHeight) inWall = true;
+
+      // If NOT on any desk/agent/wall and within bounds, allow movement
+      if (!onAlexaDesk && !onScoutDesk && !onMemoDesk && !onDocDesk && !onCalDesk && !onCommanderDesk && !onAgent && !inWall &&
           newX >= 0 && newX <= CANVAS_WIDTH && newY >= 0 && newY <= CANVAS_HEIGHT) {
         a.x = newX;
         a.y = newY;
@@ -3511,12 +3522,43 @@ function moveSelected(dx, dy) {
   const agent = AGENTS.find(a => a.id === selectedCharForControl);
   if (!agent) return;
 
-  agent.x += dx;
-  agent.y += dy;
+  // Calculate new position
+  const newX = agent.x + dx;
+  const newY = agent.y + dy;
 
-  // Clamp to canvas bounds
-  agent.x = Math.max(0, Math.min(CANVAS_WIDTH, agent.x));
-  agent.y = Math.max(0, Math.min(CANVAS_HEIGHT, agent.y));
+  // Wall dimensions
+  const topWallHeight = 180;
+  const sideWallWidth = 30;
+  const bottomWallHeight = 70;
+
+  // Character bounding box (approx 60px wide, 95px tall)
+  const charWidth = 60;
+  const charHeight = 95;
+
+  // Check if new position would collide with walls
+  let canMove = true;
+
+  // Top wall collision
+  if (newY < topWallHeight) {
+    canMove = false;
+  }
+
+  // Right wall collision
+  if (newX + charWidth > CANVAS_WIDTH - sideWallWidth) {
+    canMove = false;
+  }
+
+  // Bottom wall collision
+  if (newY + charHeight > CANVAS_HEIGHT - bottomWallHeight) {
+    canMove = false;
+  }
+
+  // Left side is open (no left wall)
+
+  if (canMove) {
+    agent.x = newX;
+    agent.y = newY;
+  }
 
   // Cancel any walk command
   delete agentWalk[selectedCharForControl];
