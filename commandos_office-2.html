@@ -2431,9 +2431,16 @@ function drawRoomWalls() {
   ctx.globalAlpha = 1;
 
   // ═══════════════════════════════════════════════════════════════
-  // LEFT WALL - REMOVED (open entrance)
+  // LEFT WALL - Full height
   // ═══════════════════════════════════════════════════════════════
-  // Left wall removed to allow open entrance from outside
+  ctx.fillStyle = WALL_COLOR;
+  ctx.fillRect(0, 0, sideWallWidth, CANVAS_HEIGHT);
+
+  // Left wall shadow
+  ctx.fillStyle = WALL_DARK;
+  ctx.globalAlpha = 0.3;
+  ctx.fillRect(0, 0, 5, CANVAS_HEIGHT);
+  ctx.globalAlpha = 1;
 
   // ═══════════════════════════════════════════════════════════════
   // RIGHT WALL - Full height
