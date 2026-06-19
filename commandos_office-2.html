@@ -3526,42 +3526,23 @@ function moveSelected(dx, dy) {
   const newX = agent.x + dx;
   const newY = agent.y + dy;
 
-  // Wall dimensions
+  // Wall dimensions (SAFE BOUNDARIES)
   const topWallHeight = 180;
   const sideWallWidth = 30;
   const bottomWallHeight = 70;
-
-  // Character bounding box (approx 60px wide, 95px tall)
   const charWidth = 60;
   const charHeight = 95;
 
-  // Check if new position would collide with walls
-  let canMove = true;
+  // Check if position is WITHIN SAFE BOUNDS (not in walls)
+  const isWithinBounds =
+    newX >= sideWallWidth &&
+    newX + charWidth <= CANVAS_WIDTH - sideWallWidth &&
+    newY >= topWallHeight &&
+    newY + charHeight <= CANVAS_HEIGHT - bottomWallHeight;
 
-  // Top wall collision
-  if (newY < topWallHeight) {
-    canMove = false;
-  }
-
-  // Right wall collision
-  if (newX + charWidth > CANVAS_WIDTH - sideWallWidth) {
-    canMove = false;
-  }
-
-  // Bottom wall collision
-  if (newY + charHeight > CANVAS_HEIGHT - bottomWallHeight) {
-    canMove = false;
-  }
-
-  // Left wall collision
-  if (newX < sideWallWidth) {
-    canMove = false;
-  }
-
-  if (canMove) {
+  if (isWithinBounds) {
     agent.x = newX;
     agent.y = newY;
-    // Cancel any walk command
     delete agentWalk[selectedCharForControl];
     agent.state = 'idle';
   }
