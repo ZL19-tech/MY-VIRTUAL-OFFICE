@@ -718,7 +718,7 @@ const AGENTS = [
   { id:'memo',      name:'Memo',      job:'Management',     color:C.purple, accent:'#FFFFFF', icon:'♪', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'tshirt' },
   { id:'doc',       name:'Doc',       job:'Content Creator', color:C.teal,   accent:'#FFFFFF', icon:'⊞', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'tshirt' },
   { id:'cal',       name:'Cal',       job:'Ads Manager',     color:C.orange, accent:'#FFFFFF', icon:'◫', hp:100, maxHp:100, tasks:0, state:'idle', x:0, y:0, deadTimer:0, deadAnim:0, clothing:'tshirt' },
-  { id:'commander', name:'CommandOS', job:'CEO',             color:C.gold,   accent:'#B8860B', icon:'♛', hp:100, maxHp:100, tasks:0, state:'idle', x:100, y:200, deadTimer:0, deadAnim:0, clothing:'classic' },
+  { id:'commander', name:'CommandOS', job:'CEO',             color:C.gold,   accent:'#B8860B', icon:'♛', hp:100, maxHp:100, tasks:0, state:'idle', x:80, y:220, deadTimer:0, deadAnim:0, clothing:'classic' },
 ];
 
 // Grid layout for 6 agents with EQUAL SPACING
@@ -3536,24 +3536,15 @@ function moveSelected(dx, dy) {
   const charWidth = 60;
   const charHeight = 95;
 
-  // Check if position is WITHIN SAFE BOUNDS (not in walls)
-  const isWithinBounds =
-    newX >= sideWallWidth &&
-    newX + charWidth <= CANVAS_WIDTH - sideWallWidth &&
-    newY >= topWallHeight &&
-    newY + charHeight <= CANVAS_HEIGHT - bottomWallHeight;
+  // TEMPORARY: Remove collision check to test if function is called
+  console.log(`moveSelected(${dx}, ${dy}): agent=${agent.name}, pos=(${agent.x},${agent.y}) -> (${newX},${newY})`);
 
-  console.log(`moveSelected(${dx}, ${dy}): agent=${agent.name}, pos=(${agent.x},${agent.y}) -> (${newX},${newY}), canMove=${isWithinBounds}, bounds=L:${sideWallWidth} R:${CANVAS_WIDTH-sideWallWidth} T:${topWallHeight} B:${CANVAS_HEIGHT-bottomWallHeight}`);
-
-  if (isWithinBounds) {
-    agent.x = newX;
-    agent.y = newY;
-    delete agentWalk[selectedCharForControl];
-    agent.state = 'idle';
-    console.log('MOVED to:', newX, newY);
-  } else {
-    console.log('BLOCKED - out of bounds');
-  }
+  // Just move without any collision check
+  agent.x = newX;
+  agent.y = newY;
+  delete agentWalk[selectedCharForControl];
+  agent.state = 'idle';
+  console.log('MOVED to:', newX, newY);
 }
 
 // Keyboard controls
