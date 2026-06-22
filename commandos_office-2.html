@@ -2445,53 +2445,39 @@ function drawCharts() {
 }
 
 // ── Scene auto-animation ─────────────────────────────────────────────
-let commanderPatrolTimer = 0;  // Timer pentru ciclul de 10 secunde
-let commanderPatrolPhase = 0;  // 0=patrol, 1=return home, 2=hide under desk
+let commanderHasArrived = false;  // Flag: has commander reached his desk?
 
 function runAutoScene() {
   // ANIMATED SCENARIO - Daily office workflow loop
 
   // ═══════════════════════════════════════════════════════════════════
-  // COMMANDER PATROL CYCLE - 10 second loop
+  // COMMANDER ENTRANCE - Door to Desk
   // ═══════════════════════════════════════════════════════════════════
-  commanderPatrolTimer++;
   const commander = AGENTS.find(a => a.id === 'commander');
 
-  if (commander) {
-    // Cycle: 0-300 = patrol (5 sec), 300-450 = return home (2.5 sec), 450-600 = hide under desk (2.5 sec)
-    if (commanderPatrolTimer > 600) {
-      commanderPatrolTimer = 0;
-      commanderPatrolPhase = 0;
-    }
+  if (commander && !commanderHasArrived) {
+    // First time: walk from door to desk
+    if (!agentWalk['commander']) {
+      // Start from door position
+      commander.x = 50;
+      commander.y = 150;
+      commander.state = 'walk';
 
-    // Phase 1: PATROL (0-300 ticks = 5 secunde) - walk through classroom
-    if (commanderPatrolTimer >= 0 && commanderPatrolTimer < 300) {
-      commander.state = 'walk';
-      // Random patrol movement within safe zones
-      if (commanderPatrolTimer % 60 === 0) {
-        const patrolX = 150 + Math.random() * 900;
-        const patrolY = 250 + Math.random() * 500;
-        walkTo('commander', patrolX, patrolY);
-      }
+      // Go to desk position
+      const deskX = GRID[5].x + 120;  // Commander's desk X
+      const deskY = GRID[5].y + 170;  // Commander's desk Y
+
+      walkTo('commander', deskX, deskY, () => {
+        // Callback when arrives at desk
+        commander.state = 'sit_work';  // Sit at desk
+        commanderHasArrived = true;
+        const arrivedMsg = LANG === 'ro' ? '👑 CommandOS a sosit la birou!' : '👑 CommandOS прибыл на рабочее место!';
+        showToast(arrivedMsg, 'gold');
+      });
     }
-    // Phase 2: RETURN HOME (300-450 ticks = 2.5 secunde) - return to desk
-    else if (commanderPatrolTimer >= 300 && commanderPatrolTimer < 450) {
-      commander.state = 'walk';
-      if (commanderPatrolTimer === 300) {
-        // Go to desk position
-        const deskX = GRID[5].x + 120;  // Commander's desk
-        const deskY = GRID[5].y + 170;
-        walkTo('commander', deskX, deskY);
-      }
-    }
-    // Phase 3: HIDE UNDER DESK (450-600 ticks = 2.5 secunde) - sit at desk
-    else if (commanderPatrolTimer >= 450 && commanderPatrolTimer < 600) {
-      commander.state = 'sit_work';  // Sit under desk
-      if (commanderPatrolTimer === 450) {
-        const hideMsg = LANG === 'ro' ? '👑 CommandOS se ascunde sub birou...' : '👑 CommandOS прячется под столом...';
-        showToast(hideMsg, 'gold');
-      }
-    }
+  } else if (commander && commanderHasArrived) {
+    // After arrival: stay at desk, don't move
+    commander.state = 'sit_work';
   }
 
   // Handle door opening animation - smooth sliding
@@ -2804,19 +2790,10 @@ function runAutoScene() {
         if (adist < 40) onAgent = true;
       });
 
-      // Commander can PASS THROUGH all desks
-      // Other agents must avoid all desks
+      // All agents respect desk collision zones
       const isCommander = a.id === 'commander';
+      const onOtherDesk = (!isCommander && onCommanderDesk) || onAlexaDesk || onScoutDesk || onMemoDesk || onDocDesk || onCalDesk;
 
-      let onOtherDesk = false;
-      if (!isCommander) {
-        // Regular agents avoid ALL desks
-        onOtherDesk = onAlexaDesk || onScoutDesk || onMemoDesk || onDocDesk || onCalDesk || onCommanderDesk;
-      }
-      // Commander: onOtherDesk stays false - can walk through any desk!
-
-      // Allow movement if within bounds and not blocked by other agents
-      // (Commander ignores desk collisions, other agents respect them)
       if (!onOtherDesk && !onAgent &&
           newX >= 0 && newX <= CANVAS_WIDTH && newY >= 0 && newY <= CANVAS_HEIGHT) {
         a.x = newX;
