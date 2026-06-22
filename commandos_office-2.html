@@ -629,34 +629,7 @@ let totalTaskCount = 0;
 // ── Commander patrol route ───────────────────────────────────────────
 // Desks to AVOID (ALL desks - NO ENTRY):
 //   Agent desks: Alexa (40-240, 80-280), Scout (360-560, 80-280), Memo (680-880, 80-280)
-//                Doc (40-240, 380-580), Cal (680-880, 380-580)
-//   Commander desk: (390-590, 700-850)
-// Route: ONLY perimeter outside all desks
-const COMMANDER_ROUTE = [
-  // TOP AREA - far above all desks
-  { x: 50, y: 25 },     // Top left corner
-  { x: 600, y: 25 },    // Top center
-  { x: 1050, y: 25 },   // Top right corner
-  
-  // RIGHT SIDE - far right
-  { x: 1100, y: 200 },  // Right upper
-  { x: 1100, y: 450 },  // Right middle
-  { x: 1100, y: 800 },  // Right lower
-  
-  // BOTTOM AREA - far below all desks
-  { x: 600, y: 920 },   // Bottom center
-  { x: 50, y: 900 },    // Bottom left
-  
-  // LEFT SIDE - far left
-  { x: 10, y: 800 },    // Left lower
-  { x: 10, y: 450 },    // Left middle
-  { x: 10, y: 200 },    // Left upper
-];
-let commanderRouteIdx = 0;
-let commanderWalkTimer = 0;      // Timer pentru 5 secunde de mers
-let commanderRestTimer = 0;      // Timer pentru 5 secunde de odihnă
-const COMMANDER_WALK_DURATION = 300;  // 5 secunde (60 ticks/sec)
-const COMMANDER_REST_DURATION = 300;  // 5 secunde
+// Commander route moved to runAutoScene() function (U-shape entrance only)
 
 // ── Control System ───────────────────────────────────────────────────
 let systemState = 'running';  // 'running', 'paused', 'stopped', 'lunch'
@@ -2446,34 +2419,46 @@ function drawCharts() {
 
 // ── Scene auto-animation ─────────────────────────────────────────────
 let commanderHasArrived = false;  // Flag: has commander reached his desk?
+let commanderWaypointIndex = 0;   // Current waypoint in route
+const COMMANDER_ROUTE = [
+  { x: 50, y: 150 },      // 0: Start at door
+  { x: 1100, y: 150 },    // 1: Move RIGHT along top wall
+  { x: 1100, y: 620 },    // 2: Move DOWN along right wall
+  { x: 500, y: 620 }      // 3: Move to desk
+];
 
 function runAutoScene() {
   // ANIMATED SCENARIO - Daily office workflow loop
 
   // ═══════════════════════════════════════════════════════════════════
-  // COMMANDER ENTRANCE - Door to Desk
+  // COMMANDER ENTRANCE - U-Shape Route (Door → Right Wall → Down → Desk)
   // ═══════════════════════════════════════════════════════════════════
   const commander = AGENTS.find(a => a.id === 'commander');
 
   if (commander && !commanderHasArrived) {
-    // First time: walk from door to desk
+    commander.state = 'walk';
+
+    // If no current waypoint movement, start next one
     if (!agentWalk['commander']) {
-      // Start from door position
-      commander.x = 50;
-      commander.y = 150;
-      commander.state = 'walk';
+      if (commanderWaypointIndex < COMMANDER_ROUTE.length) {
+        const waypoint = COMMANDER_ROUTE[commanderWaypointIndex];
 
-      // Go to desk position
-      const deskX = GRID[5].x + 120;  // Commander's desk X
-      const deskY = GRID[5].y + 170;  // Commander's desk Y
+        // Callback for when waypoint is reached
+        const onWaypointReached = () => {
+          commanderWaypointIndex++;
 
-      walkTo('commander', deskX, deskY, () => {
-        // Callback when arrives at desk
-        commander.state = 'sit_work';  // Sit at desk
-        commanderHasArrived = true;
-        const arrivedMsg = LANG === 'ro' ? '👑 CommandOS a sosit la birou!' : '👑 CommandOS прибыл на рабочее место!';
-        showToast(arrivedMsg, 'gold');
-      });
+          // Last waypoint? Then sit at desk
+          if (commanderWaypointIndex >= COMMANDER_ROUTE.length) {
+            commander.state = 'sit_work';
+            commanderHasArrived = true;
+            const arrivedMsg = LANG === 'ro' ? '👑 CommandOS a sosit la birou!' : '👑 CommandOS прибыл на рабочее место!';
+            showToast(arrivedMsg, 'gold');
+          }
+          // Otherwise, next waypoint will be picked up next frame
+        };
+
+        walkTo('commander', waypoint.x, waypoint.y, onWaypointReached);
+      }
     }
   } else if (commander && commanderHasArrived) {
     // After arrival: stay at desk, don't move
