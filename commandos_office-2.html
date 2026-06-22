@@ -2804,11 +2804,19 @@ function runAutoScene() {
         if (adist < 40) onAgent = true;
       });
 
-      // All agents respect desk collision zones
-      // Commander also avoids desks (but his own desk is special)
+      // Commander can PASS THROUGH all desks
+      // Other agents must avoid all desks
       const isCommander = a.id === 'commander';
-      const onOtherDesk = (!isCommander && onCommanderDesk) || onAlexaDesk || onScoutDesk || onMemoDesk || onDocDesk || onCalDesk;
 
+      let onOtherDesk = false;
+      if (!isCommander) {
+        // Regular agents avoid ALL desks
+        onOtherDesk = onAlexaDesk || onScoutDesk || onMemoDesk || onDocDesk || onCalDesk || onCommanderDesk;
+      }
+      // Commander: onOtherDesk stays false - can walk through any desk!
+
+      // Allow movement if within bounds and not blocked by other agents
+      // (Commander ignores desk collisions, other agents respect them)
       if (!onOtherDesk && !onAgent &&
           newX >= 0 && newX <= CANVAS_WIDTH && newY >= 0 && newY <= CANVAS_HEIGHT) {
         a.x = newX;
