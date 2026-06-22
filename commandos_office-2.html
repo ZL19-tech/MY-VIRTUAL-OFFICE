@@ -1830,42 +1830,34 @@ function drawPlant(x, y, size) {
 // Draw task board on wall
 let boardDisplayTimer = 0;  // Timer to show/hide board
 function drawTaskBoard(x, y) {
-  // Only draw if timer > 0
-  const alpha = boardDisplayTimer > 0 ? Math.min(1, boardDisplayTimer / 60) : 0;
-  if (alpha <= 0) return;
+  if (boardDisplayTimer <= 0) return;
 
-  const w = 120;
-  const h = 100;
-
-  // Save alpha
-  ctx.globalAlpha = alpha;
+  const w = 100;
+  const h = 80;
 
   // Board background - dark wood
-  ctx.fillStyle = '#6B5345';
+  ctx.fillStyle = '#8B4513';
   ctx.fillRect(sx(x - w/2), sy(y - h/2), S(w), S(h));
 
-  // Board border
+  // Board border - bright gold
   ctx.strokeStyle = '#FFD700';
-  ctx.lineWidth = S(3);
+  ctx.lineWidth = S(4);
   ctx.strokeRect(sx(x - w/2), sy(y - h/2), S(w), S(h));
 
   // Title
-  ctx.font = `${S(10)}px "Press Start 2P", monospace`;
+  ctx.font = `${S(12)}px Arial, sans-serif`;
   ctx.fillStyle = '#FFD700';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
-  ctx.fillText('TASKS', sx(x), sy(y - h/2 + 8));
+  ctx.fillText('TASKS', sx(x), sy(y - 30));
 
-  // Task lines
-  ctx.font = `${S(6)}px "Press Start 2P", monospace`;
+  // Task list
+  ctx.font = `${S(8)}px Arial, sans-serif`;
   ctx.fillStyle = '#00FF88';
-  const tasks = ['✓ Memo', '✓ Scout', '✓ Alexa', '✓ Doc', '✓ Cal'];
+  const tasks = ['✓ Memo', '✓ Scout', '✓ Alexa'];
   for (let i = 0; i < tasks.length; i++) {
-    ctx.fillText(tasks[i], sx(x - w/2 + 10), sy(y - h/2 + 25 + i * 12));
+    ctx.fillText(tasks[i], sx(x), sy(y - 15 + i * 12));
   }
-
-  // Restore alpha
-  ctx.globalAlpha = 1;
 }
 
 // Draw large flower decoration - green with red accents
@@ -3059,7 +3051,7 @@ function render() {
   drawChatButton();
 
   // Draw task board on wall
-  drawTaskBoard(1020, 846);
+  drawTaskBoard(783, 118);
 
   ctx.restore();
 
