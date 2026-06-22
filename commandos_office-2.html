@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CommandOS — Agent Office</title>
-<!-- Face Recognition Library - Real Camera Detection -->
-<script async src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;image-rendering:pixelated;}
@@ -124,48 +122,6 @@ canvas{display:block;width:100%;height:100%;}
 }
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
 
-/* Game Controller */
-#game-controller{
-  position:fixed;top:50%;right:20px;transform:translateY(-50%);
-  background:rgba(13,17,23,0.95);
-  border:2px solid #00FF88;border-radius:8px;padding:8px;
-  z-index:500;font-family:'Press Start 2P',monospace;
-  box-shadow:0 0 20px rgba(0,255,136,0.3);
-  width:160px;max-height:90vh;overflow-y:auto;
-}
-#game-controller h3{
-  color:#00FF88;font-size:6px;margin:0 0 6px 0;letter-spacing:1px;
-}
-.char-selector{
-  display:flex;flex-wrap:wrap;gap:2px;margin-bottom:6px;justify-content:center;
-}
-.char-btn{
-  padding:2px 4px;font-size:5px;border:1px solid #00FF88;
-  background:transparent;color:#00FF88;cursor:pointer;
-  font-family:'Press Start 2P',monospace;transition:all 0.15s;
-}
-.char-btn.active{
-  background:#00FF88;color:#0D1117;
-}
-.char-btn:hover{
-  filter:brightness(1.3);
-}
-.dpad{
-  display:grid;grid-template-columns:repeat(3,28px);
-  grid-template-rows:repeat(3,28px);gap:2px;justify-items:center;
-}
-.dpad-btn{
-  width:28px;height:28px;border:2px solid #00BFFF;
-  background:transparent;color:#00BFFF;cursor:pointer;
-  font-size:12px;display:flex;align-items:center;justify-content:center;
-  transition:all 0.1s;font-family:monospace;
-}
-.dpad-btn:hover{
-  background:rgba(0,191,255,0.2);filter:brightness(1.2);
-}
-.dpad-btn:active{
-  background:rgba(0,191,255,0.4);transform:scale(0.95);
-}
 
 /* Toast */
 #toast-wrap{
@@ -247,59 +203,6 @@ canvas{display:block;width:100%;height:100%;}
 }
 #chat-send:hover{background:rgba(0,191,255,0.2);}
 
-/* FaceID Modal */
-#faceIdModal{
-  position:fixed;top:0;left:0;width:100%;height:100%;
-  background:rgba(0,0,0,0.85);z-index:10000;
-  display:none;align-items:center;justify-content:center;
-}
-#faceIdModal.active{display:flex;}
-#faceIdBox{
-  background:#0A0F1A;border:3px solid var(--green);border-radius:2px;
-  padding:30px;text-align:center;width:400px;max-width:90vw;
-  box-shadow:0 0 50px rgba(0,255,136,0.3);
-}
-#faceIdBox h2{
-  color:var(--green);font-family:'Press Start 2P',monospace;font-size:16px;
-  margin-bottom:20px;letter-spacing:2px;
-}
-#faceIdCamera{
-  width:100%;height:300px;background:#000;border:2px solid var(--blue);
-  margin:20px 0;position:relative;overflow:hidden;border-radius:2px;
-  display:flex;align-items:center;justify-content:center;
-}
-#faceIdCamera video{
-  width:100%;height:100%;object-fit:cover;display:block;
-}
-#faceIdCamera canvas{
-  position:absolute;top:0;left:0;width:100%;height:100%;
-}
-#faceLoadingStatus{
-  position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);
-  color:var(--blue);font-family:'Press Start 2P', monospace;font-size:12px;
-  text-align:center;z-index:10;text-shadow:0 0 10px rgba(0,191,255,0.5);
-}
-#faceIdCamera.scanning::before{
-  content:'🔍 SCANNING...';position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-50%);color:var(--blue);font-size:20px;
-  font-family:'Press Start 2P',monospace;z-index:5;
-}
-#faceIdCamera.scanning::after{
-  content:'';position:absolute;top:0;left:0;width:100%;height:100%;
-  background:linear-gradient(180deg,transparent,rgba(0,191,255,0.3));
-  animation:scanLine 1s infinite;z-index:4;
-}
-@keyframes scanLine{
-  0%,100%{transform:translateY(0);}
-  50%{transform:translateY(200px);}
-}
-#faceScanResult{
-  margin:15px 0;min-height:40px;display:flex;align-items:center;
-  justify-content:center;color:var(--green);font-family:'Share Tech Mono',monospace;
-  font-size:12px;
-}
-#faceScanResult.success{color:var(--green);}
-#faceScanResult.error{color:var(--orange);}
 </style>
 </head>
 <body>
@@ -375,44 +278,6 @@ canvas{display:block;width:100%;height:100%;}
   <div id="chat-grid-items"></div>
 </div>
 
-<!-- Game Controller -->
-<div id="game-controller">
-  <h3>🎮 CONTROL</h3>
-
-  <div style="margin-bottom:10px;">
-    <div style="color:#00FF88;font-size:7px;margin-bottom:5px;">SELECT CHAR</div>
-    <div class="char-selector" id="char-selector"></div>
-  </div>
-
-  <div style="color:#00BFFF;font-size:7px;margin-bottom:5px;">MOVE</div>
-  <div class="dpad">
-    <div></div>
-    <button class="dpad-btn" onclick="moveSelected(0,-10)">▲</button>
-    <div></div>
-    <button class="dpad-btn" onclick="moveSelected(-10,0)">◄</button>
-    <button class="dpad-btn" onclick="moveSelected(0,0)" style="opacity:0.5;">●</button>
-    <button class="dpad-btn" onclick="moveSelected(10,0)">►</button>
-    <div></div>
-    <button class="dpad-btn" onclick="moveSelected(0,10)">▼</button>
-    <div></div>
-  </div>
-</div>
-
-<!-- FaceID Authentication Modal -->
-<div id="faceIdModal">
-  <div id="faceIdBox">
-    <h2>🔐 FACE ID</h2>
-    <p style="color:var(--text);font-family:'Share Tech Mono',monospace;font-size:11px;margin-bottom:15px;">
-      SCAN YOUR FACE TO OPEN DOOR
-    </p>
-    <div id="faceIdCamera" class="scanning">
-      <video id="faceVideo" autoplay playsinline muted style="width:100%; height:100%; object-fit: cover; display: block;"></video>
-      <canvas id="faceDetectionCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
-      <div id="faceLoadingStatus" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00FF88; font-family: 'Press Start 2P', monospace; font-size: 12px; text-align: center; z-index: 10;">⏳ LOADING CAMERA...</div>
-    </div>
-    <div id="faceScanResult"></div>
-  </div>
-</div>
 
 <script>
 // ═══════════════════════════════════════════════════════════════════
@@ -2065,238 +1930,6 @@ function drawCompanyLogo(x, y) {
   ctx.fillText('CMD', sx(x), sy(y));
 }
 
-// ── FACEID SYSTEM - REAL CAMERA DETECTION ───────────────────────
-let faceIdPending = false;
-let faceIdApproved = false;
-let faceVideoStream = null;
-let faceDetected = false;
-let cameraPermission = 'pending'; // 'pending' | 'granted' | 'denied'
-let modelLoading = false;
-let faceDetectStartTime = null;  // Track when face first detected for 5-second scanning
-
-async function openFaceIdModal() {
-  faceIdApproved = false;
-  faceIdPending = true;
-  faceDetected = false;
-  cameraPermission = 'pending';
-
-  const modal = document.getElementById('faceIdModal');
-  modal.classList.add('active');
-
-  const camera = document.getElementById('faceIdCamera');
-  camera.classList.add('scanning');
-
-  const video = document.getElementById('faceVideo');
-  const canvas = document.getElementById('faceDetectionCanvas');
-  const loadingStatus = document.getElementById('faceLoadingStatus');
-
-  try {
-    // Step 1: Request camera permission
-    loadingStatus.textContent = '📷 REQUESTING CAMERA...';
-
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      throw new Error('Camera not supported');
-    }
-
-    faceVideoStream = await navigator.mediaDevices.getUserMedia({
-      video: { width: 640, height: 480 },
-      audio: false
-    });
-
-    cameraPermission = 'granted';
-    video.srcObject = faceVideoStream;
-
-    // Step 2: Load face-api models
-    loadingStatus.textContent = '🧠 LOADING AI MODELS...';
-
-    if (!modelLoading) {
-      modelLoading = true;
-      const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
-
-      try {
-        await Promise.all([
-          faceapi.nets.tinyFaceDetector.load(MODEL_URL),
-          faceapi.nets.faceLandmark68Net.load(MODEL_URL),
-          faceapi.nets.faceExpressionNet.load(MODEL_URL),
-        ]);
-      } catch (e) {
-        console.warn('Some models failed to load, trying minimal detection', e);
-      }
-    }
-
-    // Wait for video to load
-    await new Promise(resolve => {
-      video.onloadedmetadata = () => {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        resolve();
-      };
-    });
-
-    loadingStatus.style.display = 'none';
-    showFaceScanResult('🔍 SCANNING FACE...', 'normal');
-
-    // Step 3: Detection loop - 5 SECOND SCANNING BEFORE AUTO-APPROVE
-    const detectFace = async () => {
-      if (!faceIdPending) return;
-
-      try {
-        const detections = await faceapi.detectAllFaces(
-          video,
-          new faceapi.TinyFaceDetectorOptions()
-        ).withFaceLandmarks().withFaceExpressions();
-
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        if (detections.length >= 1) {
-          // FACE DETECTED - START 5 SECOND SCAN
-          const detection = detections[0];
-          const box = detection.detection.box;
-
-          // Initialize scan start time on first detection
-          if (!faceDetectStartTime) {
-            faceDetectStartTime = Date.now();
-          }
-
-          faceDetected = true;
-
-          // Calculate scan duration and progress
-          const scanDuration = Date.now() - faceDetectStartTime;
-          const scanPercent = Math.min(100, Math.floor((scanDuration / 5000) * 100));
-
-          // Draw bounding box (always GREEN)
-          ctx.strokeStyle = '#00FF88';
-          ctx.lineWidth = 3;
-          ctx.strokeRect(box.x, box.y, box.width, box.height);
-
-          // Draw landmarks
-          ctx.fillStyle = '#00BFFF';
-          const landmarks = detection.landmarks.positions;
-          landmarks.forEach(point => {
-            ctx.beginPath();
-            ctx.arc(point.x, point.y, 2, 0, Math.PI * 2);
-            ctx.fill();
-          });
-
-          // Show progress percentage
-          ctx.fillStyle = '#00FF88';
-          ctx.font = '16px "Press Start 2P", monospace';
-          ctx.textAlign = 'center';
-          ctx.fillText(`${scanPercent}%`, canvas.width / 2, 30);
-
-          // Update status with progress
-          showFaceScanResult(`SCANNING FACE... ${scanPercent}%`, 'normal');
-
-          // AUTO-APPROVE AFTER 5 SECONDS
-          if (scanDuration >= 5000) {
-            showFaceScanResult('✓ FACE APPROVED', 'success');
-            faceIdPending = false;
-            faceDetectStartTime = null;
-
-            setTimeout(() => {
-              closeFaceIdModal();
-              showToast('🔐 FACE ID APPROVED - Welcome!', 'green');
-
-              // Play door opening sound when door starts to open
-              playDoorOpenSound();
-
-              // START DOOR OPENING ANIMATION
-              doorAnimating = true;
-              commanderEntering = false;  // Start entering sequence after door opens
-
-              // After door animation completes (~1 second), CommandOS enters
-              setTimeout(() => {
-                commanderEntering = true;
-                commanderShouldEnter = true;
-                const commander = AGENTS.find(a => a.id === 'commander');
-                if (commander) {
-                  // Make CommandOS visible by changing from 'hidden' to 'walk'
-                  commander.state = 'walk';
-                  showToast('🚪 DOOR OPENED - CommandOS entering...', 'green');
-
-                  // Call initCEOPath to move CEO to red square
-                  initCEOPath();
-                }
-              }, 1000);  // Wait for door to fully open
-            }, 300);
-            return;
-          }
-        } else {
-          // NO FACE DETECTED - RESET TIMER
-          faceDetected = false;
-          faceDetectStartTime = null;
-          ctx.fillStyle = '#FF6B35';
-          ctx.font = '14px "Press Start 2P", monospace';
-          ctx.textAlign = 'center';
-          ctx.fillText('NO FACE DETECTED', canvas.width / 2, 30);
-          showFaceScanResult('❌ NO FACE DETECTED', 'error');
-        }
-      } catch (err) {
-        console.error('Detection error:', err);
-      }
-
-      if (faceIdPending) {
-        requestAnimationFrame(detectFace);
-      }
-    };
-
-    detectFace();
-
-  } catch (err) {
-    console.error('Face ID Error:', err);
-    cameraPermission = 'denied';
-
-    // BLOCK ACCESS - show error
-    loadingStatus.textContent = '❌ CAMERA REQUIRED';
-    loadingStatus.style.color = '#FF6B35';
-    showFaceScanResult('🔐 Camera required for Face ID', 'error');
-    showToast('❌ Camera access denied or not available', 'warn');
-  }
-}
-
-function showFaceScanResult(text, status) {
-  const resultDiv = document.getElementById('faceScanResult');
-  resultDiv.textContent = text;
-  resultDiv.className = status;
-}
-
-function closeFaceIdModal() {
-  faceIdPending = false;
-  faceIdApproved = false;
-
-  // Stop video stream
-  if (faceVideoStream) {
-    faceVideoStream.getTracks().forEach(track => track.stop());
-    faceVideoStream = null;
-  }
-
-  // Clear canvas
-  const canvas = document.getElementById('faceDetectionCanvas');
-  if (canvas) {
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
-
-  // Reset states
-  faceDetected = false;
-
-  // Hide modal
-  document.getElementById('faceIdModal').classList.remove('active');
-
-  // Show loading status again
-  const loadingStatus = document.getElementById('faceLoadingStatus');
-  if (loadingStatus) {
-    loadingStatus.style.display = 'block';
-    loadingStatus.textContent = '⏳ LOADING CAMERA...';
-  }
-}
-
-function approveFaceId() {
-  // NO LONGER USED - Auto-approve happens instantly in openFaceIdModal()
-  // This function is kept for backwards compatibility but not called
-}
-
 // ── ENTRANCE DOOR & CONTROL - Top Left Corner ──────────────────
 let doorIsOpen = false;  // Door state: true = open, false = closed
 let doorOpenProgress = 0;  // Animation progress: 0 (closed) to 1 (open)
@@ -3520,61 +3153,6 @@ function updateChatGrid() {
   document.getElementById('chat-grid').classList.toggle('active', grid.children.length > 0);
 }
 
-// ── Game Controller ──────────────────────────────────────────────────
-let selectedCharForControl = null;
-
-function buildCharSelector() {
-  const wrap = document.getElementById('char-selector');
-  wrap.innerHTML = '';
-  AGENTS.forEach(a => {
-    const btn = document.createElement('button');
-    btn.className = 'char-btn';
-    btn.textContent = a.name.slice(0, 6);
-    btn.style.borderColor = a.color;
-    btn.style.color = a.color;
-    btn.onclick = () => {
-      selectedCharForControl = a.id;
-      document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      showToast(`🎮 Controlling: ${a.name}`, 'gold');
-    };
-    wrap.appendChild(btn);
-  });
-}
-
-function moveSelected(dx, dy) {
-  if (!selectedCharForControl) {
-    showToast('Select character first!', 'warn');
-    return;
-  }
-  const agent = AGENTS.find(a => a.id === selectedCharForControl);
-  if (!agent) {
-    console.log('ERROR: Agent not found!', selectedCharForControl);
-    return;
-  }
-
-  // Calculate new position
-  const newX = agent.x + dx;
-  const newY = agent.y + dy;
-
-  // Wall dimensions (SAFE BOUNDARIES)
-  const topWallHeight = 180;
-  const sideWallWidth = 30;
-  const bottomWallHeight = 70;
-  const charWidth = 60;
-  const charHeight = 95;
-
-  console.log(`moveSelected(${dx}, ${dy}): agent=${agent.name}, pos=(${agent.x},${agent.y}) -> (${newX},${newY})`);
-
-  // Move without any wall restrictions
-  agent.x = newX;
-  agent.y = newY;
-  delete agentWalk[selectedCharForControl];
-  agent.state = 'idle';
-  console.log('MOVED to:', newX, newY);
-}
-
-// Keyboard controls
 // Chat input - Enter to send
 document.getElementById('chat-input').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
@@ -3583,33 +3161,8 @@ document.getElementById('chat-input').addEventListener('keydown', (e) => {
   }
 });
 
-document.addEventListener('keydown', (e) => {
-  if (e.target === document.getElementById('chat-input')) return;  // Don't move while typing chat
-
-  const moveSpeed = 15;
-  switch(e.key) {
-    case 'ArrowUp':
-      e.preventDefault();
-      moveSelected(0, -moveSpeed);
-      break;
-    case 'ArrowDown':
-      e.preventDefault();
-      moveSelected(0, moveSpeed);
-      break;
-    case 'ArrowLeft':
-      e.preventDefault();
-      moveSelected(-moveSpeed, 0);
-      break;
-    case 'ArrowRight':
-      e.preventDefault();
-      moveSelected(moveSpeed, 0);
-      break;
-  }
-});
-
 // ── Init ─────────────────────────────────────────────────────────────
 buildAgentButtons();
-buildCharSelector();
 initChats();
 setLang('ro');
 
@@ -3676,15 +3229,7 @@ function initCEOPath() {
   followWaypoint();
 }
 
-// CEO path is triggered by Face ID approval, not automatically
-// (removed automatic trigger - Face ID will call initCEOPath when approved)
-
-// AUTO-START FACE ID SCANNING ON PAGE LOAD
-setTimeout(() => {
-  showToast('🔐 FACE ID SCANNING... (Wave at camera)', 'gold');
-  openFaceIdModal();
-}, 500);
-
+// Agents move automatically - no Face ID or manual control needed
 render();
 </script>
 </body>
