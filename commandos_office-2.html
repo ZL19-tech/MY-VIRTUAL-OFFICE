@@ -1832,8 +1832,8 @@ let boardDisplayTimer = 0;  // Timer to show/hide board
 function drawTaskBoard(x, y) {
   if (boardDisplayTimer <= 0) return;
 
-  const w = 100;
-  const h = 80;
+  const w = 160;
+  const h = 120;
 
   // Board background - dark wood
   ctx.fillStyle = '#8B4513';
@@ -3051,7 +3051,7 @@ function render() {
   drawChatButton();
 
   // Draw task board on wall
-  drawTaskBoard(783, 118);
+  drawTaskBoard(950, 180);
 
   ctx.restore();
 
