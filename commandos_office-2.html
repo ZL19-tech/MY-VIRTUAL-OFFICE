@@ -2551,8 +2551,8 @@ function runAutoScene() {
             // Pause for 5 seconds (300 frames at 60fps)
             commanderWaitTimer = 300;
 
-            // SPECIAL: At desk waypoint 6 (after patrol), show board and make sound
-            if (commanderWaypointIndex === 7) {
+            // SPECIAL: At desk waypoints (3 after first desk, 7 after patrol desk), show board and make sound
+            if (commanderWaypointIndex === 3 || commanderWaypointIndex === 7) {
               // Show board for 10 seconds (600 frames at 60fps)
               boardDisplayTimer = 600;
 
