@@ -2467,10 +2467,13 @@ function drawCharts() {
 // ── Scene auto-animation ─────────────────────────────────────────────
 let commanderHasArrived = false;  // Flag: has commander reached his desk?
 let commanderWaypointIndex = 0;   // Current waypoint in route
+let commanderWaitTimer = 0;       // Timer for pause at desk/door
 const COMMANDER_ROUTE = [
-  { x: 50, y: 150 },      // 0: Start at door
-  { x: 50, y: 750 },      // 1: Move DOWN along left wall (under desk)
-  { x: 611, y: 750 }      // 2: Final position - exact coordinates (611, 750)
+  { x: 50, y: 150 },      // 0: Door entrance
+  { x: 50, y: 750 },      // 1: Down left wall
+  { x: 611, y: 750 },     // 2: At desk (wait here)
+  { x: 50, y: 750 },      // 3: Back up left wall
+  { x: 50, y: 150 }       // 4: Return to door (wait, then loop)
 ];
 
 function runAutoScene() {
@@ -2481,7 +2484,14 @@ function runAutoScene() {
   // ═══════════════════════════════════════════════════════════════════
   const commander = AGENTS.find(a => a.id === 'commander');
 
-  if (commander && !commanderHasArrived) {
+  if (commander) {
+    // Handle wait timer
+    if (commanderWaitTimer > 0) {
+      commanderWaitTimer--;
+      commander.state = 'sit_work';
+      return;  // Don't advance waypoints while waiting
+    }
+
     commander.state = 'walk';
 
     // If no current waypoint movement, start next one
@@ -2493,12 +2503,16 @@ function runAutoScene() {
         const onWaypointReached = () => {
           commanderWaypointIndex++;
 
-          // Last waypoint? Then sit at desk
+          // Add pause at desk (waypoint 2) and door (waypoint 4)
+          if (commanderWaypointIndex === 3 || commanderWaypointIndex === 5) {
+            // Pause for 5 seconds (300 frames at 60fps)
+            commanderWaitTimer = 300;
+          }
+
+          // Last waypoint? Reset and loop
           if (commanderWaypointIndex >= COMMANDER_ROUTE.length) {
-            commander.state = 'sit_work';
-            commanderHasArrived = true;
-            const arrivedMsg = LANG === 'ro' ? '👑 CommandOS a sosit la birou!' : '👑 CommandOS прибыл на рабочее место!';
-            showToast(arrivedMsg, 'gold');
+            commanderWaypointIndex = 0;  // Reset to start
+            commanderWaitTimer = 300;     // Wait 5 seconds before next cycle
           }
           // Otherwise, next waypoint will be picked up next frame
         };
@@ -2506,9 +2520,6 @@ function runAutoScene() {
         walkTo('commander', waypoint.x, waypoint.y, onWaypointReached);
       }
     }
-  } else if (commander && commanderHasArrived) {
-    // After arrival: stay at desk, don't move
-    commander.state = 'sit_work';
   }
 
   // Handle door opening animation - smooth sliding
