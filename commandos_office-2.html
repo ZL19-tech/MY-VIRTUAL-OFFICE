@@ -2812,8 +2812,36 @@ function drawCharts() {
 }
 
 // ── Scene auto-animation ─────────────────────────────────────────────
+let autoMoveTimer = 0;  // Track when to assign next auto-move target
+
 function runAutoScene() {
-  // DISABLED - CEO moves only via initCEOPath waypoints, no auto-scene interference
+  // Auto-movement system - agents move around office automatically
+  autoMoveTimer++;
+
+  // Every 2-5 seconds, give agents new movement targets
+  if (autoMoveTimer > 120 + Math.random() * 180) {
+    autoMoveTimer = 0;
+
+    // Send each agent to a random location
+    AGENTS.forEach(a => {
+      if (a.id !== 'commander' && a.state !== 'dead') {
+        // Random target within office bounds
+        const targetX = 200 + Math.random() * 800;
+        const targetY = 350 + Math.random() * 400;
+        walkTo(a.id, targetX, targetY);
+      }
+    });
+
+    // Commander also moves
+    const commander = AGENTS.find(x => x.id === 'commander');
+    if (commander && commander.state !== 'dead') {
+      const targetX = 200 + Math.random() * 800;
+      const targetY = 300 + Math.random() * 500;
+      walkTo('commander', targetX, targetY);
+    }
+  }
+
+  // Original scene code is disabled - uncomment below to restore
   return;
 
   // Handle door opening animation - smooth sliding
