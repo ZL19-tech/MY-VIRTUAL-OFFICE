@@ -2564,8 +2564,8 @@ function runAutoScene() {
   // DETAILED ANIMATION SEQUENCE - CommandOS Office Loop
   // ═══════════════════════════════════════════════════════════════════
 
-  // DISABLED - Only simple agent movement, Commander stays at desk
-  if (false) {  // <- Scenes disabled, but code remains for reference
+  // ENABLED - Full animation scenarios but Commander stays on his route
+  if (true) {  // <- Scenes ACTIVE
 
   // SCENE 1: AGENTS SLEEPING AT DESKS (0-60)
   if (sceneTimer <= 60) {
@@ -2607,7 +2607,7 @@ function runAutoScene() {
     const memo = AGENTS.find(a => a.id === 'memo');
     if (memo) {
       const idx = AGENTS.indexOf(memo);
-      walkTo('commander', GRID[idx].x + 120, GRID[idx].y + 170);
+      // walkTo('commander', GRID[idx].x + 120, GRID[idx].y + 170);  // DISABLED - Commander stays on route
       const bubbleText = LANG === 'ro' ? '🎙️ Procesează întâlnirea' : '🎙️ Обработай совещание';
       const toastText = LANG === 'ro' ? '✓ Memo: 🎙️ Procesează întâlnirea' : '✓ Memo: 🎙️ Обработай совещание';
       const statusText = LANG === 'ro' ? '✓ SARCINĂ ATRIBUITĂ' : '✓ ЗАДАЧА НАЗНАЧЕНА';
@@ -2624,7 +2624,7 @@ function runAutoScene() {
     const scout = AGENTS.find(a => a.id === 'scout');
     if (scout) {
       const idx = AGENTS.indexOf(scout);
-      walkTo('commander', GRID[idx].x + 120, GRID[idx].y + 170);
+      // walkTo('commander', GRID[idx].x + 120, GRID[idx].y + 170);  // DISABLED - Commander stays on route
       const bubbleText = LANG === 'ro' ? '🔍 Analiză Telegram' : '🔍 Анализируй Telegram';
       const toastText = LANG === 'ro' ? '✓ Scout: 🔍 Analiză Chaturi Telegram' : '✓ Scout: 🔍 Анализируй чаты Telegram';
       const statusText = LANG === 'ro' ? '✓ SARCINĂ ATRIBUITĂ' : '✓ ЗАДАЧА НАЗНАЧЕНА';
@@ -2641,7 +2641,7 @@ function runAutoScene() {
     const alexa = AGENTS.find(a => a.id === 'alexa');
     if (alexa) {
       const idx = AGENTS.indexOf(alexa);
-      walkTo('commander', GRID[idx].x + 120, GRID[idx].y + 170);
+      // walkTo('commander', GRID[idx].x + 120, GRID[idx].y + 170);  // DISABLED - Commander stays on route
       const bubbleText = LANG === 'ro' ? '🤖 Răspunde la întrebări' : '🤖 Отвечай на вопросы';
       const toastText = LANG === 'ro' ? '✓ Alexa: 🤖 Răspunde la întrebări' : '✓ Alexa: 🤖 Отвечай на вопросы';
       const statusText = LANG === 'ro' ? '✓ SARCINĂ ATRIBUITĂ' : '✓ ЗАДАЧА НАЗНАЧЕНА';
@@ -2658,7 +2658,7 @@ function runAutoScene() {
     const doc = AGENTS.find(a => a.id === 'doc');
     if (doc) {
       const idx = AGENTS.indexOf(doc);
-      walkTo('commander', GRID[idx].x + 120, GRID[idx].y + 170);
+      // walkTo('commander', GRID[idx].x + 120, GRID[idx].y + 170);  // DISABLED - Commander stays on route
       const bubbleText = LANG === 'ro' ? '📚 Actualizează KB' : '📚 Обновляй БЗ';
       const toastText = LANG === 'ro' ? '✓ Doc: 📚 Actualizează cunoștințele bază' : '✓ Doc: 📚 Обновляй базу знаний';
       const statusText = LANG === 'ro' ? '✓ SARCINĂ ATRIBUITĂ' : '✓ ЗАДАЧА НАЗНАЧЕНА';
@@ -2675,7 +2675,7 @@ function runAutoScene() {
     const cal = AGENTS.find(a => a.id === 'cal');
     if (cal) {
       const idx = AGENTS.indexOf(cal);
-      walkTo('commander', GRID[idx].x + 120, GRID[idx].y + 170);
+      // walkTo('commander', GRID[idx].x + 120, GRID[idx].y + 170);  // DISABLED - Commander stays on route
       const bubbleText = LANG === 'ro' ? '📅 Organizează termene' : '📅 Организуй сроки';
       const toastText = LANG === 'ro' ? '✓ Cal: 📅 Organizează termene limită' : '✓ Cal: 📅 Организуй сроки выполнения';
       const statusText = LANG === 'ro' ? '✓ SARCINĂ ATRIBUITĂ' : '✓ ЗАДАЧА НАЗНАЧЕНА';
