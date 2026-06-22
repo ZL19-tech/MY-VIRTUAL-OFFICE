@@ -1772,7 +1772,15 @@ function drawBubble(b) {
 }
 
 function drawStatusAbove(agentId, gx, gy) {
-  // Disabled - status text removed
+  if (!statusAbove[agentId]) return;
+  const status = statusAbove[agentId];
+
+  // Status text above agent head
+  ctx.font = `${S(8)}px "Press Start 2P", monospace`;
+  ctx.fillStyle = '#00FF88';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(status.text, sx(gx), sy(gy - 60));
 }
 
 // ── Office Decoration Helper Functions ──────────────────────────────
@@ -2746,14 +2754,16 @@ function runAutoScene() {
     a.y = GRID[AGENTS.indexOf(a)].y + 90;
   });
 
-  // Update walking
+  // Update walking - ONLY FOR COMMANDER
   Object.entries(agentWalk).forEach(([id, w]) => {
+    // Skip all agents except commander
+    if (id !== 'commander') { delete agentWalk[id]; return; }
+
     const a = AGENTS.find(x => x.id === id);
     if (!a || a.state === 'dead') { delete agentWalk[id]; return; }
     const dx = w.tx - a.x, dy = w.ty - a.y;
     const dist = Math.sqrt(dx*dx + dy*dy);
-    // For CEO: use larger threshold to ensure he reaches exact position
-    const threshold = (id === 'commander') ? 2 : 3;
+    const threshold = 2;  // Commander threshold
     if (dist < threshold) {
       a.x = w.tx; a.y = w.ty;  // SNAP to exact position
       delete agentWalk[id];
@@ -2763,7 +2773,6 @@ function runAutoScene() {
       let newX = a.x + dx/dist * speed;
       let newY = a.y + dy/dist * speed;
 
-      // All agents respect collision zones
       // Desk collision zones (updated Y coordinates after desk movement)
       const onAlexaDesk = newX >= 70 && newX <= 310 && newY >= 210 && newY <= 330;
       const onScoutDesk = newX >= 480 && newX <= 720 && newY >= 210 && newY <= 330;
@@ -2772,21 +2781,10 @@ function runAutoScene() {
       const onCalDesk = newX >= 730 && newX <= 970 && newY >= 380 && newY <= 500;
       const onCommanderDesk = newX >= 280 && newX <= 720 && newY >= 580 && newY <= 740;
 
-      // Agent collision - don't walk into other agents
-      let onAgent = false;
-      AGENTS.forEach(ag => {
-        if (ag.id === a.id) return;
-        const adx = newX - ag.x;
-        const ady = newY - ag.y;
-        const adist = Math.sqrt(adx*adx + ady*ady);
-        if (adist < 40) onAgent = true;
-      });
+      // Commander can pass through other desks, only check desks
+      const onOtherDesk = onAlexaDesk || onScoutDesk || onMemoDesk || onDocDesk || onCalDesk;
 
-      // All agents respect desk collision zones
-      const isCommander = a.id === 'commander';
-      const onOtherDesk = (!isCommander && onCommanderDesk) || onAlexaDesk || onScoutDesk || onMemoDesk || onDocDesk || onCalDesk;
-
-      if (!onOtherDesk && !onAgent &&
+      if (!onOtherDesk &&
           newX >= 0 && newX <= CANVAS_WIDTH && newY >= 0 && newY <= CANVAS_HEIGHT) {
         a.x = newX;
         a.y = newY;
@@ -2925,6 +2923,8 @@ function render() {
     drawDeskItems(g.x, g.y + 54, a, isCommander);
     // Draw agent on top of desk
     drawAgent(a);
+    // Draw status bar above agent
+    drawStatusAbove(a.id, a.x, a.y);
   });
 
   // Draw proximity chat button
