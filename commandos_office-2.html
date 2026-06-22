@@ -1827,6 +1827,45 @@ function drawPlant(x, y, size) {
   ctx.fill();
 }
 
+// Draw task board on wall
+let boardDisplayTimer = 0;  // Timer to show/hide board
+function drawTaskBoard(x, y) {
+  if (boardDisplayTimer <= 0) return;  // Don't draw if timer is 0
+
+  const w = 120;
+  const h = 100;
+
+  // Board background - dark wood
+  ctx.fillStyle = '#6B5345';
+  ctx.fillRect(sx(x - w/2), sy(y - h/2), S(w), S(h));
+
+  // Board border
+  ctx.strokeStyle = '#8B6F47';
+  ctx.lineWidth = S(3);
+  ctx.strokeRect(sx(x - w/2), sy(y - h/2), S(w), S(h));
+
+  // Title
+  ctx.font = `${S(10)}px "Press Start 2P", monospace`;
+  ctx.fillStyle = '#FFD700';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  ctx.fillText('TASKS', sx(x), sy(y - h/2 + 8));
+
+  // Task lines
+  ctx.font = `${S(6)}px "Press Start 2P", monospace`;
+  ctx.fillStyle = '#00FF88';
+  const tasks = ['✓ Memo', '✓ Scout', '✓ Alexa', '✓ Doc', '✓ Cal'];
+  for (let i = 0; i < tasks.length; i++) {
+    ctx.fillText(tasks[i], sx(x - 40), sy(y - h/2 + 25 + i * 12));
+  }
+
+  // Fade effect based on timer
+  ctx.globalAlpha = Math.min(1, boardDisplayTimer / 30);
+  ctx.fillStyle = 'rgba(255, 215, 0, 0.1)';
+  ctx.fillRect(sx(x - w/2), sy(y - h/2), S(w), S(h));
+  ctx.globalAlpha = 1;
+}
+
 // Draw large flower decoration - green with red accents
 function drawFlower(x, y, size) {
   const petals = 5;
@@ -2512,6 +2551,30 @@ function runAutoScene() {
           if (commanderWaypointIndex === 3 || commanderWaypointIndex === 8 || commanderWaypointIndex === 10) {
             // Pause for 5 seconds (300 frames at 60fps)
             commanderWaitTimer = 300;
+
+            // SPECIAL: At desk waypoint 7 (after patrol), show board and make sound
+            if (commanderWaypointIndex === 8) {
+              // Show board for 10 seconds (600 frames at 60fps)
+              boardDisplayTimer = 600;
+
+              // Play sound (beep)
+              try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                osc.frequency.value = 800;
+                gain.gain.setValueAtTime(0.2, audioContext.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                osc.start(audioContext.currentTime);
+                osc.stop(audioContext.currentTime + 0.3);
+              } catch (e) {}
+
+              // Show message
+              const msg = LANG === 'ro' ? '💬 Raport zilei...' : '💬 Дневной отчет...';
+              showToast(msg, 'gold');
+            }
           }
 
           // Last waypoint? Reset and loop
@@ -2876,6 +2939,9 @@ function runAutoScene() {
     }
   }
 
+  // Decay board timer
+  if (boardDisplayTimer > 0) boardDisplayTimer--;
+
   // Loop
   if (sceneTimer > 750) sceneTimer = 0;
 }
@@ -2983,6 +3049,9 @@ function render() {
 
   // Draw proximity chat button
   drawChatButton();
+
+  // Draw task board on wall
+  drawTaskBoard(1020, 846);
 
   ctx.restore();
 
