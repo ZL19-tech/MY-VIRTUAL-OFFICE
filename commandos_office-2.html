@@ -2735,33 +2735,15 @@ function runAutoScene() {
   }  // END of if (false) - Scenes disabled
 
   // ═══════════════════════════════════════════════════════════════════
-  // SIMPLE MODE - Commander at desk, other agents move randomly
+  // SIMPLE MODE - Only Commander moves on U-route, others stay at desks
   // ═══════════════════════════════════════════════════════════════════
 
-  // Commander stays at desk
-  if (commander) {
-    commander.state = 'sit_work';
-    commander.x = GRID[5].x + 120;
-    commander.y = GRID[5].y + 170;
-  }
-
-  // Other agents walk to random locations every 3-5 seconds
-  if (sceneTimer % 180 === 0) {  // Every 3 seconds (180 ticks)
-    AGENTS.forEach(a => {
-      if (a.id !== 'commander' && a.state !== 'dead') {
-        const targetX = 150 + Math.random() * 900;
-        const targetY = 250 + Math.random() * 500;
-        walkTo(a.id, targetX, targetY);
-      }
-    });
-  }
-
-  // When agents reach destination, sit down
+  // All OTHER agents stay at their desks
   AGENTS.forEach(a => {
     if (a.id === 'commander') return;  // Skip commander
-    if (a.state === 'walk' && !agentWalk[a.id]) {
-      a.state = 'sit_work';
-    }
+    a.state = 'sit_work';  // Always sitting
+    a.x = GRID[AGENTS.indexOf(a)].x + 80;
+    a.y = GRID[AGENTS.indexOf(a)].y + 90;
   });
 
   // Update walking
