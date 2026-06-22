@@ -2430,9 +2430,8 @@ let commanderHasArrived = false;  // Flag: has commander reached his desk?
 let commanderWaypointIndex = 0;   // Current waypoint in route
 const COMMANDER_ROUTE = [
   { x: 50, y: 150 },      // 0: Start at door
-  { x: 1100, y: 150 },    // 1: Move RIGHT along top wall
-  { x: 1100, y: 620 },    // 2: Move DOWN along right wall
-  { x: 500, y: 620 }      // 3: Move to desk
+  { x: 50, y: 620 },      // 1: Move DOWN along left wall
+  { x: 500, y: 620 }      // 2: Move RIGHT along bottom wall to desk
 ];
 
 function runAutoScene() {
