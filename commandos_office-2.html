@@ -2505,12 +2505,14 @@ const COMMANDER_ROUTE = [
   { x: 50, y: 150 },      // 0: Door entrance
   { x: 50, y: 750 },      // 1: Down left wall
   { x: 611, y: 750 },     // 2: At desk (wait here)
-  { x: 950, y: 180 },     // 3: Patrol - up right corridor (avoids all desks)
-  { x: 1100, y: 400 },    // 4: Patrol - right side (avoids all desks)
-  { x: 100, y: 400 },     // 5: Patrol - left side corridor (avoids all desks)
-  { x: 611, y: 750 },     // 6: Back to desk (wait here)
-  { x: 50, y: 750 },      // 7: Back up left wall
-  { x: 50, y: 150 }       // 8: Return to door (wait, then loop)
+  { x: 1100, y: 400 },    // 3: Move right on edge (avoids all desks)
+  { x: 1100, y: 180 },    // 4: Move up on right edge (avoids all desks)
+  { x: 950, y: 180 },     // 5: At task board (SPEAK)
+  { x: 1100, y: 180 },    // 6: Return right edge
+  { x: 1100, y: 400 },    // 7: Down right edge
+  { x: 611, y: 750 },     // 8: Back to desk (wait here)
+  { x: 50, y: 750 },      // 9: Back up left wall
+  { x: 50, y: 150 }       // 10: Return to door (wait, then loop)
 ];
 
 function runAutoScene() {
@@ -2547,13 +2549,13 @@ function runAutoScene() {
         const onWaypointReached = () => {
           commanderWaypointIndex++;
 
-          // Add pause at desk (waypoint 2 and 6) and door (waypoint 8)
-          if (commanderWaypointIndex === 3 || commanderWaypointIndex === 7 || commanderWaypointIndex === 9) {
+          // Add pause at desk, board, and door
+          if (commanderWaypointIndex === 3 || commanderWaypointIndex === 6 || commanderWaypointIndex === 9 || commanderWaypointIndex === 11) {
             // Pause for 5 seconds (300 frames at 60fps)
             commanderWaitTimer = 300;
 
-            // SPECIAL: At desk waypoints (3 after first desk, 7 after patrol desk), show board and make sound
-            if (commanderWaypointIndex === 3 || commanderWaypointIndex === 7) {
+            // SPECIAL: At board waypoint (5), show board and make sound
+            if (commanderWaypointIndex === 6) {
               // Show board for 10 seconds (600 frames at 60fps)
               boardDisplayTimer = 600;
 
