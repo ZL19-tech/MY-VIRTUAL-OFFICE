@@ -2947,6 +2947,10 @@ canvas.addEventListener('click', (e) => {
   const clickX = (clickXScreen - offsetX) / zoomLevel;
   const clickY = (clickYScreen - offsetY) / zoomLevel;
 
+  // COORDINATE PICKER MODE - Log click position
+  console.log(`📍 COORDINATES: x=${Math.round(clickX)}, y=${Math.round(clickY)}`);
+  showToast(`📍 x=${Math.round(clickX)}, y=${Math.round(clickY)}`, 'gold');
+
   // Check chat button click
   if (window.chatButtonRect) {
     const btn = window.chatButtonRect;
