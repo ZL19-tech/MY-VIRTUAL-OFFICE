@@ -2524,6 +2524,13 @@ const COMMANDER_ROUTE = [
 function runAutoScene() {
   // ANIMATED SCENARIO - Daily office workflow loop
 
+  // TEST: Force board to show every 300 frames (5 seconds on, 5 seconds off cycle)
+  if (Math.floor(sceneTimer / 300) % 2 === 0) {
+    boardDisplayTimer = 300;
+  } else {
+    boardDisplayTimer = 0;
+  }
+
   // ═══════════════════════════════════════════════════════════════════
   // COMMANDER ENTRANCE - U-Shape Route (Door → Right Wall → Down → Desk)
   // ═══════════════════════════════════════════════════════════════════
