@@ -2533,6 +2533,9 @@ function runAutoScene() {
   // DETAILED ANIMATION SEQUENCE - CommandOS Office Loop
   // ═══════════════════════════════════════════════════════════════════
 
+  // DISABLED - Only simple agent movement, Commander stays at desk
+  if (false) {  // <- Scenes disabled, but code remains for reference
+
   // SCENE 1: AGENTS SLEEPING AT DESKS (0-60)
   if (sceneTimer <= 60) {
     if (sceneTimer === 30) {
@@ -2744,11 +2747,33 @@ function runAutoScene() {
   // Loop reset
   if (sceneTimer > 900) sceneTimer = 0;
 
-  // Commander patrol disabled - uses walkTo() only
+  }  // END of if (false) - Scenes disabled
 
-  // Walk home occasionally (but NOT for commander - he moves via initCEOPath)
+  // ═══════════════════════════════════════════════════════════════════
+  // SIMPLE MODE - Commander at desk, other agents move randomly
+  // ═══════════════════════════════════════════════════════════════════
+
+  // Commander stays at desk
+  if (commander) {
+    commander.state = 'sit_work';
+    commander.x = GRID[5].x + 120;
+    commander.y = GRID[5].y + 170;
+  }
+
+  // Other agents walk to random locations every 3-5 seconds
+  if (sceneTimer % 180 === 0) {  // Every 3 seconds (180 ticks)
+    AGENTS.forEach(a => {
+      if (a.id !== 'commander' && a.state !== 'dead') {
+        const targetX = 150 + Math.random() * 900;
+        const targetY = 250 + Math.random() * 500;
+        walkTo(a.id, targetX, targetY);
+      }
+    });
+  }
+
+  // When agents reach destination, sit down
   AGENTS.forEach(a => {
-    if (a.id === 'commander') return;  // Skip commander - he follows waypoints
+    if (a.id === 'commander') return;  // Skip commander
     if (a.state === 'walk' && !agentWalk[a.id]) {
       a.state = 'sit_work';
     }
