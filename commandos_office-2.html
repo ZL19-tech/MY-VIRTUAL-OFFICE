@@ -1827,6 +1827,45 @@ function drawPlant(x, y, size) {
   ctx.fill();
 }
 
+// Draw large flower decoration - green with red accents
+function drawFlower(x, y, size) {
+  const petals = 5;
+  const petalSize = size * 0.6;
+
+  // Draw petals (green)
+  ctx.fillStyle = '#22DD22';
+  for (let i = 0; i < petals; i++) {
+    const angle = (i / petals) * Math.PI * 2;
+    const px = x + Math.cos(angle) * size * 0.5;
+    const py = y + Math.sin(angle) * size * 0.5;
+    ctx.beginPath();
+    ctx.ellipse(sx(px), sy(py), S(petalSize * 0.4), S(petalSize), angle, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Red petal accents
+  ctx.fillStyle = '#FF3333';
+  for (let i = 0; i < petals; i++) {
+    const angle = (i / petals) * Math.PI * 2 + Math.PI / petals;
+    const px = x + Math.cos(angle) * size * 0.35;
+    const py = y + Math.sin(angle) * size * 0.35;
+    ctx.beginPath();
+    ctx.ellipse(sx(px), sy(py), S(petalSize * 0.25), S(petalSize * 0.6), angle, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Center - yellow
+  ctx.fillStyle = '#FFDD00';
+  ctx.beginPath();
+  ctx.arc(sx(x), sy(y), S(size * 0.25), 0, Math.PI * 2);
+  ctx.fill();
+
+  // Center border - red
+  ctx.strokeStyle = '#DD2222';
+  ctx.lineWidth = S(2);
+  ctx.stroke();
+}
+
 // Draw framed artwork on wall
 function drawArtwork(x, y, w, h, frameColor) {
   // Frame
@@ -2911,6 +2950,9 @@ function render() {
 
   // Draw HUD (time, text) on top of background
   drawHUD();
+
+  // Draw decorative flower
+  drawFlower(1082, 243, 50);
 
   // Draw all professional desks and agents
   AGENTS.forEach((a, i) => {
