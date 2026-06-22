@@ -1830,17 +1830,22 @@ function drawPlant(x, y, size) {
 // Draw task board on wall
 let boardDisplayTimer = 0;  // Timer to show/hide board
 function drawTaskBoard(x, y) {
-  if (boardDisplayTimer <= 0) return;  // Don't draw if timer is 0
+  // Only draw if timer > 0
+  const alpha = boardDisplayTimer > 0 ? Math.min(1, boardDisplayTimer / 60) : 0;
+  if (alpha <= 0) return;
 
   const w = 120;
   const h = 100;
+
+  // Save alpha
+  ctx.globalAlpha = alpha;
 
   // Board background - dark wood
   ctx.fillStyle = '#6B5345';
   ctx.fillRect(sx(x - w/2), sy(y - h/2), S(w), S(h));
 
   // Board border
-  ctx.strokeStyle = '#8B6F47';
+  ctx.strokeStyle = '#FFD700';
   ctx.lineWidth = S(3);
   ctx.strokeRect(sx(x - w/2), sy(y - h/2), S(w), S(h));
 
@@ -1856,13 +1861,10 @@ function drawTaskBoard(x, y) {
   ctx.fillStyle = '#00FF88';
   const tasks = ['✓ Memo', '✓ Scout', '✓ Alexa', '✓ Doc', '✓ Cal'];
   for (let i = 0; i < tasks.length; i++) {
-    ctx.fillText(tasks[i], sx(x - 40), sy(y - h/2 + 25 + i * 12));
+    ctx.fillText(tasks[i], sx(x - w/2 + 10), sy(y - h/2 + 25 + i * 12));
   }
 
-  // Fade effect based on timer
-  ctx.globalAlpha = Math.min(1, boardDisplayTimer / 30);
-  ctx.fillStyle = 'rgba(255, 215, 0, 0.1)';
-  ctx.fillRect(sx(x - w/2), sy(y - h/2), S(w), S(h));
+  // Restore alpha
   ctx.globalAlpha = 1;
 }
 
@@ -3054,6 +3056,7 @@ function render() {
 
   ctx.restore();
 
+  // Draw charts and run animation
   drawCharts();
   runAutoScene();
   tick++;
