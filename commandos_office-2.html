@@ -2504,7 +2504,9 @@ let commanderWaitTimer = 0;       // Timer for pause at desk/door
 const COMMANDER_ROUTE = [
   { x: 50, y: 150 },      // 0: Door entrance
   { x: 50, y: 750 },      // 1: Down left wall
-  { x: 611, y: 750 }      // 2: At desk (wait here) - PAUSE & SPEAK at board next to desk
+  { x: 611, y: 750 },     // 2: At desk (PAUSE & SPEAK)
+  { x: 50, y: 750 },      // 3: Back up left wall
+  { x: 50, y: 150 }       // 4: Back to door (then loop)
 ];
 
 function runAutoScene() {
@@ -2543,8 +2545,8 @@ function runAutoScene() {
 
           // Add pause at desk (waypoint 2) - show board and make sound
           if (commanderWaypointIndex === 3) {
-            // Pause for 10 seconds (600 frames at 60fps)
-            commanderWaitTimer = 600;
+            // Pause for 90 seconds (5400 frames at 60fps) - total 3 min cycle: 90s Door→Desk + 90s Desk→Door
+            commanderWaitTimer = 5400;
 
             // Show board for 10 seconds (600 frames at 60fps)
             boardDisplayTimer = 600;
