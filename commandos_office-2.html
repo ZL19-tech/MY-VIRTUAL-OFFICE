@@ -1938,7 +1938,31 @@ function drawLargePlant(x, y, isLeft = false) {
 
 // Draw wall-mounted shelves - horizontal long shelf on upper wall
 function drawWallShelves(x1, y1, x2, y2) {
-  // This function is deprecated - shelves removed, only storage cabinet remains
+  const width = x2 - x1;
+  const height = y2 - y1;
+  const shelfY = y1 + height/2;
+
+  // Main horizontal shelf board - light wood
+  ctx.fillStyle = '#A0826D';
+  ctx.fillRect(sx(x1), sy(shelfY - 3), S(width), S(6));
+
+  // Shelf border
+  ctx.strokeStyle = '#8B6914';
+  ctx.lineWidth = S(2);
+  ctx.strokeRect(sx(x1), sy(shelfY - 3), S(width), S(6));
+
+  // Support brackets (small vertical pieces) at regular intervals
+  ctx.fillStyle = '#8B6914';
+  const bracketSpacing = 80;
+  for (let i = 0; i < width; i += bracketSpacing) {
+    ctx.fillRect(sx(x1 + i), sy(shelfY + 3), S(4), S(height/2));
+  }
+
+  // Wall backing panel - subtle light color
+  ctx.fillStyle = '#D4A574';
+  ctx.globalAlpha = 0.2;
+  ctx.fillRect(sx(x1), sy(y1), S(width), S(height));
+  ctx.globalAlpha = 1;
 }
 
 // Draw modern bookshelf attached to wall at specific coordinates
@@ -3192,9 +3216,6 @@ function render() {
 
   // Brown-coffee wood walls with windows
   drawRoomWalls();
-
-  // Storage cabinet under windows
-  drawStorageCabinet();
 
   // Entrance door and control button
   drawEntranceDoor();
