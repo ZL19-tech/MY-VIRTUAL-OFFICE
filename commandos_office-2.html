@@ -1936,6 +1936,66 @@ function drawLargePlant(x, y, isLeft = false) {
   ctx.stroke();
 }
 
+// Draw wall-mounted shelves with drawers (from top to window level)
+function drawWallShelves(x, y, width, height) {
+  // Shelving unit - light wood color
+  ctx.fillStyle = '#C19A6B';  // Gold/tan wood
+  ctx.fillRect(sx(x - width/2), sy(y), S(width), S(height));
+
+  // Wood border/frame
+  ctx.strokeStyle = '#8B6914';
+  ctx.lineWidth = S(3);
+  ctx.strokeRect(sx(x - width/2), sy(y), S(width), S(height));
+
+  // Side panels
+  ctx.fillStyle = '#A0826D';
+  ctx.fillRect(sx(x - width/2), sy(y), S(8), S(height));
+  ctx.fillRect(sx(x + width/2 - 8), sy(y), S(8), S(height));
+
+  // Shelves (4 shelves) with drawers below
+  const numShelves = 4;
+  for (let i = 0; i < numShelves; i++) {
+    const shelfY = y + (height / (numShelves + 1)) * (i + 1);
+
+    // Shelf
+    ctx.fillStyle = '#A0826D';
+    ctx.fillRect(sx(x - width/2 + 8), sy(shelfY - 3), S(width - 16), S(6));
+
+    // Drawer below shelf
+    const drawerHeight = (height / (numShelves + 1)) * 0.6;
+    ctx.fillStyle = '#C19A6B';
+    ctx.fillRect(sx(x - width/2 + 15), sy(shelfY + 5), S(width - 30), S(drawerHeight));
+
+    // Drawer border
+    ctx.strokeStyle = '#8B6914';
+    ctx.lineWidth = S(1);
+    ctx.strokeRect(sx(x - width/2 + 15), sy(shelfY + 5), S(width - 30), S(drawerHeight));
+
+    // Drawer handle
+    ctx.fillStyle = '#D4A574';
+    ctx.fillRect(sx(x - 3), sy(shelfY + 10), S(6), S(3));
+  }
+
+  // Items on shelves - books, folders, office supplies
+  const colors = ['#C41E3A', '#1F4788', '#228B22', '#DAA520'];
+  for (let i = 0; i < numShelves; i++) {
+    const shelfY = y + (height / (numShelves + 1)) * (i + 1) - 25;
+    let itemX = x - width/2 + 20;
+
+    // Place a few books/items on each shelf
+    for (let j = 0; j < 3; j++) {
+      ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+      const itemWidth = 12;
+      const itemHeight = 20;
+      ctx.fillRect(sx(itemX), sy(shelfY - itemHeight/2), S(itemWidth), S(itemHeight));
+      ctx.strokeStyle = '#2a2a2a';
+      ctx.lineWidth = S(0.5);
+      ctx.strokeRect(sx(itemX), sy(shelfY - itemHeight/2), S(itemWidth), S(itemHeight));
+      itemX += itemWidth + 3;
+    }
+  }
+}
+
 // Draw modern bookshelf attached to wall at specific coordinates
 function drawModernBookshelf(x, y) {
   const shelfWidth = 200;
@@ -3200,6 +3260,9 @@ function render() {
   // Draw large plants on right side
   drawLargePlant(1100, 200, false); // Top-right corner plant (white pot)
   drawLargePlant(1100, 750, true);  // Bottom-right corner plant (black pot)
+
+  // Draw wall-mounted shelves with drawers on back wall (from top)
+  drawWallShelves(600, 100, 220, 200);
 
   ctx.restore();
 
