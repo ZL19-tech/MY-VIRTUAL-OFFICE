@@ -1943,12 +1943,12 @@ function drawWallShelves(x1, y1, x2, y2) {
   const height = y2 - y1;
   const doorSpacing = 50;  // Vertical door separators every 50px
 
-  // Main cabinet body - matching desk color palette
-  ctx.fillStyle = '#3A5070';  // Dark desk blue-brown
+  // Main cabinet body - dark coffee brown
+  ctx.fillStyle = '#5C4033';  // Dark coffee brown
   ctx.fillRect(sx(x1), sy(y1), S(width), S(height));
 
   // Cabinet top edge highlight
-  ctx.fillStyle = '#556B8D';  // Lighter desk color
+  ctx.fillStyle = '#6D4C41';  // Lighter coffee brown
   ctx.fillRect(sx(x1), sy(y1), S(width), S(3));
 
   // Cabinet border
@@ -1968,7 +1968,7 @@ function drawWallShelves(x1, y1, x2, y2) {
   }
 
   // Door panels (rectangles between separators)
-  ctx.fillStyle = '#445080';  // Slightly lighter panel color
+  ctx.fillStyle = '#6D4C41';  // Slightly lighter coffee brown
   for (let i = 0; i < Math.ceil(width / doorSpacing); i++) {
     const doorX = x1 + (i * doorSpacing);
     const doorW = Math.min(doorSpacing - 2, x2 - doorX - 2);
@@ -3251,7 +3251,7 @@ function render() {
   drawRoomWalls();
 
   // Draw wall-mounted shelves (cabinet) BEFORE other elements
-  drawWallShelves(281, 174, 990, 225);
+  drawWallShelves(270, 180, 1000, 235);
 
   // Entrance door and control button
   drawEntranceDoor();
