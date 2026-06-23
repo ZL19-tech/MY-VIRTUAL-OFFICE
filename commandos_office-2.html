@@ -2404,48 +2404,48 @@ function drawWallShadows() {
 function drawStorageCabinet() {
   const cabinetX = 210;        // Start position (under windows)
   const cabinetY = 175;        // Just below top wall
-  const cabinetWidth = 980;    // Long cabinet spanning under windows
+  const cabinetWidth = 780;    // Extended to reach near the plant (x=990)
   const cabinetHeight = 50;    // Solid height for storage
 
-  // Main cabinet body - wood color matching desks
-  ctx.fillStyle = '#3A5070';   // Dark blue-brown like desk color
+  // Main cabinet body - dark coffee brown wood color
+  ctx.fillStyle = '#5C4033';   // Dark coffee brown wood
   ctx.fillRect(sx(cabinetX), sy(cabinetY), S(cabinetWidth), S(cabinetHeight));
 
   // Cabinet border/frame - darker edge
-  ctx.strokeStyle = '#2D3A4A';
+  ctx.strokeStyle = '#3E2723';
   ctx.lineWidth = S(2);
   ctx.strokeRect(sx(cabinetX), sy(cabinetY), S(cabinetWidth), S(cabinetHeight));
 
-  // Top trim/edge - lighter wood color for depth
-  ctx.fillStyle = '#D4A574';
+  // Top trim/edge - slightly lighter wood for depth
+  ctx.fillStyle = '#6D4C41';
   ctx.fillRect(sx(cabinetX), sy(cabinetY - 2), S(cabinetWidth), S(2));
 
   // Shadow at bottom for depth
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
   ctx.fillRect(sx(cabinetX), sy(cabinetY + cabinetHeight - 2), S(cabinetWidth), S(2));
 
-  // Cabinet doors - divided into 6 sections with vertical separators
-  const doorCount = 6;
+  // Cabinet doors - divided into 8 sections with vertical separators
+  const doorCount = 8;
   const doorWidth = cabinetWidth / doorCount;
 
   for (let i = 0; i < doorCount; i++) {
     const doorX = cabinetX + (i * doorWidth);
 
-    // Door panel - slightly lighter shade
-    ctx.fillStyle = '#445080';
+    // Door panel - slightly lighter shade of brown
+    ctx.fillStyle = '#6D4C41';
     const doorPadding = 3;
     ctx.fillRect(sx(doorX + doorPadding), sy(cabinetY + doorPadding),
                  S(doorWidth - doorPadding * 2), S(cabinetHeight - doorPadding * 2));
 
     // Door border/frame
-    ctx.strokeStyle = '#2D3A4A';
+    ctx.strokeStyle = '#3E2723';
     ctx.lineWidth = S(1);
     ctx.strokeRect(sx(doorX + doorPadding), sy(cabinetY + doorPadding),
                    S(doorWidth - doorPadding * 2), S(cabinetHeight - doorPadding * 2));
 
     // Vertical door separators
     if (i > 0) {
-      ctx.strokeStyle = '#2D3A4A';
+      ctx.strokeStyle = '#3E2723';
       ctx.lineWidth = S(2);
       ctx.beginPath();
       ctx.moveTo(sx(doorX), sy(cabinetY));
@@ -2453,14 +2453,14 @@ function drawStorageCabinet() {
       ctx.stroke();
     }
 
-    // Door handle - brass/gold colored
-    ctx.fillStyle = '#D4A574';
+    // Door handle - dark iron/brass colored
+    ctx.fillStyle = '#8B6F47';
     const handleX = doorX + doorWidth/2 - 4;
     const handleY = cabinetY + cabinetHeight/2 - 2;
     ctx.fillRect(sx(handleX), sy(handleY), S(8), S(4));
 
     // Handle detail - darker shade for depth
-    ctx.strokeStyle = '#A0826D';
+    ctx.strokeStyle = '#5C4033';
     ctx.lineWidth = S(1);
     ctx.strokeRect(sx(handleX), sy(handleY), S(8), S(4));
   }
@@ -2481,9 +2481,6 @@ function drawBaseboards() {
   ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
   ctx.fillRect(S(80), sy(918), canvas.width - S(160), S(4));
 
-  // Baseboard trim details - gold accent
-  ctx.fillStyle = '#D4A574';
-  ctx.fillRect(0, sy(918), canvas.width, S(2));
 }
 
 // ── Hanging Lamp Light Effect (improved) ──────────────────────────
