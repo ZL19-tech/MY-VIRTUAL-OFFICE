@@ -1936,64 +1936,31 @@ function drawLargePlant(x, y, isLeft = false) {
   ctx.stroke();
 }
 
-// Draw wall-mounted shelves with drawers (from top to window level)
-function drawWallShelves(x, y, width, height) {
-  // Shelving unit - light wood color
-  ctx.fillStyle = '#C19A6B';  // Gold/tan wood
-  ctx.fillRect(sx(x - width/2), sy(y), S(width), S(height));
+// Draw wall-mounted shelves - horizontal long shelf on right wall
+function drawWallShelves(x1, y1, x2, y2) {
+  const width = x2 - x1;
+  const height = y2 - y1;
 
-  // Wood border/frame
-  ctx.strokeStyle = '#8B6914';
-  ctx.lineWidth = S(3);
-  ctx.strokeRect(sx(x - width/2), sy(y), S(width), S(height));
-
-  // Side panels
+  // Main horizontal shelf board - light wood
   ctx.fillStyle = '#A0826D';
-  ctx.fillRect(sx(x - width/2), sy(y), S(8), S(height));
-  ctx.fillRect(sx(x + width/2 - 8), sy(y), S(8), S(height));
+  ctx.fillRect(sx(x1), sy(y1 + height/2 - 3), S(800), S(6));
 
-  // Shelves (4 shelves) with drawers below
-  const numShelves = 4;
-  for (let i = 0; i < numShelves; i++) {
-    const shelfY = y + (height / (numShelves + 1)) * (i + 1);
+  // Shelf border
+  ctx.strokeStyle = '#8B6914';
+  ctx.lineWidth = S(2);
+  ctx.strokeRect(sx(x1), sy(y1 + height/2 - 3), S(800), S(6));
 
-    // Shelf
-    ctx.fillStyle = '#A0826D';
-    ctx.fillRect(sx(x - width/2 + 8), sy(shelfY - 3), S(width - 16), S(6));
-
-    // Drawer below shelf
-    const drawerHeight = (height / (numShelves + 1)) * 0.6;
-    ctx.fillStyle = '#C19A6B';
-    ctx.fillRect(sx(x - width/2 + 15), sy(shelfY + 5), S(width - 30), S(drawerHeight));
-
-    // Drawer border
-    ctx.strokeStyle = '#8B6914';
-    ctx.lineWidth = S(1);
-    ctx.strokeRect(sx(x - width/2 + 15), sy(shelfY + 5), S(width - 30), S(drawerHeight));
-
-    // Drawer handle
-    ctx.fillStyle = '#D4A574';
-    ctx.fillRect(sx(x - 3), sy(shelfY + 10), S(6), S(3));
+  // Support brackets (small vertical pieces)
+  ctx.fillStyle = '#8B6914';
+  for (let i = 0; i < 800; i += 100) {
+    ctx.fillRect(sx(x1 + i), sy(y1 + height/2 + 3), S(3), S(height/2 - 3));
   }
 
-  // Items on shelves - books, folders, office supplies
-  const colors = ['#C41E3A', '#1F4788', '#228B22', '#DAA520'];
-  for (let i = 0; i < numShelves; i++) {
-    const shelfY = y + (height / (numShelves + 1)) * (i + 1) - 25;
-    let itemX = x - width/2 + 20;
-
-    // Place a few books/items on each shelf
-    for (let j = 0; j < 3; j++) {
-      ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
-      const itemWidth = 12;
-      const itemHeight = 20;
-      ctx.fillRect(sx(itemX), sy(shelfY - itemHeight/2), S(itemWidth), S(itemHeight));
-      ctx.strokeStyle = '#2a2a2a';
-      ctx.lineWidth = S(0.5);
-      ctx.strokeRect(sx(itemX), sy(shelfY - itemHeight/2), S(itemWidth), S(itemHeight));
-      itemX += itemWidth + 3;
-    }
-  }
+  // Wall backing panel - subtle
+  ctx.fillStyle = '#D4A574';
+  ctx.globalAlpha = 0.3;
+  ctx.fillRect(sx(x1), sy(y1), S(800), S(height));
+  ctx.globalAlpha = 1;
 }
 
 // Draw modern bookshelf attached to wall at specific coordinates
@@ -3262,7 +3229,7 @@ function render() {
   drawLargePlant(1100, 750, true);  // Bottom-right corner plant (black pot)
 
   // Draw wall-mounted shelves with drawers on right wall (exact coordinates)
-  drawWallShelves(982, 191, 150, 34);
+  drawWallShelves(982, 174, 984, 208);
 
   ctx.restore();
 
