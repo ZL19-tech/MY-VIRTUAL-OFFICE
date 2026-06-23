@@ -626,6 +626,10 @@ let scenePhase = 0;
 let sceneTimer = 0;
 let totalTaskCount = 0;
 
+// ── Intro Animation State ────────────────────────────────────────────
+let introActive = true;
+let introTimer = 0;
+
 // ── Commander patrol route ───────────────────────────────────────────
 // Desks to AVOID (ALL desks - NO ENTRY):
 //   Agent desks: Alexa (40-240, 80-280), Scout (360-560, 80-280), Memo (680-880, 80-280)
@@ -1934,6 +1938,62 @@ function drawLargePlant(x, y, isLeft = false) {
   ctx.ellipse(sx(x - 8), sy(y - 85), S(15), S(20), 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.stroke();
+}
+
+// ── Intro Animation ──────────────────────────────────────────────────
+function drawIntro() {
+  // Black background
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Stage 0: Text at center (0-120 frames)
+  if (introTimer < 120) {
+    const textX = CANVAS_WIDTH / 2;
+    const textY = CANVAS_HEIGHT / 2;
+
+    // Draw "CommandOS" text
+    ctx.font = `${S(80)}px "Press Start 2P", monospace`;
+    ctx.fillStyle = '#00FF88';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = '#00FF88';
+    ctx.shadowBlur = S(20);
+    ctx.fillText('CommandOS', sx(textX), sy(textY));
+    ctx.shadowBlur = 0;
+  }
+
+  // Stage 1: Text moves to top-left, lights turn on (120-240 frames)
+  else if (introTimer < 240) {
+    const progress = (introTimer - 120) / 120;
+
+    // Animate text position: center -> top-left
+    const startX = CANVAS_WIDTH / 2;
+    const startY = CANVAS_HEIGHT / 2;
+    const endX = 150;
+    const endY = 80;
+
+    const textX = startX + (endX - startX) * progress;
+    const textY = startY + (endY - startY) * progress;
+
+    // Fade darkness overlay
+    ctx.fillStyle = `rgba(0, 0, 0, ${1 - progress})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw text at animated position
+    ctx.font = `${S(60)}px "Press Start 2P", monospace`;
+    ctx.fillStyle = '#00FF88';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = '#00FF88';
+    ctx.shadowBlur = S(15);
+    ctx.fillText('CommandOS', sx(textX), sy(textY));
+    ctx.shadowBlur = 0;
+  }
+
+  // Stage 2: Intro finished, show full office
+  else {
+    introActive = false;
+  }
 }
 
 // Draw wall-mounted shelves - horizontal long shelf on upper wall
@@ -3250,6 +3310,22 @@ function render() {
   // Fill entire physical canvas with dark background first
   ctx.fillStyle = '#0D1117';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // ── INTRO ANIMATION ──
+  if (introActive) {
+    drawIntro();
+    introTimer++;
+
+    // Start music and initialize office when intro finishes
+    if (introTimer >= 240 && !introActive) {
+      bgMusic.play().catch(err => console.log('Music autoplay blocked'));
+      commanderWaypointIndex = 0;
+    }
+
+    ctx.restore();
+    requestAnimationFrame(render);
+    return;  // Skip normal render during intro
+  }
 
   // Apply transformations for game rendering
   ctx.translate(offsetX, offsetY);
