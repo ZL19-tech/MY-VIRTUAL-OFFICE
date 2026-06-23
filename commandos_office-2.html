@@ -2416,54 +2416,9 @@ function drawStorageCabinet() {
   ctx.lineWidth = S(2);
   ctx.strokeRect(sx(cabinetX), sy(cabinetY), S(cabinetWidth), S(cabinetHeight));
 
-  // Top trim/edge - slightly lighter wood for depth
-  ctx.fillStyle = '#6D4C41';
-  ctx.fillRect(sx(cabinetX), sy(cabinetY - 2), S(cabinetWidth), S(2));
-
   // Shadow at bottom for depth
   ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
   ctx.fillRect(sx(cabinetX), sy(cabinetY + cabinetHeight - 2), S(cabinetWidth), S(2));
-
-  // Cabinet doors - divided into 8 sections with vertical separators
-  const doorCount = 8;
-  const doorWidth = cabinetWidth / doorCount;
-
-  for (let i = 0; i < doorCount; i++) {
-    const doorX = cabinetX + (i * doorWidth);
-
-    // Door panel - slightly lighter shade of brown
-    ctx.fillStyle = '#6D4C41';
-    const doorPadding = 3;
-    ctx.fillRect(sx(doorX + doorPadding), sy(cabinetY + doorPadding),
-                 S(doorWidth - doorPadding * 2), S(cabinetHeight - doorPadding * 2));
-
-    // Door border/frame
-    ctx.strokeStyle = '#3E2723';
-    ctx.lineWidth = S(1);
-    ctx.strokeRect(sx(doorX + doorPadding), sy(cabinetY + doorPadding),
-                   S(doorWidth - doorPadding * 2), S(cabinetHeight - doorPadding * 2));
-
-    // Vertical door separators
-    if (i > 0) {
-      ctx.strokeStyle = '#3E2723';
-      ctx.lineWidth = S(2);
-      ctx.beginPath();
-      ctx.moveTo(sx(doorX), sy(cabinetY));
-      ctx.lineTo(sx(doorX), sy(cabinetY + cabinetHeight));
-      ctx.stroke();
-    }
-
-    // Door handle - dark coffee brown metal
-    ctx.fillStyle = '#4A342A';
-    const handleX = doorX + doorWidth/2 - 4;
-    const handleY = cabinetY + cabinetHeight/2 - 2;
-    ctx.fillRect(sx(handleX), sy(handleY), S(8), S(4));
-
-    // Handle detail - darker shade for depth
-    ctx.strokeStyle = '#3E2723';
-    ctx.lineWidth = S(1);
-    ctx.strokeRect(sx(handleX), sy(handleY), S(8), S(4));
-  }
 }
 
 // ── Baseboard (Plinte) ──────────────────────────────────────────────
