@@ -1936,69 +1936,79 @@ function drawLargePlant(x, y, isLeft = false) {
   ctx.stroke();
 }
 
-// Draw modern bookshelf on right wall
+// Draw modern bookshelf attached to wall at specific coordinates
 function drawModernBookshelf(x, y) {
-  const shelfWidth = 180;
-  const shelfHeight = 300;
+  const shelfWidth = 200;
+  const shelfHeight = 240;
 
-  // Bookshelf background - natural wood
-  ctx.fillStyle = '#8B6914';
+  // Bookshelf frame - dark wood attached to wall
+  ctx.fillStyle = '#A0826D';  // Light wood color
   ctx.fillRect(sx(x - shelfWidth/2), sy(y - shelfHeight/2), S(shelfWidth), S(shelfHeight));
 
-  // Wood border
-  ctx.strokeStyle = '#654321';
-  ctx.lineWidth = S(3);
-  ctx.strokeRect(sx(x - shelfWidth/2), sy(y - shelfHeight/2), S(shelfWidth), S(shelfHeight));
+  // Side panels - darker wood
+  ctx.fillStyle = '#8B7355';
+  ctx.fillRect(sx(x - shelfWidth/2), sy(y - shelfHeight/2), S(8), S(shelfHeight));
+  ctx.fillRect(sx(x + shelfWidth/2 - 8), sy(y - shelfHeight/2), S(8), S(shelfHeight));
 
-  // Shelves (5 shelves)
-  ctx.strokeStyle = '#654321';
-  ctx.lineWidth = S(2);
-  for (let i = 1; i < 5; i++) {
-    const shelfY = y - shelfHeight/2 + (shelfHeight / 5) * i;
-    ctx.beginPath();
-    ctx.moveTo(sx(x - shelfWidth/2 + 5), sy(shelfY));
-    ctx.lineTo(sx(x + shelfWidth/2 - 5), sy(shelfY));
-    ctx.stroke();
+  // Top panel
+  ctx.fillRect(sx(x - shelfWidth/2), sy(y - shelfHeight/2), S(shelfWidth), S(10));
+
+  // Bottom panel
+  ctx.fillRect(sx(x - shelfWidth/2), sy(y + shelfHeight/2 - 10), S(shelfWidth), S(10));
+
+  // Shelves (6 horizontal shelves)
+  ctx.strokeStyle = '#5C4033';
+  ctx.lineWidth = S(3);
+  for (let i = 1; i <= 5; i++) {
+    const shelfY = y - shelfHeight/2 + 10 + (shelfHeight - 20) / 6 * i;
+    ctx.fillStyle = '#8B7355';
+    ctx.fillRect(sx(x - shelfWidth/2 + 8), sy(shelfY - 3), S(shelfWidth - 16), S(6));
   }
 
-  // Books on shelves - colorful spines
-  const bookColors = ['#C41E3A', '#4169E1', '#228B22', '#FFD700', '#8B4513', '#9370DB', '#DC143C', '#20B2AA'];
-  let colorIdx = 0;
+  // Books on shelves - varied heights and colors
+  const bookColors = ['#C41E3A', '#1F4788', '#228B22', '#DAA520', '#8B4513', '#663399', '#DC143C', '#2F4F7F', '#556B2F'];
 
-  for (let shelf = 0; shelf < 4; shelf++) {
-    const shelfY = y - shelfHeight/2 + (shelfHeight / 5) * (shelf + 0.7);
-    const bookSpacing = 15;
+  for (let shelf = 0; shelf < 5; shelf++) {
+    const shelfY = y - shelfHeight/2 + 10 + (shelfHeight - 20) / 6 * (shelf + 0.5);
     let bookX = x - shelfWidth/2 + 15;
+    const shelfEnd = x + shelfWidth/2 - 15;
 
-    while (bookX < x + shelfWidth/2 - 15) {
-      const bookWidth = 8 + Math.random() * 8;
-      const bookHeight = 25;
+    while (bookX < shelfEnd) {
+      const bookWidth = 10 + Math.random() * 12;
+      const bookHeight = 18 + Math.random() * 20;
+      const colorIdx = Math.floor(Math.random() * bookColors.length);
 
-      ctx.fillStyle = bookColors[colorIdx % bookColors.length];
+      // Book spine
+      ctx.fillStyle = bookColors[colorIdx];
       ctx.fillRect(sx(bookX), sy(shelfY - bookHeight/2), S(bookWidth), S(bookHeight));
 
-      // Book details
-      ctx.strokeStyle = '#000000';
+      // Book border
+      ctx.strokeStyle = '#2a2a2a';
       ctx.lineWidth = S(0.5);
       ctx.strokeRect(sx(bookX), sy(shelfY - bookHeight/2), S(bookWidth), S(bookHeight));
 
-      bookX += bookWidth + 2;
-      colorIdx++;
+      bookX += bookWidth + 1;
     }
   }
 
-  // Decorative items (small plants, objects)
-  // Small decorative plant
-  ctx.fillStyle = '#2d7a2d';
+  // Small decorative objects on top shelf
+  // Small plant pot
+  ctx.fillStyle = '#D2B48C';
   ctx.beginPath();
-  ctx.arc(sx(x + 70), sy(y - 130), S(12), 0, Math.PI * 2);
+  ctx.ellipse(sx(x - 60), sy(y - shelfHeight/2 + 20), S(8), S(12), 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Small decoration
-  ctx.fillStyle = '#FFD700';
+  ctx.fillStyle = '#2d7a2d';
   ctx.beginPath();
-  ctx.rect(sx(x - 75), sy(y + 120), S(15), S(15));
+  ctx.arc(sx(x - 60), sy(y - shelfHeight/2 + 10), S(6), 0, Math.PI * 2);
   ctx.fill();
+
+  // Small decoration - frame or object
+  ctx.fillStyle = '#DAA520';
+  ctx.fillRect(sx(x + 50), sy(y - shelfHeight/2 + 15), S(20), S(20));
+  ctx.strokeStyle = '#8B6914';
+  ctx.lineWidth = S(1);
+  ctx.strokeRect(sx(x + 50), sy(y - shelfHeight/2 + 15), S(20), S(20));
 }
 
 // Draw large flower decoration - green with red accents
