@@ -2392,6 +2392,27 @@ function drawWallShadows() {
 }
 
 
+// ── Storage Cabinet under Windows ──────────────────────────────────
+function drawStorageCabinet() {
+  const cabinetX = 210;        // Start position (under windows)
+  const cabinetY = 175;        // Just below top wall
+  const cabinetWidth = 780;    // Extended to reach near the plant (x=990)
+  const cabinetHeight = 50;    // Solid height for storage
+
+  // Main cabinet body - dark coffee brown wood color
+  ctx.fillStyle = '#5C4033';   // Dark coffee brown wood
+  ctx.fillRect(sx(cabinetX), sy(cabinetY), S(cabinetWidth), S(cabinetHeight));
+
+  // Cabinet border/frame - darker edge
+  ctx.strokeStyle = '#3E2723';
+  ctx.lineWidth = S(2);
+  ctx.strokeRect(sx(cabinetX), sy(cabinetY), S(cabinetWidth), S(cabinetHeight));
+
+  // Shadow at bottom for depth
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+  ctx.fillRect(sx(cabinetX), sy(cabinetY + cabinetHeight - 2), S(cabinetWidth), S(2));
+}
+
 // ── Baseboard (Plinte) ──────────────────────────────────────────────
 function drawBaseboards() {
   // Baseboard color - slightly darker/richer than walls
@@ -3221,6 +3242,9 @@ function render() {
 
   // Draw wall-mounted shelves with drawers on right wall (exact coordinates)
   drawWallShelves(281, 174, 990, 208);
+
+  // Draw storage cabinet under windows
+  drawStorageCabinet();
 
   ctx.restore();
 
