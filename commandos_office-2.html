@@ -1936,30 +1936,32 @@ function drawLargePlant(x, y, isLeft = false) {
   ctx.stroke();
 }
 
-// Draw wall-mounted shelves - horizontal long shelf on right wall
+// Draw wall-mounted shelves - horizontal long shelf on upper wall
 function drawWallShelves(x1, y1, x2, y2) {
   const width = x2 - x1;
   const height = y2 - y1;
+  const shelfY = y1 + height/2;
 
   // Main horizontal shelf board - light wood
   ctx.fillStyle = '#A0826D';
-  ctx.fillRect(sx(x1), sy(y1 + height/2 - 3), S(800), S(6));
+  ctx.fillRect(sx(x1), sy(shelfY - 3), S(width), S(6));
 
   // Shelf border
   ctx.strokeStyle = '#8B6914';
   ctx.lineWidth = S(2);
-  ctx.strokeRect(sx(x1), sy(y1 + height/2 - 3), S(800), S(6));
+  ctx.strokeRect(sx(x1), sy(shelfY - 3), S(width), S(6));
 
-  // Support brackets (small vertical pieces)
+  // Support brackets (small vertical pieces) at regular intervals
   ctx.fillStyle = '#8B6914';
-  for (let i = 0; i < 800; i += 100) {
-    ctx.fillRect(sx(x1 + i), sy(y1 + height/2 + 3), S(3), S(height/2 - 3));
+  const bracketSpacing = 80;
+  for (let i = 0; i < width; i += bracketSpacing) {
+    ctx.fillRect(sx(x1 + i), sy(shelfY + 3), S(4), S(height/2));
   }
 
-  // Wall backing panel - subtle
+  // Wall backing panel - subtle light color
   ctx.fillStyle = '#D4A574';
-  ctx.globalAlpha = 0.3;
-  ctx.fillRect(sx(x1), sy(y1), S(800), S(height));
+  ctx.globalAlpha = 0.2;
+  ctx.fillRect(sx(x1), sy(y1), S(width), S(height));
   ctx.globalAlpha = 1;
 }
 
@@ -3229,7 +3231,7 @@ function render() {
   drawLargePlant(1100, 750, true);  // Bottom-right corner plant (black pot)
 
   // Draw wall-mounted shelves with drawers on right wall (exact coordinates)
-  drawWallShelves(982, 174, 984, 208);
+  drawWallShelves(281, 174, 990, 208);
 
   ctx.restore();
 
