@@ -2504,14 +2504,7 @@ let commanderWaitTimer = 0;       // Timer for pause at desk/door
 const COMMANDER_ROUTE = [
   { x: 50, y: 150 },      // 0: Door entrance
   { x: 50, y: 750 },      // 1: Down left wall
-  { x: 611, y: 750 },     // 2: At desk (wait here) - PAUSE & SPEAK
-  { x: 100, y: 750 },     // 3: Left along bottom wall
-  { x: 1100, y: 750 },    // 4: Right along bottom wall
-  { x: 1100, y: 150 },    // 5: Up right wall to top
-  { x: 950, y: 180 },     // 6: At task board (PAUSE & SPEAK)
-  { x: 50, y: 150 },      // 7: Back to door via top wall
-  { x: 50, y: 750 },      // 8: Down left wall
-  { x: 611, y: 750 }      // 9: Back to desk (wait, then loop)
+  { x: 611, y: 750 }      // 2: At desk (wait here) - PAUSE & SPEAK at board next to desk
 ];
 
 function runAutoScene() {
@@ -2548,34 +2541,31 @@ function runAutoScene() {
         const onWaypointReached = () => {
           commanderWaypointIndex++;
 
-          // Add pause at desk (waypoint 2) and board (waypoint 6)
-          if (commanderWaypointIndex === 3 || commanderWaypointIndex === 7) {
-            // Pause for 10 seconds (600 frames at 60fps) - to reach 5 minute total cycle
+          // Add pause at desk (waypoint 2) - show board and make sound
+          if (commanderWaypointIndex === 3) {
+            // Pause for 10 seconds (600 frames at 60fps)
             commanderWaitTimer = 600;
 
-            // SPECIAL: At board waypoint (6), show board and make sound
-            if (commanderWaypointIndex === 7) {
-              // Show board for 10 seconds (600 frames at 60fps)
-              boardDisplayTimer = 600;
+            // Show board for 10 seconds (600 frames at 60fps)
+            boardDisplayTimer = 600;
 
-              // Play sound (beep)
-              try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = audioContext.createOscillator();
-                const gain = audioContext.createGain();
-                osc.connect(gain);
-                gain.connect(audioContext.destination);
-                osc.frequency.value = 800;
-                gain.gain.setValueAtTime(0.2, audioContext.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-                osc.start(audioContext.currentTime);
-                osc.stop(audioContext.currentTime + 0.3);
-              } catch (e) {}
+            // Play sound (beep)
+            try {
+              const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+              const osc = audioContext.createOscillator();
+              const gain = audioContext.createGain();
+              osc.connect(gain);
+              gain.connect(audioContext.destination);
+              osc.frequency.value = 800;
+              gain.gain.setValueAtTime(0.2, audioContext.currentTime);
+              gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+              osc.start(audioContext.currentTime);
+              osc.stop(audioContext.currentTime + 0.3);
+            } catch (e) {}
 
-              // Show message
-              const msg = LANG === 'ro' ? '💬 Raport zilei...' : '💬 Дневной отчет...';
-              showToast(msg, 'gold');
-            }
+            // Show message
+            const msg = LANG === 'ro' ? '💬 Raport zilei...' : '💬 Дневной отчет...';
+            showToast(msg, 'gold');
           }
 
           // Last waypoint? Reset and loop
@@ -3051,8 +3041,8 @@ function render() {
   // Draw proximity chat button
   drawChatButton();
 
-  // Draw task board on wall
-  drawTaskBoard(950, 180);
+  // Draw task board next to Commander's desk
+  drawTaskBoard(750, 700);
 
   ctx.restore();
 
