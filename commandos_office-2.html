@@ -1860,6 +1860,147 @@ function drawTaskBoard(x, y) {
   }
 }
 
+// Draw large realistic indoor plant (Ficus/Monstera)
+function drawLargePlant(x, y, isLeft = false) {
+  // Pot - modern black or white
+  const potColor = isLeft ? '#1a1a1a' : '#f5f5f5';
+  const potBorder = isLeft ? '#333333' : '#cccccc';
+
+  // Pot body
+  ctx.fillStyle = potColor;
+  ctx.fillRect(sx(x - 25), sy(y - 10), S(50), S(40));
+
+  // Pot border
+  ctx.strokeStyle = potBorder;
+  ctx.lineWidth = S(2);
+  ctx.strokeRect(sx(x - 25), sy(y - 10), S(50), S(40));
+
+  // Soil
+  ctx.fillStyle = '#8B7355';
+  ctx.fillRect(sx(x - 22), sy(y - 8), S(44), S(8));
+
+  // Main stem
+  ctx.strokeStyle = '#2d5016';
+  ctx.lineWidth = S(4);
+  ctx.beginPath();
+  ctx.moveTo(sx(x), sy(y - 8));
+  ctx.quadraticCurveTo(sx(x + 5), sy(y - 60), sx(x - 3), sy(y - 120));
+  ctx.stroke();
+
+  // Left branch
+  ctx.beginPath();
+  ctx.moveTo(sx(x - 2), sy(y - 40));
+  ctx.quadraticCurveTo(sx(x - 40), sy(y - 60), sx(x - 50), sy(y - 70));
+  ctx.stroke();
+
+  // Right branch
+  ctx.beginPath();
+  ctx.moveTo(sx(x + 2), sy(y - 80));
+  ctx.quadraticCurveTo(sx(x + 35), sy(y - 100), sx(x + 45), sy(y - 110));
+  ctx.stroke();
+
+  // Leaves - large monstera style
+  ctx.fillStyle = '#1b5e20';
+
+  // Left large leaf
+  ctx.beginPath();
+  ctx.ellipse(sx(x - 45), sy(y - 65), S(25), S(35), -0.3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#0d3817';
+  ctx.lineWidth = S(1);
+  ctx.stroke();
+
+  // Right large leaf
+  ctx.beginPath();
+  ctx.ellipse(sx(x + 40), sy(y - 105), S(28), S(38), 0.3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  // Top leaves cluster
+  ctx.fillStyle = '#2d7a2d';
+  ctx.beginPath();
+  ctx.ellipse(sx(x - 15), sy(y - 115), S(20), S(30), -0.2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.ellipse(sx(x + 10), sy(y - 125), S(22), S(32), 0.2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  // Small accent leaves
+  ctx.fillStyle = '#3a9d3a';
+  ctx.beginPath();
+  ctx.ellipse(sx(x - 8), sy(y - 85), S(15), S(20), 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+}
+
+// Draw modern bookshelf on right wall
+function drawModernBookshelf(x, y) {
+  const shelfWidth = 180;
+  const shelfHeight = 300;
+
+  // Bookshelf background - natural wood
+  ctx.fillStyle = '#8B6914';
+  ctx.fillRect(sx(x - shelfWidth/2), sy(y - shelfHeight/2), S(shelfWidth), S(shelfHeight));
+
+  // Wood border
+  ctx.strokeStyle = '#654321';
+  ctx.lineWidth = S(3);
+  ctx.strokeRect(sx(x - shelfWidth/2), sy(y - shelfHeight/2), S(shelfWidth), S(shelfHeight));
+
+  // Shelves (5 shelves)
+  ctx.strokeStyle = '#654321';
+  ctx.lineWidth = S(2);
+  for (let i = 1; i < 5; i++) {
+    const shelfY = y - shelfHeight/2 + (shelfHeight / 5) * i;
+    ctx.beginPath();
+    ctx.moveTo(sx(x - shelfWidth/2 + 5), sy(shelfY));
+    ctx.lineTo(sx(x + shelfWidth/2 - 5), sy(shelfY));
+    ctx.stroke();
+  }
+
+  // Books on shelves - colorful spines
+  const bookColors = ['#C41E3A', '#4169E1', '#228B22', '#FFD700', '#8B4513', '#9370DB', '#DC143C', '#20B2AA'];
+  let colorIdx = 0;
+
+  for (let shelf = 0; shelf < 4; shelf++) {
+    const shelfY = y - shelfHeight/2 + (shelfHeight / 5) * (shelf + 0.7);
+    const bookSpacing = 15;
+    let bookX = x - shelfWidth/2 + 15;
+
+    while (bookX < x + shelfWidth/2 - 15) {
+      const bookWidth = 8 + Math.random() * 8;
+      const bookHeight = 25;
+
+      ctx.fillStyle = bookColors[colorIdx % bookColors.length];
+      ctx.fillRect(sx(bookX), sy(shelfY - bookHeight/2), S(bookWidth), S(bookHeight));
+
+      // Book details
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = S(0.5);
+      ctx.strokeRect(sx(bookX), sy(shelfY - bookHeight/2), S(bookWidth), S(bookHeight));
+
+      bookX += bookWidth + 2;
+      colorIdx++;
+    }
+  }
+
+  // Decorative items (small plants, objects)
+  // Small decorative plant
+  ctx.fillStyle = '#2d7a2d';
+  ctx.beginPath();
+  ctx.arc(sx(x + 70), sy(y - 130), S(12), 0, Math.PI * 2);
+  ctx.fill();
+
+  // Small decoration
+  ctx.fillStyle = '#FFD700';
+  ctx.beginPath();
+  ctx.rect(sx(x - 75), sy(y + 120), S(15), S(15));
+  ctx.fill();
+}
+
 // Draw large flower decoration - green with red accents
 function drawFlower(x, y, size) {
   const petals = 5;
@@ -3045,6 +3186,13 @@ function render() {
 
   // Draw task board next to Commander's desk
   drawTaskBoard(947, 909);
+
+  // Draw large plants in corners
+  drawLargePlant(100, 200, true);   // Top-left corner plant (black pot)
+  drawLargePlant(1100, 200, false); // Top-right corner plant (white pot)
+
+  // Draw modern bookshelf on right wall
+  drawModernBookshelf(1000, 450);
 
   ctx.restore();
 
