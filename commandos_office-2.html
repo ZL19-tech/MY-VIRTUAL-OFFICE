@@ -2453,14 +2453,14 @@ function drawStorageCabinet() {
       ctx.stroke();
     }
 
-    // Door handle - dark iron/brass colored
-    ctx.fillStyle = '#8B6F47';
+    // Door handle - dark coffee brown metal
+    ctx.fillStyle = '#4A342A';
     const handleX = doorX + doorWidth/2 - 4;
     const handleY = cabinetY + cabinetHeight/2 - 2;
     ctx.fillRect(sx(handleX), sy(handleY), S(8), S(4));
 
     // Handle detail - darker shade for depth
-    ctx.strokeStyle = '#5C4033';
+    ctx.strokeStyle = '#3E2723';
     ctx.lineWidth = S(1);
     ctx.strokeRect(sx(handleX), sy(handleY), S(8), S(4));
   }
