@@ -3265,12 +3265,8 @@ function render() {
   // Draw wall-mounted shelves (cabinet) BEFORE other elements
   drawWallShelves(270, 190, 1000, 240);
 
-  // Entrance door and control button
+  // Entrance door
   drawEntranceDoor();
-  drawDoorButton();
-
-  // Draw HUD (time, text) on top of background
-  drawHUD();
 
   // Draw all professional desks and agents
   AGENTS.forEach((a, i) => {
