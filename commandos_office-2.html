@@ -3317,9 +3317,11 @@ function render() {
     introTimer++;
 
     // Start music and initialize office when intro finishes
-    if (introTimer >= 240 && !introActive) {
+    if (introTimer >= 240) {
+      introActive = false;
       bgMusic.play().catch(err => console.log('Music autoplay blocked'));
       commanderWaypointIndex = 0;
+      sceneTimer = 0;  // Reset scene timer to start animations
     }
 
     ctx.restore();
